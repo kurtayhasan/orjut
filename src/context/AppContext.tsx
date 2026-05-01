@@ -173,8 +173,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       crop_type: land.crop_type,
       lat: land.lat,
       lng: land.lng,
-      planting_date: new Date().toISOString(),
-      status: 'active'
+      planting_date: new Date().toISOString()
     };
 
     // Optimistic Update
