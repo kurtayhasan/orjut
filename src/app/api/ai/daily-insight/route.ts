@@ -1,3 +1,4 @@
+// AI Model Update: Using gemini-pro for stability
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 

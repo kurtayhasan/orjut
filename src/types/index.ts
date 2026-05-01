@@ -11,7 +11,6 @@ export interface Season {
   name: string;
   year: number;
   is_active: boolean;
-  status: 'active' | 'completed';
 }
 
 export interface Land {
@@ -28,7 +27,6 @@ export interface Land {
   planting_date: string;
   expected_yield_per_decare?: number;
   expected_sell_price_unit?: number;
-  status: 'active' | 'completed';
 }
 
 export interface Transaction {
