@@ -34,8 +34,8 @@ export default function LandsPage() {
 
   React.useEffect(() => {
     if (selectedLand) {
-      setEditYield(selectedLand.expected_yield || '');
-      setEditPrice(selectedLand.expected_price || '');
+      setEditYield(selectedLand.expected_yield_per_decare || '');
+      setEditPrice(selectedLand.expected_sell_price_unit || '');
     }
   }, [selectedLand]);
 
@@ -43,8 +43,8 @@ export default function LandsPage() {
     if (!selectedLand) return;
     const updated = {
       ...selectedLand,
-      expected_yield: Number(editYield),
-      expected_price: Number(editPrice)
+      expected_yield_per_decare: Number(editYield),
+      expected_sell_price_unit: Number(editPrice)
     };
     updateLand(updated);
     setSelectedLand(updated);
@@ -219,7 +219,7 @@ export default function LandsPage() {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between p-3 border border-zinc-100 rounded-xl bg-zinc-50">
                         <div className="font-medium text-zinc-900 text-sm">Siz</div>
-                        <div className="text-xs font-bold text-indigo-600 bg-indigo-100 px-2 py-1 rounded-md uppercase">Owner</div>
+                        <div className="text-xs font-bold text-indigo-600 bg-indigo-100 px-2 py-1 rounded-md uppercase">Sahip</div>
                       </div>
                     </div>
                     {currentUserRole === 'owner' && (

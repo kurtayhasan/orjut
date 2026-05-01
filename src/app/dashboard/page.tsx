@@ -156,7 +156,7 @@ export default function DashboardPage() {
           <div className="absolute top-0 right-0 p-4 opacity-20">
             <Sparkles size={64} />
           </div>
-          <p className="text-sm font-bold text-emerald-200 uppercase tracking-wider mb-1">Saved by Orjut</p>
+          <p className="text-sm font-bold text-emerald-200 uppercase tracking-wider mb-1">Orjut Tasarrufu</p>
           <div className="flex items-baseline gap-2 z-10">
             <h1 className="text-4xl font-black tracking-tighter text-white">
               +₺{totalSavings.toLocaleString()}

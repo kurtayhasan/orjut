@@ -2,15 +2,25 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAppContext } from '@/context/AppContext';
 import { 
-  Leaf, LayoutDashboard, Map as MapIcon, Box, Wallet, Settings, CalendarDays 
+  Leaf, LayoutDashboard, Map as MapIcon, Box, Wallet, Settings, CalendarDays, LogOut 
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { t, isSidebarOpen, setIsSidebarOpen } = useAppContext();
+
+  const handleLogout = () => {
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('user_name');
+    localStorage.removeItem('user_phone');
+    toast.success("Başarıyla çıkış yapıldı.");
+    router.push('/');
+  };
 
   return (
     <>
@@ -31,7 +41,7 @@ export default function Sidebar() {
       </div>
       
       <div className="p-4">
-        <p className="text-xs font-semibold text-zinc-400 tracking-wider uppercase mb-3 px-3">Menu</p>
+        <p className="text-xs font-semibold text-zinc-400 tracking-wider uppercase mb-3 px-3">Menü</p>
         <nav className="flex flex-col gap-1 w-full">
           <SidebarItem href="/dashboard" icon={<LayoutDashboard size={18} />} label={t('dashboard')} active={pathname === '/dashboard'} />
           <SidebarItem href="/dashboard/seasons" icon={<CalendarDays size={18} />} label="Sezonlar" active={pathname.includes('/seasons')} />
@@ -41,8 +51,15 @@ export default function Sidebar() {
         </nav>
       </div>
 
-      <div className="mt-auto p-4 border-t border-zinc-100">
+      <div className="mt-auto p-4 border-t border-zinc-100 space-y-1">
         <SidebarItem href="/dashboard/settings" icon={<Settings size={18} />} label={t('settings')} active={pathname.includes('/settings')} />
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-medium text-rose-600 hover:bg-rose-50"
+        >
+          <LogOut size={18} />
+          Çıkış Yap
+        </button>
       </div>
     </aside>
     </>
