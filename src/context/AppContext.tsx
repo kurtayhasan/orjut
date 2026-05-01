@@ -84,7 +84,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const t = (key: keyof typeof translations['en']) => translations[lang][key] || key;
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = React.useCallback(async () => {
     setIsLoadingTransactions(true);
     const userId = localStorage.getItem('user_id');
     if (IS_DEMO || !userId) {
@@ -99,9 +99,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (all) setTotalExpenses(all.reduce((sum, tx) => sum + Number(tx.amount || 0), 0));
     } catch (e) { console.error(e); }
     setIsLoadingTransactions(false);
-  };
+  }, []);
 
-  const fetchLands = async () => {
+  const fetchLands = React.useCallback(async () => {
     setIsLoadingLands(true);
     const userId = localStorage.getItem('user_id');
     if (IS_DEMO || !userId) {
@@ -118,9 +118,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (e) { console.error(e); }
     setIsLoadingLands(false);
-  };
+  }, []);
 
-  const fetchSeasons = async () => {
+  const fetchSeasons = React.useCallback(async () => {
     const userId = localStorage.getItem('user_id');
     if (IS_DEMO || !userId) return;
     try {
@@ -130,9 +130,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setActiveSeason(data.find((s: any) => s.is_active) || data[0] || null);
       }
     } catch (e) { console.error(e); }
-  };
+  }, []);
 
-  const syncOfflineData = async () => {
+  const syncOfflineData = React.useCallback(async () => {
     const userId = localStorage.getItem('user_id');
     if (!userId) return;
     const pendingTxs = JSON.parse(localStorage.getItem('pending_transactions') || '[]');
@@ -149,7 +149,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       toast.success("Çevrimdışı veriler eşitlendi!");
       fetchLands(); fetchTransactions();
     }
-  };
+  }, [fetchLands, fetchTransactions]);
 
   useEffect(() => {
     fetchSeasons(); fetchLands(); fetchTransactions();
@@ -159,58 +159,109 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const addLand = async (land: any) => {
     const userId = localStorage.getItem('user_id');
-    const newLand = { ...land, id: land.id || Math.random().toString(), org_id: userId };
-    setLands(prev => [...prev, newLand]);
-    setTotalArea(prev => prev + Number(land.size_decare || 0));
+    const tempId = land.id || Math.random().toString(36).substring(7);
+    
+    // DB şemasına uygun veriyi hazırla
+    const landToSave = {
+      org_id: userId,
+      city: land.city,
+      district: land.district,
+      block_no: land.block_no,
+      parcel_no: land.parcel_no,
+      size_decare: Number(land.size_decare),
+      crop_type: land.crop_type,
+      lat: land.lat,
+      lng: land.lng,
+      planting_date: new Date().toISOString(),
+      status: 'active'
+    };
+
+    // Optimistic Update
+    setLands(prev => [...prev, { ...landToSave, id: tempId }]);
+    setTotalArea(prev => prev + Number(landToSave.size_decare));
 
     if (!IS_DEMO && userId) {
       try {
-        await supabase.from('lands').insert([{ ...land, org_id: userId }]);
-        toast.success("Arazi eklendi");
-      } catch (err) {
-        const pending = JSON.parse(localStorage.getItem('pending_lands') || '[]');
-        localStorage.setItem('pending_lands', JSON.stringify([...pending, { ...land, org_id: userId }]));
-        toast.warning("Çevrimdışı kaydedildi");
+        const { data, error } = await supabase.from('lands').insert([landToSave]).select().single();
+        
+        if (error) {
+          console.error("Supabase Land Insert Error:", error);
+          throw error;
+        }
+
+        // Geçici ID'yi gerçek ID ile güncelle
+        if (data) {
+          setLands(prev => prev.map(l => l.id === tempId ? data : l));
+          toast.success("Arazi başarıyla kaydedildi");
+        }
+      } catch (err: any) {
+        toast.error("Veritabanına kaydedilemedi: " + (err.message || "Bilinmeyen hata"));
+        // Hata durumunda rollback
+        setLands(prev => prev.filter(l => l.id !== tempId));
+        setTotalArea(prev => prev - Number(landToSave.size_decare));
       }
     }
   };
 
   const updateLand = async (land: any) => {
-    setLands(prev => prev.map(l => l.id === land.id ? land : l));
-    if (!IS_DEMO) await supabase.from('lands').update(land).eq('id', land.id);
-    toast.success("Arazi güncellendi");
+    const { id, ...updateData } = land;
+    setLands(prev => prev.map(l => l.id === id ? land : l));
+    if (!IS_DEMO) {
+      const { error } = await supabase.from('lands').update(updateData).eq('id', id);
+      if (error) toast.error("Güncelleme hatası: " + error.message);
+      else toast.success("Arazi güncellendi");
+    }
   };
 
   const deleteLand = async (id: string) => {
     const land = lands.find(l => l.id === id);
     if (land) setTotalArea(prev => prev - Number(land.size_decare || 0));
     setLands(prev => prev.filter(l => l.id !== id));
-    if (!IS_DEMO) await supabase.from('lands').delete().eq('id', id);
-    toast.success("Arazi silindi");
+    if (!IS_DEMO) {
+      const { error } = await supabase.from('lands').delete().eq('id', id);
+      if (error) toast.error("Silme hatası: " + error.message);
+      else toast.success("Arazi silindi");
+    }
   };
 
   const addExpense = async (amount: number, category: string, date: string, land_id: string, receipt_url?: string, receipt_thumbnail_url?: string) => {
     const userId = localStorage.getItem('user_id');
     setTotalExpenses(prev => prev + amount);
-    const newTx: Transaction = { 
-      id: Math.random().toString(), 
+    const tempId = Math.random().toString(36).substring(7);
+
+    const newTx: any = { 
+      id: tempId, 
       amount, 
       description: category, 
       date, 
       type: 'expense', 
       category: category, 
       land_id, 
-      org_id: userId || 'pending' 
+      org_id: userId
     };
-    setTransactions(prev => [newTx, ...prev].slice(0, 5));
+    setTransactions(prev => [newTx, ...prev]);
 
     if (!IS_DEMO && userId) {
       try {
-        await supabase.from('transactions').insert([{ org_id: userId, amount, description: category, date, land_id, receipt_url, receipt_thumbnail_url }]);
-        toast.success("Masraf eklendi");
-      } catch (err) {
-        const pending = JSON.parse(localStorage.getItem('pending_transactions') || '[]');
-        localStorage.setItem('pending_transactions', JSON.stringify([...pending, { org_id: userId, amount, description: category, date, land_id }]));
+        const { data, error } = await supabase.from('transactions').insert([{ 
+          org_id: userId, 
+          amount, 
+          description: category, 
+          date, 
+          land_id, 
+          receipt_url, 
+          receipt_thumbnail_url,
+          category: category,
+          type: 'expense'
+        }]).select().single();
+
+        if (error) throw error;
+        if (data) setTransactions(prev => prev.map(tx => tx.id === tempId ? data : tx));
+        toast.success("Masraf kaydedildi");
+      } catch (err: any) {
+        toast.error("Masraf kaydedilemedi: " + err.message);
+        setTransactions(prev => prev.filter(tx => tx.id !== tempId));
+        setTotalExpenses(prev => prev - amount);
       }
     }
   };
@@ -225,32 +276,50 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const userId = localStorage.getItem('user_id');
     if (!IS_DEMO && userId) {
       if (activeSeason) await supabase.from('seasons').update({ is_active: false }).eq('id', activeSeason.id);
-      const { data } = await supabase.from('seasons').insert([{ name, year: new Date(startDate).getFullYear(), is_active: true, org_id: userId }]).select();
+      const { data, error } = await supabase.from('seasons').insert([{ name, year: new Date(startDate).getFullYear(), is_active: true, org_id: userId }]).select();
+      if (error) {
+        toast.error("Sezon başlatılamadı: " + error.message);
+        return;
+      }
       if (data) {
         setSeasons(prev => [data[0] as any, ...prev.map(s => ({ ...s, is_active: false }))]);
         setActiveSeason(data[0] as any);
+        toast.success("Yeni sezon başlatıldı");
       }
     }
-    toast.success("Yeni sezon başlatıldı");
   };
 
   const requestWeatherAndInsight = async () => {
     let lat = 37.7478, lon = 27.3971;
     if (lands.length > 0 && lands[0].lat && lands[0].lng) { lat = lands[0].lat; lon = lands[0].lng; }
+    
+    toast.loading("Veriler analiz ediliyor...", { id: 'ai-loading' });
+    
     try {
       const weather = await fetchWeather(lat, lon);
       setWeatherData(weather);
+      
       const landContexts: LandContext[] = lands.map(land => ({
         cropName: land.crop_type,
         sowingDate: land.planting_date || new Date().toISOString(),
         currentDay: land.planting_date ? Math.floor((Date.now() - new Date(land.planting_date).getTime()) / 86400000) : 0,
         totalArea: land.size_decare || 0
       }));
+      
       const prompt = buildAIPrompt({ weather, lands: landContexts, date: new Date().toLocaleDateString('tr-TR') });
       const res = await fetch('/api/ai/daily-insight', { method: 'POST', body: JSON.stringify({ prompt }) });
       const data = await res.json();
-      if (data.success) setDailyInsight(data.insight);
-    } catch (e) { console.error(e); }
+      
+      if (data.success) {
+        setDailyInsight(data.insight);
+        toast.success("Analiz tamamlandı", { id: 'ai-loading' });
+      } else {
+        throw new Error(data.error || "AI yanıt vermedi");
+      }
+    } catch (e: any) { 
+      console.error(e); 
+      toast.error("Analiz hatası: " + e.message, { id: 'ai-loading' });
+    }
   };
 
   return (
