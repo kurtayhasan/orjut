@@ -14,19 +14,23 @@ export async function POST(req: NextRequest) {
     const result = await model.generateContent(prompt);
     let responseText = result.response.text().trim();
     
-    // Clean markdown if present
-    if (responseText.startsWith('```json')) responseText = responseText.substring(7);
-    if (responseText.startsWith('```')) responseText = responseText.substring(3);
-    if (responseText.endsWith('```')) responseText = responseText.substring(0, responseText.length - 3);
-    responseText = responseText.trim();
-
-    // Sometimes Gemini adds extra words before/after JSON
-    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      responseText = jsonMatch[0];
+    // Robust JSON extraction
+    let cleanResponse = responseText;
+    const jsonBlockMatch = responseText.match(/```json\s*([\s\S]*?)\s*```/);
+    if (jsonBlockMatch) {
+      cleanResponse = jsonBlockMatch[1];
+    } else {
+      const braceMatch = responseText.match(/\{[\s\S]*\}/);
+      if (braceMatch) cleanResponse = braceMatch[0];
     }
 
-    const data = JSON.parse(responseText);
+    let data;
+    try {
+      data = JSON.parse(cleanResponse);
+    } catch (e) {
+      console.warn("JSON Parse failed, falling back to text", cleanResponse);
+      data = { insight: responseText, critical_alert: null };
+    }
 
     return NextResponse.json({ 
       success: true, 

@@ -29,13 +29,10 @@ ANLIK HAVA DURUMU:
 GÖREVİN:
 Hava durumu ve bitki yaşam döngüsüne (gün sayısı) göre finansal kayıpları önleyecek, SADECE bugün yapılması gereken 1-3 somut ve spesifik işi söyle.
 
-KURALLAR:
-- Her madde maksimum 1 cümle olsun.
-- "Sulama önemlidir" gibi genel değil, teknik konuş.
-- Yanıtı Türkçe ver.
-
 FORMAT:
-⚠️ [Varsa kritik uyarı]
-✅ [Aksiyon 1]
-✅ [Aksiyon 2]`;
+SADECE aşağıdaki JSON formatında yanıt ver, başka hiçbir metin ekleme:
+{
+  "insight": "Bugün yapılması gereken aksiyonlar (maddeler halinde)",
+  "critical_alert": "Varsa kritik don, fırtına uyarısı yoksa null"
+}`;
 }
