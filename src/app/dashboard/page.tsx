@@ -29,8 +29,8 @@ export default function DashboardPage() {
 
   // Projected Profit Logic
   const projectedRevenue = lands.reduce((sum, land) => {
-    const yieldAmt = Number(land.expected_yield) || 0;
-    const price = Number(land.expected_price) || 0;
+    const yieldAmt = Number(land.expected_yield_per_decare) || 0;
+    const price = Number(land.expected_sell_price_unit) || 0;
     return sum + (yieldAmt * price);
   }, 0);
   const projectedProfit = projectedRevenue > 0 ? projectedRevenue - totalExpenses : 0;

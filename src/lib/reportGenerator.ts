@@ -61,7 +61,7 @@ export const generateSeasonExcel = (season: any, transactions: any[], lands: any
     const landsSheet = XLSX.utils.json_to_sheet(lands.map(l => ({
       'Arazi': `${l.city}/${l.district}`,
       'Ada/Parsel': `${l.block_no}/${l.parcel_no}`,
-      'Büyüklük (Dönüm)': l.size_decare || l.size,
+      'Büyüklük (Dönüm)': l.size_decare,
       'Ürün': l.crop_type
     })));
 

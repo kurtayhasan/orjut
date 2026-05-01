@@ -108,7 +108,7 @@ export default function LandsPage() {
                     <p className="text-zinc-500 font-medium">Ada {selectedLand.block_no} / Parsel {selectedLand.parcel_no} • {selectedLand.crop_type}</p>
                   </div>
                   <div className="text-right">
-                    <div className="font-black text-2xl text-emerald-600">{selectedLand.size_decare || selectedLand.size}</div>
+                    <div className="font-black text-2xl text-emerald-600">{selectedLand.size_decare}</div>
                     <div className="text-[10px] text-emerald-600/70 font-black uppercase tracking-widest">Dönüm</div>
                   </div>
                 </div>
@@ -280,7 +280,7 @@ export default function LandsPage() {
                     
                     <div className="flex items-center gap-2">
                       <div className="text-right mr-4">
-                        <div className="font-black text-xl text-zinc-900 tracking-tighter">{land.size_decare || land.size}</div>
+                        <div className="font-black text-xl text-zinc-900 tracking-tighter">{land.size_decare}</div>
                         <div className="text-[10px] text-zinc-400 font-black uppercase tracking-widest">Dönüm</div>
                       </div>
                       

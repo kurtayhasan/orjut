@@ -47,6 +47,7 @@ export interface CategoryTotals {
   [category: string]: {
     total: number;
     count: number;
-  };
+  } | any;
+  grandTotal?: number;
 }
 

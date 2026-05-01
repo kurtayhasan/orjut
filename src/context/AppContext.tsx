@@ -155,7 +155,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     fetchSeasons(); fetchLands(); fetchTransactions();
     window.addEventListener('online', syncOfflineData);
     return () => window.removeEventListener('online', syncOfflineData);
-  }, []);
+  }, [syncOfflineData]);
 
   const addLand = async (land: any) => {
     const userId = localStorage.getItem('user_id');

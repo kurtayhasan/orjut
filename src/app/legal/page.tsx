@@ -37,7 +37,7 @@ export default function LegalPage() {
               </h2>
               <div className="text-zinc-600 leading-relaxed space-y-4 text-sm font-medium">
                 <p>
-                  Orjut AgTech OS ("Platform") olarak, kişisel verilerinizin güvenliğine büyük önem veriyoruz. 6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") uyarınca, verilerinizin işlenme amaçları, hukuki sebepleri ve haklarınız konusunda sizi bilgilendirmek isteriz.
+                  Orjut AgTech OS (&quot;Platform&quot;) olarak, kişisel verilerinizin güvenliğine büyük önem veriyoruz. 6698 sayılı Kişisel Verilerin Korunması Kanunu (&quot;KVKK&quot;) uyarınca, verilerinizin işlenme amaçları, hukuki sebepleri ve haklarınız konusunda sizi bilgilendirmek isteriz.
                 </p>
                 <p>
                   <strong>İşlenen Veriler:</strong> İsim, soyisim, telefon numarası ve arazi verileriniz (ada, parsel, koordinat).
