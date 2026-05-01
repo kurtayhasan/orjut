@@ -205,7 +205,7 @@ export default function DashboardPage() {
                   
                   <div className="flex items-center gap-4 shrink-0">
                     {(tx.receipt_url || tx.receipt_thumbnail_url) && (
-                      <div className="hidden sm:block w-8 h-8 rounded-md overflow-hidden border border-zinc-200">
+                      <div className="hidden sm:block w-8 h-8 rounded-md overflow-hidden border border-zinc-200 relative">
                         <img 
                           src={tx.receipt_thumbnail_url || tx.receipt_url} 
                           alt="Receipt" 
