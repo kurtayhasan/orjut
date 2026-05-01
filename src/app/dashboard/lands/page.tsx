@@ -73,10 +73,10 @@ export default function LandsPage() {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-250px)]">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[500px] lg:h-[calc(100vh-250px)]">
         
         {/* Left Side: Map */}
-        <div className="bg-white border-2 border-zinc-100 rounded-3xl overflow-hidden shadow-sm flex flex-col h-full">
+        <div className="bg-white border-2 border-zinc-100 rounded-3xl overflow-hidden shadow-sm flex flex-col h-[400px] lg:h-full">
           <div className="p-4 border-b border-zinc-100 bg-white">
             <h2 className="text-base font-bold text-zinc-900">Arazi İşaretleme</h2>
             <p className="text-sm text-zinc-500 font-medium">Tarlalarınızı eklemek için haritaya bir nokta bırakın.</p>
@@ -87,7 +87,7 @@ export default function LandsPage() {
         </div>
 
         {/* Right Side: Data Table / List */}
-        <div className="bg-white border-2 border-zinc-100 rounded-3xl overflow-hidden shadow-sm flex flex-col h-full">
+        <div className="bg-white border-2 border-zinc-100 rounded-3xl overflow-hidden shadow-sm flex flex-col h-[500px] lg:h-full">
           <div className="p-4 border-b border-zinc-100 bg-white">
             <h2 className="text-base font-bold text-zinc-900">Kayıtlı Parseller</h2>
           </div>

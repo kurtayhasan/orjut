@@ -241,8 +241,8 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
 
       {/* TKGM Crop & Size Selector */}
       {showCropSelector && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[5000] flex items-center justify-center p-2 md:p-4">
-          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg animate-in fade-in zoom-in-95 duration-300 max-h-[90vh] flex flex-col border border-zinc-100">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[10000] flex items-center justify-center p-4">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg animate-in fade-in zoom-in-95 duration-300 max-h-[90vh] flex flex-col border border-zinc-100 my-auto relative overflow-hidden">
             {/* Header - Sticky */}
             <div className="p-6 border-b border-zinc-50">
               <div className="flex justify-between items-start">
