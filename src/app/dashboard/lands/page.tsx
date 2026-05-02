@@ -54,11 +54,24 @@ export default function LandsPage() {
     setSelectedLand(updated);
   };
 
-  const calculateDays = (plantingDate?: string) => {
+  const calculateDays = (plantingDate?: string): number | null => {
     if (!plantingDate) return null;
-    const diff = new Date().getTime() - new Date(plantingDate).getTime();
-    const days = Math.floor(diff / (1000 * 3600 * 24));
-    return days >= 0 ? days : 0;
+    try {
+      // Parse as local date (YYYY-MM-DD) to avoid timezone issues
+      const parts = plantingDate.split('-');
+      if (parts.length !== 3) return null;
+      const planted = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+      if (isNaN(planted.getTime())) return null;
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      planted.setHours(0, 0, 0, 0);
+      
+      const diffMs = today.getTime() - planted.getTime();
+      return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    } catch {
+      return null;
+    }
   };
 
   return (
@@ -269,16 +282,45 @@ export default function LandsPage() {
                         <p className="text-xs text-zinc-500 font-medium mb-2">
                           Ada {land.block_no} / Parsel {land.parcel_no} • {land.crop_type}
                         </p>
-                        {calculateDays(land.planting_date) !== null && (
-                          <div className="w-48 mt-1">
-                            <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider mb-1">
-                              <span className="text-emerald-700">{land.crop_type} - {calculateDays(land.planting_date)}. Gün</span>
+                        {(() => {
+                          const days = calculateDays(land.planting_date);
+                          const totalDays = CROP_LIFECYCLES[land.crop_type] || 150;
+                          
+                          if (days === null) {
+                            return (
+                              <p className="text-[10px] text-zinc-400 font-medium mt-1">Ekim tarihi girilmedi</p>
+                            );
+                          }
+                          
+                          if (days < 0) {
+                            return (
+                              <div className="mt-1">
+                                <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+                                  ⏳ Ekim bekleniyor ({Math.abs(days)} gün sonra)
+                                </span>
+                              </div>
+                            );
+                          }
+                          
+                          const percentage = Math.min(100, (days / totalDays) * 100);
+                          const isHarvested = days >= totalDays;
+                          
+                          return (
+                            <div className="w-48 mt-1">
+                              <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider mb-1">
+                                <span className={isHarvested ? 'text-amber-700' : 'text-emerald-700'}>
+                                  {isHarvested ? `🌾 Hasat zamanı!` : `${days}. Gün / ${totalDays}`}
+                                </span>
+                              </div>
+                              <div className="w-full bg-zinc-100 rounded-full h-1.5 overflow-hidden">
+                                <div 
+                                  className={`h-1.5 rounded-full transition-all ${isHarvested ? 'bg-amber-500' : 'bg-emerald-500'}`} 
+                                  style={{ width: `${percentage}%` }}
+                                ></div>
+                              </div>
                             </div>
-                            <div className="w-full bg-zinc-100 rounded-full h-1.5 overflow-hidden">
-                              <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: `${Math.min(100, (calculateDays(land.planting_date)! / (CROP_LIFECYCLES[land.crop_type] || 150)) * 100)}%` }}></div>
-                            </div>
-                          </div>
-                        )}
+                          );
+                        })()}
                       </div>
                     </div>
                     

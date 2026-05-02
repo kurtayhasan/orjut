@@ -206,15 +206,17 @@ export default function DashboardPage() {
                   </div>
                   
                   <div className="flex items-center gap-4 shrink-0">
-                    {(tx.receipt_url || tx.receipt_thumbnail_url) && (
+                    {(tx.receipt_url && tx.receipt_url !== 'offline-pending') || tx.receipt_thumbnail_url ? (
                       <div className="hidden sm:block w-8 h-8 rounded-md overflow-hidden border border-zinc-200 relative">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img 
                           src={tx.receipt_thumbnail_url || tx.receipt_url} 
-                          alt="Receipt" 
+                          alt="Makbuz" 
                           className="w-full h-full object-cover"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                         />
                       </div>
-                    )}
+                    ) : null}
                     <div className="text-right text-xs text-zinc-400 font-medium w-20">
                       {new Date(tx.date).toLocaleDateString('tr-TR')}
                     </div>
