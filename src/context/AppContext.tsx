@@ -197,7 +197,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         toast.error("Veritabanına kaydedilemedi: " + (err.message || "Bilinmeyen hata"));
         // Hata durumunda rollback
         setLands(prev => prev.filter(l => l.id !== tempId));
-        setTotalArea(prev => prev - Number(landToSave.size_decare));
+        setTotalArea(prev => prev - Number(dbPayload.size_decare));
       }
     }
   };
