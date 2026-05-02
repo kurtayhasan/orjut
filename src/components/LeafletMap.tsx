@@ -6,8 +6,9 @@ import 'leaflet/dist/leaflet.css';
 import { useAppContext } from '@/context/AppContext';
 import { useEffect, useState, useMemo } from 'react';
 import { toast } from 'sonner';
-import { MapPin, X, Save, TreePine, Ruler, Search, Layers, Globe } from 'lucide-react';
+import { MapPin, X, Save, TreePine, Ruler, Search, Layers, Globe, ChevronDown } from 'lucide-react';
 import { WMSTileLayer, LayersControl } from 'react-leaflet';
+import { Country, State, City, ICountry, IState, ICity } from 'country-state-city';
 
 // Fix Leaflet default icon issues in Next.js
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -17,7 +18,12 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-const CROP_TYPES = ['Buğday', 'Arpa', 'Mısır', 'Pamuk', 'Şeker Pancarı'];
+// Top 15 Global Crops
+const CROP_TYPES = [
+  'Buğday', 'Mısır', 'Pirinç', 'Soya Fasulyesi', 'Pamuk',
+  'Arpa', 'Patates', 'Şeker Pancarı', 'Şeker Kamışı', 'Domates',
+  'Soğan', 'Elma', 'Üzüm', 'Portakal', 'Kahve'
+];
 
 function MapClickHandler({ onLocationSelect }: { onLocationSelect: (latlng: L.LatLng) => void }) {
   const map = useMapEvents({
@@ -47,7 +53,9 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
   const [showCropSelector, setShowCropSelector] = useState(false);
   const [editingLandId, setEditingLandId] = useState<string | null>(null);
   
-  // TKGM Fields
+  // Location dropdown states
+  const [selectedCountryCode, setSelectedCountryCode] = useState('TR');
+  const [selectedStateCode, setSelectedStateCode] = useState('');
   const [city, setCity] = useState('');
   const [district, setDistrict] = useState('');
   const [neighborhood, setNeighborhood] = useState('');
@@ -57,6 +65,11 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
   const [selectedCrop, setSelectedCrop] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+
+  // Country/State/City data from country-state-city
+  const countries = useMemo(() => Country.getAllCountries(), []);
+  const states = useMemo(() => State.getStatesOfCountry(selectedCountryCode), [selectedCountryCode]);
+  const cities = useMemo(() => selectedStateCode ? City.getCitiesOfState(selectedCountryCode, selectedStateCode) : [], [selectedCountryCode, selectedStateCode]);
 
   // Effect to handle external edit request (from Edit button)
   useEffect(() => {
@@ -90,6 +103,8 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
   };
 
   const resetForm = () => {
+    setSelectedCountryCode('TR');
+    setSelectedStateCode('');
     setCity('');
     setDistrict('');
     setNeighborhood('');
@@ -100,8 +115,8 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
   };
 
   const handleSavePlot = async () => {
-    if (!selectedCrop || !plotSize || !city || !district) {
-      toast.error("Lütfen tüm zorunlu alanları (İl, İlçe, Dönüm ve Ürün) doldurun.");
+    if (!selectedCrop || !plotSize || !city) {
+      toast.error("Lütfen tüm zorunlu alanları (İl, Dönüm ve Ürün) doldurun.");
       return;
     }
     
@@ -117,7 +132,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
     } else {
       // Duplicate check (Ada/Parsel)
       const isDuplicate = lands.find(l => l.block_no === blockNo && l.parcel_no === parcelNo && l.city === city);
-      if (isDuplicate) {
+      if (isDuplicate && blockNo && parcelNo) {
         toast.error("Bu ada/parsel zaten kayıtlı!");
         return;
       }
@@ -161,6 +176,9 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
     if (lands.length > 0 && lands[0].lat && lands[0].lng) return [lands[0].lat, lands[0].lng];
     return [37.3122, 40.7339]; // Mardin
   }, [focusLand, lands]);
+
+  // Select styling helper
+  const selectClass = "w-full px-3 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition-all text-sm font-semibold appearance-none cursor-pointer";
 
   return (
     <div className="relative w-full h-full group">
@@ -260,17 +278,81 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
             
             {/* Scrollable Content */}
             <div className="p-6 overflow-y-auto flex-1 space-y-4 custom-scrollbar">
+              
+              {/* Country Selector */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Ülke</label>
+                <div className="relative">
+                  <Globe size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+                  <select 
+                    className={`${selectClass} pl-10`}
+                    value={selectedCountryCode} 
+                    onChange={(e) => {
+                      setSelectedCountryCode(e.target.value);
+                      setSelectedStateCode('');
+                      setCity('');
+                      setDistrict('');
+                    }}
+                  >
+                    {countries.map((c: ICountry) => (
+                      <option key={c.isoCode} value={c.isoCode}>{c.name}</option>
+                    ))}
+                  </select>
+                  <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-300 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* State/City Selector */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">İl</label>
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">İl / Eyalet</label>
                   <div className="relative">
-                    <Globe size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
-                    <input type="text" className="w-full pl-10 pr-3 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition-all text-sm font-semibold" placeholder="Mardin" value={city} onChange={(e) => setCity(e.target.value)} />
+                    <select 
+                      className={selectClass}
+                      value={selectedStateCode}
+                      onChange={(e) => {
+                        const code = e.target.value;
+                        setSelectedStateCode(code);
+                        const stateObj = states.find((s: IState) => s.isoCode === code);
+                        setCity(stateObj?.name || '');
+                        setDistrict('');
+                      }}
+                    >
+                      <option value="">İl seçin...</option>
+                      {states.map((s: IState) => (
+                        <option key={s.isoCode} value={s.isoCode}>{s.name}</option>
+                      ))}
+                    </select>
+                    <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-300 pointer-events-none" />
                   </div>
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">İlçe</label>
-                  <input type="text" className="w-full px-3 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition-all text-sm font-semibold" placeholder="Kızıltepe" value={district} onChange={(e) => setDistrict(e.target.value)} />
+                  <div className="relative">
+                    {cities.length > 0 ? (
+                      <>
+                        <select 
+                          className={selectClass}
+                          value={district}
+                          onChange={(e) => setDistrict(e.target.value)}
+                        >
+                          <option value="">İlçe seçin...</option>
+                          {cities.map((c: ICity, i: number) => (
+                            <option key={`${c.name}-${i}`} value={c.name}>{c.name}</option>
+                          ))}
+                        </select>
+                        <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-300 pointer-events-none" />
+                      </>
+                    ) : (
+                      <input 
+                        type="text" 
+                        className={selectClass}
+                        placeholder="İlçe yazın..." 
+                        value={district} 
+                        onChange={(e) => setDistrict(e.target.value)} 
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -278,24 +360,24 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
                 <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Mahalle/Köy</label>
                 <div className="relative">
                   <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
-                  <input type="text" className="w-full pl-10 pr-3 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition-all text-sm font-semibold" placeholder="Cumhuriyet Mah." value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} />
+                  <input type="text" className={`${selectClass} pl-10`} placeholder="Cumhuriyet Mah." value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} />
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Ada</label>
-                  <input type="text" className="w-full px-3 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition-all text-sm font-semibold" placeholder="101" value={blockNo} onChange={(e) => setBlockNo(e.target.value)} />
+                  <input type="text" className={selectClass} placeholder="101" value={blockNo} onChange={(e) => setBlockNo(e.target.value)} />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Parsel</label>
-                  <input type="text" className="w-full px-3 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition-all text-sm font-semibold" placeholder="42" value={parcelNo} onChange={(e) => setParcelNo(e.target.value)} />
+                  <input type="text" className={selectClass} placeholder="42" value={parcelNo} onChange={(e) => setParcelNo(e.target.value)} />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Dönüm</label>
                   <div className="relative">
                     <Ruler size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-300" />
-                    <input type="number" className="w-full px-3 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition-all text-sm font-semibold" placeholder="50" value={plotSize} onChange={(e) => setPlotSize(e.target.value)} />
+                    <input type="number" className={selectClass} placeholder="50" value={plotSize} onChange={(e) => setPlotSize(e.target.value)} />
                   </div>
                 </div>
               </div>
@@ -304,13 +386,11 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
                 <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Ekili Ürün</label>
                 <div className="relative">
                   <TreePine size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
-                  <select className="w-full pl-10 pr-3 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition-all text-sm font-semibold appearance-none cursor-pointer" value={selectedCrop} onChange={(e) => setSelectedCrop(e.target.value)}>
+                  <select className={`${selectClass} pl-10`} value={selectedCrop} onChange={(e) => setSelectedCrop(e.target.value)}>
                     <option value="" disabled>Ürün seçin...</option>
                     {CROP_TYPES.map(crop => <option key={crop} value={crop}>{crop}</option>)}
                   </select>
-                  <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <Layers size={14} className="text-zinc-300" />
-                  </div>
+                  <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-300 pointer-events-none" />
                 </div>
               </div>
               
@@ -324,7 +404,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
                 <button onClick={handleCancelPlot} className="flex-1 py-3.5 text-zinc-500 font-bold bg-white border border-zinc-200 hover:bg-zinc-100 rounded-xl transition-all active:scale-[0.98]">İptal</button>
                 <button 
                   onClick={handleSavePlot} 
-                  disabled={!selectedCrop || !plotSize || !city || !district} 
+                  disabled={!selectedCrop || !plotSize || !city} 
                   className="flex-[2] py-3.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-200 disabled:opacity-50 disabled:grayscale transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                 >
                   <Save size={18} />

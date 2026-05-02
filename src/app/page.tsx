@@ -1,12 +1,13 @@
 'use client';
 // Final Build Signature: 2026-05-02
 
-
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { Phone, User, ArrowRight, ShieldCheck, RefreshCcw, Lock } from 'lucide-react';
+import { User, ArrowRight, ShieldCheck, RefreshCcw, Lock } from 'lucide-react';
+import PhoneInput from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
 
 export default function AuthPage() {
   const router = useRouter();
@@ -35,9 +36,9 @@ export default function AuthPage() {
     e.preventDefault();
     console.log("Auth started...", { mode, formData, captchaValue, generatedCaptcha });
     
-    // Basic Validation
-    if (!formData.phone || formData.phone.length < 10) {
-      toast.error("Geçerli bir telefon numarası giriniz.");
+    // Basic Validation (E.164 format starts with +)
+    if (!formData.phone || formData.phone.length < 10 || !formData.phone.startsWith('+')) {
+      toast.error("Geçerli bir telefon numarası seçiniz.");
       return;
     }
 
@@ -185,17 +186,13 @@ export default function AuthPage() {
 
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Telefon Numarası</label>
-              <div className="relative">
-                <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
-                <input 
-                  type="tel" 
-                  required
-                  placeholder="5xx xxx xxxx"
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-3.5 pl-11 pr-4 text-white text-sm placeholder:text-slate-600 outline-none focus:border-emerald-500/50 transition-all"
-                  value={formData.phone}
-                  onChange={e => setFormData({...formData, phone: e.target.value})}
-                />
-              </div>
+              <PhoneInput
+                international
+                defaultCountry="TR"
+                value={formData.phone}
+                onChange={(value) => setFormData({...formData, phone: value || ''})}
+                className="phone-input-dark w-full bg-white/5 border border-white/10 rounded-2xl py-2 px-4 text-white text-sm outline-none focus-within:border-emerald-500/50 transition-all"
+              />
             </div>
 
             <div className="space-y-2">

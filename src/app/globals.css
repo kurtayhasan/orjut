@@ -36,3 +36,26 @@
 .leaflet-popup-tip {
   @apply !bg-white;
 }
+
+/* Phone Input Dark Theme */
+.phone-input-dark .PhoneInputInput {
+  background: transparent;
+  border: none;
+  color: white;
+  outline: none;
+  font-size: 0.875rem;
+}
+
+.phone-input-dark .PhoneInputInput::placeholder {
+  color: rgb(71 85 105); /* slate-600 */
+}
+
+.phone-input-dark .PhoneInputCountrySelect {
+  background: #1e1e1e;
+  color: white;
+}
+
+.phone-input-dark .PhoneInputCountryIcon {
+  border: none;
+  box-shadow: none;
+}

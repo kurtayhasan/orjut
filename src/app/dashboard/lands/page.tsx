@@ -12,7 +12,11 @@ import InviteCollaborator from '@/components/collaborators/InviteCollaborator';
 import { useMarketPrice } from '@/lib/useMarketPrice';
 import MarketTrendMini from '@/components/market/MarketTrendMini';
 
-const CROP_LIFECYCLES: Record<string, number> = { 'Mısır': 120, 'Buğday': 240, 'Arpa': 210, 'Pamuk': 160, 'Şeker Pancarı': 180 };
+const CROP_LIFECYCLES: Record<string, number> = {
+  'Buğday': 240, 'Mısır': 120, 'Pirinç': 150, 'Soya Fasulyesi': 120, 'Pamuk': 160,
+  'Arpa': 210, 'Patates': 100, 'Şeker Pancarı': 180, 'Şeker Kamışı': 365, 'Domates': 90,
+  'Soğan': 120, 'Elma': 180, 'Üzüm': 170, 'Portakal': 270, 'Kahve': 270,
+};
 
 const DynamicLeafletMap = dynamic(() => import('@/components/LeafletMap'), { 
   ssr: false,
