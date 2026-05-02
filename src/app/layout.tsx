@@ -7,6 +7,7 @@ const inter = Inter({ subsets: ["latin"] });
 import { AppProvider } from "@/context/AppContext";
 import { Toaster } from 'sonner';
 import CookieConsent from '@/components/CookieConsent';
+import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 
 export const metadata: Metadata = {
   title: "ZiraiAsistan by Orjut (Beta v.1) | Akıllı Tarım Uygulaması",
@@ -70,6 +71,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        <ServiceWorkerRegister />
         <AppProvider>
           <Toaster position="top-center" richColors />
           {children}

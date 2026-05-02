@@ -39,3 +39,12 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(clients.claim());
 });
+
+self.addEventListener('fetch', (event) => {
+  // Stale-while-revalidate strategy or network-first for MVP
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request);
+    })
+  );
+});
