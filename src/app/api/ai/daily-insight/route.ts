@@ -1,25 +1,27 @@
-// CRITICAL FIX: Official Google Generative AI SDK implementation
-// Model: gemini-1.5-flash (free-tier compatible)
+// OFFICIAL: @google/genai SDK — gemini-2.0-flash model
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 
-// 1. Initialize the official SDK with the API key
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
-
-// 2. Get the stable, free-tier friendly model
-const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+// 1. Initialize the official SDK
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY as string,
+});
 
 export async function POST(req: NextRequest) {
   try {
     const { prompt } = await req.json();
 
-    // 3. Call the API using the official method
-    const result = await model.generateContent(prompt);
-    const response = result.response;
-    const text = response.text();
+    // 2. Call the API using the latest official method
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: prompt,
+    });
 
-    // 4. Strip markdown formatting if Gemini returns it (e.g., ```json ... ```)
-    let cleanResponse = text.trim();
+    // 3. Extract and clean the response text
+    const rawText = response.text ?? '';
+    let cleanResponse = rawText.trim();
+
+    // Strip markdown formatting if Gemini wraps it in ```json ... ```
     const jsonBlockMatch = cleanResponse.match(/```json\s*([\s\S]*?)\s*```/);
     if (jsonBlockMatch) {
       cleanResponse = jsonBlockMatch[1];
@@ -28,18 +30,18 @@ export async function POST(req: NextRequest) {
       if (braceMatch) cleanResponse = braceMatch[0];
     }
 
-    // 5. Parse and return the result safely
+    // 4. Parse and return the result safely
     let data;
     try {
       data = JSON.parse(cleanResponse);
     } catch {
       console.warn('JSON parse failed, returning raw text as insight');
-      data = { insight: text.trim(), critical_alert: null };
+      data = { insight: rawText.trim(), critical_alert: null };
     }
 
     return NextResponse.json({
       success: true,
-      insight: data.insight || data.recommendation || text.trim(),
+      insight: data.insight || data.recommendation || rawText.trim(),
       critical_alert: data.critical_alert || null,
       recommended_action: data.recommended_action || null,
     });
