@@ -86,13 +86,28 @@ ALTER TABLE public.market_prices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.collaborators ENABLE ROW LEVEL SECURITY;
 
 -- 11. Permissive policies (custom auth — no auth.uid())
-CREATE POLICY IF NOT EXISTS "allow_all_profiles" ON public.profiles FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY IF NOT EXISTS "allow_all_lands" ON public.lands FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY IF NOT EXISTS "allow_all_transactions" ON public.transactions FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY IF NOT EXISTS "allow_all_seasons" ON public.seasons FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY IF NOT EXISTS "allow_all_inventory" ON public.inventory FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY IF NOT EXISTS "allow_all_savings" ON public.savings_logs FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY IF NOT EXISTS "allow_all_market" ON public.market_prices FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY IF NOT EXISTS "allow_all_collab" ON public.collaborators FOR ALL USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "allow_all_profiles" ON public.profiles;
+CREATE POLICY "allow_all_profiles" ON public.profiles FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "allow_all_lands" ON public.lands;
+CREATE POLICY "allow_all_lands" ON public.lands FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "allow_all_transactions" ON public.transactions;
+CREATE POLICY "allow_all_transactions" ON public.transactions FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "allow_all_seasons" ON public.seasons;
+CREATE POLICY "allow_all_seasons" ON public.seasons FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "allow_all_inventory" ON public.inventory;
+CREATE POLICY "allow_all_inventory" ON public.inventory FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "allow_all_savings" ON public.savings_logs;
+CREATE POLICY "allow_all_savings" ON public.savings_logs FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "allow_all_market" ON public.market_prices;
+CREATE POLICY "allow_all_market" ON public.market_prices FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "allow_all_collab" ON public.collaborators;
+CREATE POLICY "allow_all_collab" ON public.collaborators FOR ALL USING (true) WITH CHECK (true);
 
 SELECT 'Migration Complete ✅' AS status;
