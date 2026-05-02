@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
 
     // 2. Call the API using the latest official method
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3.1-flash-lite-preview',
       contents: prompt,
     });
 
