@@ -4,24 +4,28 @@
 CREATE EXTENSION IF NOT EXISTS postgis;
 
 -- 1. Lands Table
-CREATE TYPE crop_type_enum AS ENUM ('Buğday', 'Arpa', 'Mısır', 'Pamuk', 'Şeker Pancarı');
+-- NOTE: crop_type is now TEXT (not enum) to support dynamic global crop list
 
 CREATE TABLE IF NOT EXISTS public.lands (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    org_id UUID NOT NULL, -- references organizations(id) in Gravity
-    name TEXT NOT NULL,
-    geometry GEOMETRY(Polygon, 4326), -- PostGIS Polygon
+    org_id UUID NOT NULL,
+    name TEXT,
+    geometry GEOMETRY(Polygon, 4326),
     city TEXT,
     district TEXT,
     neighborhood TEXT,
     block_no TEXT,
     parcel_no TEXT,
-    size_hectares NUMERIC, 
+    size_decare NUMERIC,
     soil_type TEXT,
-    crop_type crop_type_enum,
+    crop_type TEXT,
     planting_date DATE,
     expected_yield NUMERIC,
     expected_price NUMERIC,
+    expected_yield_per_decare NUMERIC,
+    expected_sell_price_unit NUMERIC,
+    lat DOUBLE PRECISION,
+    lng DOUBLE PRECISION,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -50,6 +54,9 @@ CREATE TABLE IF NOT EXISTS public.transactions (
     type transaction_type NOT NULL,
     amount NUMERIC NOT NULL,
     description TEXT,
+    category TEXT,
+    receipt_url TEXT,
+    receipt_thumbnail_url TEXT,
     date DATE NOT NULL DEFAULT CURRENT_DATE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
