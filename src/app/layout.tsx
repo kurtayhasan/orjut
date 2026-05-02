@@ -12,6 +12,18 @@ export const metadata: Metadata = {
   title: "ZiraiAsistan by Orjut (Beta v.1) | Akıllı Tarım Uygulaması",
   description: "Arazi takip, hasat, verim, gübreleme ve ilaçlama süreçlerinizi gerçek verilerle yönetin. Sıfır kayıp, maksimum hasat için hemen başlayın.",
   keywords: ["arazi takip", "hasat", "verim", "gübreleme", "ilaçlama", "akıllı tarım", "ZiraiAsistan", "Orjut"],
+  icons: {
+    icon: [
+      { url: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'ZiraiAsistan',
+  },
   openGraph: {
     title: "ZiraiAsistan by Orjut | Akıllı Tarım Uygulaması",
     description: "Yapay zeka destekli arazi, gübreleme, ilaçlama ve hasat takip uygulaması.",
@@ -22,6 +34,9 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+  },
+  other: {
+    'mobile-web-app-capable': 'yes',
   },
 };
 
@@ -46,6 +61,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="tr">
+      <head>
+        <meta name="theme-color" content="#16a34a" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+      </head>
       <body className={inter.className}>
         <script
           type="application/ld+json"

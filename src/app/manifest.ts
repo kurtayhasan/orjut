@@ -4,13 +4,46 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'ZiraiAsistan by Orjut (Beta v.1)',
     short_name: 'ZiraiAsistan',
-    description: 'Gerçek verilerle sıfır kayıp, maksimum hasat.',
+    description: 'Gerçek verilerle sıfır kayıp, maksimum hasat. Arazi takip, hasat, verim, gübreleme ve ilaçlama süreçlerinizi yönetin.',
     start_url: '/',
+    scope: '/',
     display: 'standalone',
+    orientation: 'portrait',
     background_color: '#ffffff',
     theme_color: '#16a34a',
+    categories: ['agriculture', 'business', 'productivity'],
     icons: [
-      { src: '/favicon.ico', sizes: 'any', type: 'image/x-icon' },
+      {
+        src: '/icon-192x192.png',
+        sizes: '192x192',
+        type: 'image/png',
+        purpose: 'any',
+      },
+      {
+        src: '/icon-192x192.png',
+        sizes: '192x192',
+        type: 'image/png',
+        purpose: 'maskable',
+      },
+      {
+        src: '/icon-512x512.png',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'any',
+      },
+      {
+        src: '/icon-512x512.png',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'maskable',
+      },
+    ],
+    screenshots: [
+      {
+        src: '/icon-512x512.png',
+        sizes: '512x512',
+        type: 'image/png',
+      },
     ],
   };
 }

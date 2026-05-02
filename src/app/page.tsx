@@ -121,15 +121,16 @@ export default function AuthPage() {
     <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
       
       {/* LEFT COLUMN — Marketing (Desktop only) */}
-      <div className="hidden lg:flex relative overflow-hidden">
-        {/* Background Image */}
-        <img 
-          src="https://images.unsplash.com/photo-1592982537447-6f2a6a0a5023?q=80&w=2000" 
-          alt="Tarım alanı" 
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        {/* Dark Overlay */}
-        <div className="absolute inset-0 bg-black/70" />
+      <div 
+        className="hidden lg:flex relative overflow-hidden"
+        style={{
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.85)), url('https://images.unsplash.com/photo-1500937386664-56d1dfef3854?q=80&w=2000&auto=format')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundColor: '#1a3a1a',
+        }}
+      >
         
         {/* Content */}
         <div className="relative z-10 flex flex-col justify-center items-start p-16 text-white max-w-xl">
