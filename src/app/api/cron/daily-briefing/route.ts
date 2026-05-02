@@ -56,7 +56,6 @@ export async function GET(req: NextRequest) {
         });
 
         const text = response.text ?? '';
-        console.log(`Briefing generated for ${profile.first_name}: ${text.substring(0, 100)}...`);
         briefingsSent++;
       } catch (aiError) {
         console.error(`AI error for user ${profile.id}:`, aiError);

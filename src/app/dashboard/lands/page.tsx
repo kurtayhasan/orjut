@@ -197,7 +197,7 @@ export default function LandsPage() {
                             <div key={tx.id} className="p-3 bg-zinc-50 border border-zinc-100 rounded-xl flex items-center justify-between text-sm">
                               <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center text-lg">
-                                  {tx.description === 'Mazot' ? '⛽' : tx.description === 'Gübre' ? '🌱' : tx.description === 'İlaç' ? '🧪' : tx.description === 'İşçilik' ? '🧑‍🌾' : '🧑‍🌾'}
+                                  {tx.description === 'Mazot' ? '⛽' : tx.description === 'Gübre' ? '🌱' : tx.description === 'İlaç' ? '🧪' : tx.description === 'Tohum' ? '🌾' : tx.description === 'İşçilik' ? '🧑‍🌾' : '📦'}
                                 </div>
                                 <span className="font-bold text-zinc-800">{tx.description}</span>
                               </div>

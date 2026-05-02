@@ -33,6 +33,14 @@ export default function BottomBar() {
             <span className="text-lg">🧪</span>
             <span className="text-[7px] sm:text-[9px] font-black uppercase tracking-widest truncate w-full px-1 text-center">İlaç</span>
           </button>
+
+          <button 
+            onClick={() => setModalCategory('Tohum')}
+            className="flex-1 flex flex-col items-center justify-center gap-1 bg-rose-500 text-white py-2.5 rounded-[1.2rem] hover:bg-rose-600 transition-all active:scale-95 shadow-lg shadow-rose-200/50"
+          >
+            <span className="text-lg">🌾</span>
+            <span className="text-[7px] sm:text-[9px] font-black uppercase tracking-widest truncate w-full px-1 text-center">Tohum</span>
+          </button>
           
           <button 
             onClick={() => setModalCategory('İşçilik')}

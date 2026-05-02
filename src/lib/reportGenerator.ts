@@ -4,7 +4,7 @@ import * as XLSX from 'xlsx';
 import { toast } from 'sonner';
 
 export const generateSeasonPDF = (season: any, transactions: any[], lands: any[]) => {
-  console.log('PDF generating...', { season, transactionsCount: transactions.length });
+
   
   try {
     const doc = new jsPDF();
@@ -50,7 +50,7 @@ export const generateSeasonPDF = (season: any, transactions: any[], lands: any[]
 };
 
 export const generateSeasonExcel = (season: any, transactions: any[], lands: any[]) => {
-  console.log('Excel generating...');
+
   try {
     const txSheet = XLSX.utils.json_to_sheet(transactions.map(tx => ({
       'Tarih': new Date(tx.date).toLocaleDateString('tr-TR'),

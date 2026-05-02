@@ -63,6 +63,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
   const [parcelNo, setParcelNo] = useState('');
   const [plotSize, setPlotSize] = useState('');
   const [selectedCrop, setSelectedCrop] = useState('');
+  const [plantingDate, setPlantingDate] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
 
@@ -96,6 +97,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
     setParcelNo(land.parcel_no || '');
     setPlotSize(String(land.size_decare || land.size || ''));
     setSelectedCrop(land.crop_type || '');
+    setPlantingDate(land.planting_date || '');
     if (land.lat && land.lng) {
       setMarkerPosition(new L.LatLng(land.lat, land.lng));
     }
@@ -112,17 +114,19 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
     setParcelNo('');
     setPlotSize('');
     setSelectedCrop('');
+    setPlantingDate('');
   };
 
   const handleSavePlot = async () => {
-    if (!selectedCrop || !plotSize || !city) {
-      toast.error("Lütfen tüm zorunlu alanları (İl, Dönüm ve Ürün) doldurun.");
+    if (!selectedCrop || !plotSize || !city || !plantingDate) {
+      toast.error("Lütfen tüm zorunlu alanları (İl, Dönüm, Ürün ve Ekim Tarihi) doldurun.");
       return;
     }
     
     const landData: any = {
       city, district, neighborhood, block_no: blockNo, parcel_no: parcelNo, 
       size: plotSize, size_decare: Number(plotSize), crop_type: selectedCrop, 
+      planting_date: plantingDate,
       lat: markerPosition?.lat, lng: markerPosition?.lng
     };
 
@@ -382,15 +386,27 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Ekili Ürün</label>
-                <div className="relative">
-                  <TreePine size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
-                  <select className={`${selectClass} pl-10`} value={selectedCrop} onChange={(e) => setSelectedCrop(e.target.value)}>
-                    <option value="" disabled>Ürün seçin...</option>
-                    {CROP_TYPES.map(crop => <option key={crop} value={crop}>{crop}</option>)}
-                  </select>
-                  <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-300 pointer-events-none" />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Ekili Ürün</label>
+                  <div className="relative">
+                    <TreePine size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+                    <select className={`${selectClass} pl-10`} value={selectedCrop} onChange={(e) => setSelectedCrop(e.target.value)}>
+                      <option value="" disabled>Ürün seçin...</option>
+                      {CROP_TYPES.map(crop => <option key={crop} value={crop}>{crop}</option>)}
+                    </select>
+                    <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-300 pointer-events-none" />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Ekim Tarihi</label>
+                  <input 
+                    type="date" 
+                    className={selectClass}
+                    value={plantingDate} 
+                    onChange={(e) => setPlantingDate(e.target.value)} 
+                    required
+                  />
                 </div>
               </div>
               
@@ -404,7 +420,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
                 <button onClick={handleCancelPlot} className="flex-1 py-3.5 text-zinc-500 font-bold bg-white border border-zinc-200 hover:bg-zinc-100 rounded-xl transition-all active:scale-[0.98]">İptal</button>
                 <button 
                   onClick={handleSavePlot} 
-                  disabled={!selectedCrop || !plotSize || !city} 
+                  disabled={!selectedCrop || !plotSize || !city || !plantingDate} 
                   className="flex-[2] py-3.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-200 disabled:opacity-50 disabled:grayscale transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                 >
                   <Save size={18} />

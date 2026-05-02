@@ -7,19 +7,6 @@ import { fetchWeather, WeatherData } from '@/lib/weatherService';
 import { buildAIPrompt, LandContext } from '@/lib/aiActionEngine';
 import { Transaction, Land, Season, Profile, CategoryTotals } from '@/types';
 
-const IS_DEMO = false;
-
-const MOCK_LANDS = [
-  { id: '1', name: 'Pamuk Tarlası', city: 'Aydın', district: 'Söke', block_no: '101', parcel_no: '5', size_decare: 45, crop_type: 'Pamuk', org_id: 'demo', lat: 37.7478, lng: 27.3971, planting_date: '2026-03-15', expected_yield: 18000, expected_price: 35 },
-  { id: '2', name: 'Buğday Tarlası', city: 'Konya', district: 'Ereğli', block_no: '205', parcel_no: '12', size_decare: 30, crop_type: 'Buğday', org_id: 'demo', lat: 37.5133, lng: 34.0467, planting_date: '2025-10-15', expected_yield: 15000, expected_price: 11 },
-  { id: '3', name: 'Mısır Tarlası', city: 'Adana', district: 'Seyhan', block_no: '110', parcel_no: '8', size_decare: 75, crop_type: 'Mısır', org_id: 'demo', lat: 36.9914, lng: 35.3308, planting_date: '2026-04-10', expected_yield: 75000, expected_price: 9 }
-];
-
-const MOCK_TRANSACTIONS: Transaction[] = [
-  { id: 't1', amount: 1200, description: 'Gübre Alımı', date: new Date().toISOString(), type: 'expense', category: 'Gübre', land_id: '1', org_id: 'demo', lands: { block_no: '101', parcel_no: '5' } },
-  { id: 't2', amount: 850, description: 'Mazot', date: new Date().toISOString(), type: 'expense', category: 'Mazot', land_id: '2', org_id: 'demo', lands: { block_no: '205', parcel_no: '12' } },
-  { id: 't3', amount: 3000, description: 'Tohum', date: new Date(Date.now() - 86400000).toISOString(), type: 'expense', category: 'Diğer', land_id: '3', org_id: 'demo', lands: { block_no: '110', parcel_no: '8' } }
-];
 
 const translations = {
   en: { dashboard: "Action Tracker", lands: "Plots", inventory: "Inventory", finance: "Finance", settings: "Settings" },
@@ -87,8 +74,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const fetchTransactions = React.useCallback(async () => {
     setIsLoadingTransactions(true);
     const userId = localStorage.getItem('user_id');
-    if (IS_DEMO || !userId) {
-      setTransactions(MOCK_TRANSACTIONS);
+    if (!userId) {
+      setTransactions([]);
       setIsLoadingTransactions(false);
       return;
     }
@@ -104,9 +91,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const fetchLands = React.useCallback(async () => {
     setIsLoadingLands(true);
     const userId = localStorage.getItem('user_id');
-    if (IS_DEMO || !userId) {
-      setLands(MOCK_LANDS as any);
-      setTotalArea(MOCK_LANDS.reduce((sum, l) => sum + l.size_decare, 0));
+    if (!userId) {
+      setLands([]);
+      setTotalArea(0);
       setIsLoadingLands(false);
       return;
     }
@@ -122,7 +109,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const fetchSeasons = React.useCallback(async () => {
     const userId = localStorage.getItem('user_id');
-    if (IS_DEMO || !userId) return;
+    if (!userId) return;
     try {
       const { data } = await supabase.from('seasons').select('*').eq('org_id', userId).order('created_at', { ascending: false });
       if (data) {
@@ -179,7 +166,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setLands(prev => [...prev, { ...dbPayload, id: tempId } as any]);
     setTotalArea(prev => prev + Number(dbPayload.size_decare));
 
-    if (!IS_DEMO && userId) {
+    if (userId) {
       try {
         const { data, error } = await supabase.from('lands').insert([dbPayload]).select().single();
         
@@ -205,22 +192,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const updateLand = async (land: any) => {
     const { id, ...updateData } = land;
     setLands(prev => prev.map(l => l.id === id ? land : l));
-    if (!IS_DEMO) {
-      const { error } = await supabase.from('lands').update(updateData).eq('id', id);
-      if (error) toast.error("Güncelleme hatası: " + error.message);
-      else toast.success("Arazi güncellendi");
-    }
+    const { error } = await supabase.from('lands').update(updateData).eq('id', id);
+    if (error) toast.error("Güncelleme hatası: " + error.message);
+    else toast.success("Arazi güncellendi");
   };
 
   const deleteLand = async (id: string) => {
     const land = lands.find(l => l.id === id);
     if (land) setTotalArea(prev => prev - Number(land.size_decare || 0));
     setLands(prev => prev.filter(l => l.id !== id));
-    if (!IS_DEMO) {
-      const { error } = await supabase.from('lands').delete().eq('id', id);
-      if (error) toast.error("Silme hatası: " + error.message);
-      else toast.success("Arazi silindi");
-    }
+    const { error } = await supabase.from('lands').delete().eq('id', id);
+    if (error) toast.error("Silme hatası: " + error.message);
+    else toast.success("Arazi silindi");
   };
 
   const addExpense = async (amount: number, category: string, date: string, land_id: string, receipt_url?: string, receipt_thumbnail_url?: string) => {
@@ -240,7 +223,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
     setTransactions(prev => [newTx, ...prev]);
 
-    if (!IS_DEMO && userId) {
+    if (userId) {
       try {
         const { data, error } = await supabase.from('transactions').insert([{ 
           org_id: userId, 
@@ -268,12 +251,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const logSaving = async (amount: number, reason: string) => {
     setTotalSavings(prev => prev + amount);
     const userId = localStorage.getItem('user_id');
-    if (!IS_DEMO && userId) await supabase.from('savings_logs').insert([{ user_id: userId, amount, reason, date: new Date().toISOString() }]);
+    if (userId) await supabase.from('savings_logs').insert([{ user_id: userId, amount, reason, date: new Date().toISOString() }]);
   };
 
   const startNewSeason = async (name: string, startDate: string, endDate: string) => {
     const userId = localStorage.getItem('user_id');
-    if (!IS_DEMO && userId) {
+    if (userId) {
       if (activeSeason) await supabase.from('seasons').update({ is_active: false }).eq('id', activeSeason.id);
       const { data, error } = await supabase.from('seasons').insert([{ name, year: new Date(startDate).getFullYear(), is_active: true, org_id: userId }]).select();
       if (error) {
@@ -322,7 +305,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AppContext.Provider value={{ lang, setLang, t, totalExpenses, totalArea, addExpense, weather: { temp: weatherData?.temperature || null, windspeed: weatherData?.windSpeed || null, loading: false, error: null }, dailyInsight, criticalAlert, totalSavings, dailySpent, dailyActions, lands, transactions, isLoadingLands, isLoadingTransactions, addLand, updateLand, deleteLand, logSaving, requestWeatherAndInsight, startNewSeason, isDemo: IS_DEMO, isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s) => setActiveSeason(s), weatherData, currentUserRole }}>
+    <AppContext.Provider value={{ lang, setLang, t, totalExpenses, totalArea, addExpense, weather: { temp: weatherData?.temperature || null, windspeed: weatherData?.windSpeed || null, loading: false, error: null }, dailyInsight, criticalAlert, totalSavings, dailySpent, dailyActions, lands, transactions, isLoadingLands, isLoadingTransactions, addLand, updateLand, deleteLand, logSaving, requestWeatherAndInsight, startNewSeason, isDemo: false, isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s) => setActiveSeason(s), weatherData, currentUserRole }}>
       {children}
     </AppContext.Provider>
   );

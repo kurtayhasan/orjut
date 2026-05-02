@@ -24,7 +24,7 @@ export default function DashboardPage() {
   
   // Cost Metric Logic
   const costPerDonum = totalArea > 0 ? totalExpenses / totalArea : 0;
-  const averageCost = 950; // Mock average
+  const averageCost = 1000; // Benchmark: average cost per dönüm in the region
   const isRising = costPerDonum > averageCost;
 
   // Projected Profit Logic
@@ -35,14 +35,16 @@ export default function DashboardPage() {
   }, 0);
   const projectedProfit = projectedRevenue > 0 ? projectedRevenue - totalExpenses : 0;
 
-  // Mock Category & Budget Data (In real app, fetch from context/db)
+  // Category & Budget Data (computed from real transactions)
+  // Dynamic budget estimate: totalArea * 2000 TL distributed across categories
+  const estimatedTotalBudget = totalArea > 0 ? totalArea * 2000 : 100000;
   const categoryData = [
-    { name: 'Mazot', value: transactions.filter(t => t.description === 'Mazot').reduce((s, t) => s + t.amount, 0) || 12000, color: '#F97316', budget: 50000 },
-    { name: 'Gübre', value: transactions.filter(t => t.description === 'Gübre').reduce((s, t) => s + t.amount, 0) || 8500, color: '#22C55E', budget: 30000 },
-    { name: 'İlaç', value: transactions.filter(t => t.description === 'İlaç').reduce((s, t) => s + t.amount, 0) || 4500, color: '#14B8A6', budget: 20000 },
-    { name: 'Tohum', value: transactions.filter(t => t.description === 'Tohum').reduce((s, t) => s + t.amount, 0) || 15000, color: '#EF4444', budget: 15000 },
-    { name: 'İşçilik', value: transactions.filter(t => t.description === 'İşçilik').reduce((s, t) => s + t.amount, 0) || 45000, color: '#3B82F6', budget: 40000 },
-    { name: 'Diğer', value: transactions.filter(t => !['Mazot', 'Gübre', 'İlaç', 'Tohum', 'İşçilik'].includes(t.description)).reduce((s, t) => s + t.amount, 0) || 5000, color: '#94A3B8', budget: 10000 }
+    { name: 'Mazot', value: transactions.filter(t => t.description === 'Mazot').reduce((s, t) => s + t.amount, 0), color: '#F97316', budget: estimatedTotalBudget * 0.25 },
+    { name: 'Gübre', value: transactions.filter(t => t.description === 'Gübre').reduce((s, t) => s + t.amount, 0), color: '#22C55E', budget: estimatedTotalBudget * 0.20 },
+    { name: 'İlaç', value: transactions.filter(t => t.description === 'İlaç').reduce((s, t) => s + t.amount, 0), color: '#14B8A6', budget: estimatedTotalBudget * 0.12 },
+    { name: 'Tohum', value: transactions.filter(t => t.description === 'Tohum').reduce((s, t) => s + t.amount, 0), color: '#EF4444', budget: estimatedTotalBudget * 0.15 },
+    { name: 'İşçilik', value: transactions.filter(t => t.description === 'İşçilik').reduce((s, t) => s + t.amount, 0), color: '#3B82F6', budget: estimatedTotalBudget * 0.20 },
+    { name: 'Diğer', value: transactions.filter(t => !['Mazot', 'Gübre', 'İlaç', 'Tohum', 'İşçilik'].includes(t.description)).reduce((s, t) => s + t.amount, 0), color: '#94A3B8', budget: estimatedTotalBudget * 0.08 }
   ];
 
   return (
@@ -190,7 +192,7 @@ export default function DashboardPage() {
                 <div key={tx.id} className={`p-4 flex items-center justify-between text-sm transition-colors hover:bg-zinc-50 group ${tx.isPending ? 'opacity-50' : ''}`}>
                   <div className="flex items-center gap-3 flex-1">
                     <div className="w-10 h-10 shrink-0 rounded-full bg-zinc-50 flex items-center justify-center text-xl group-hover:bg-white transition-colors">
-                      {tx.description === 'Mazot' ? '⛽' : tx.description === 'Gübre' ? '🌱' : tx.description === 'İlaç' ? '🧪' : tx.description === 'İşçilik' ? '🧑‍🌾' : '📦'}
+                      {tx.description === 'Mazot' ? '⛽' : tx.description === 'Gübre' ? '🌱' : tx.description === 'İlaç' ? '🧪' : tx.description === 'Tohum' ? '🌾' : tx.description === 'İşçilik' ? '🧑‍🌾' : '📦'}
                     </div>
                     <div>
                       <p className="font-bold text-zinc-800 flex items-center gap-1">
@@ -227,7 +229,7 @@ export default function DashboardPage() {
         <div className="bg-white border-2 border-zinc-100 rounded-3xl overflow-hidden shadow-sm flex flex-col transition-all hover:border-zinc-200 lg:col-span-1 p-5">
           <div className="flex items-center gap-2 mb-4">
             <PieChart size={20} className="text-indigo-600" />
-            <h2 className="text-base font-bold text-zinc-900">Bütçe Durumu</h2>
+            <h2 className="text-base font-bold text-zinc-900">Harcama Dağılımı</h2>
           </div>
           <CategoryPieChart data={categoryData} />
           <CategorySummaryBar 
