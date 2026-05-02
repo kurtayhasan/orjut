@@ -159,11 +159,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const addLand = async (land: any) => {
     const userId = localStorage.getItem('user_id') || '';
-    const tempId = land.id || Math.random().toString(36).substring(7);
+    const tempId = 'temp_' + Date.now();
     
-    // DB şemasına uygun veriyi hazırla
-    const landToSave: Land = {
-      id: tempId,
+    // DB'ye gönderilecek veri (id YOK — Supabase UUID üretecek)
+    const dbPayload = {
       org_id: userId,
       city: land.city,
       district: land.district,
@@ -176,13 +175,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       planting_date: new Date().toISOString()
     };
 
-    // Optimistic Update
-    setLands(prev => [...prev, landToSave]);
-    setTotalArea(prev => prev + Number(landToSave.size_decare));
+    // Optimistic Update (geçici ID ile ekrana yansıt)
+    setLands(prev => [...prev, { ...dbPayload, id: tempId } as any]);
+    setTotalArea(prev => prev + Number(dbPayload.size_decare));
 
     if (!IS_DEMO && userId) {
       try {
-        const { data, error } = await supabase.from('lands').insert([landToSave]).select().single();
+        const { data, error } = await supabase.from('lands').insert([dbPayload]).select().single();
         
         if (error) {
           console.error("Supabase Land Insert Error:", error);
@@ -227,7 +226,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addExpense = async (amount: number, category: string, date: string, land_id: string, receipt_url?: string, receipt_thumbnail_url?: string) => {
     const userId = localStorage.getItem('user_id') || '';
     setTotalExpenses(prev => prev + amount);
-    const tempId = Math.random().toString(36).substring(7);
+    const tempId = 'temp_' + Date.now();
 
     const newTx: Transaction = { 
       id: tempId, 
