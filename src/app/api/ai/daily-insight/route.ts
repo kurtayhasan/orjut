@@ -1,4 +1,4 @@
-// AI Model Update: Using gemini-pro for stability
+// AI Model Update: Using gemini-1.5-flash for free-tier compatibility
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     const { prompt } = await req.json();
 
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-1.5-flash',
     });
 
     const result = await model.generateContent(prompt);
@@ -40,6 +40,17 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: any) {
     console.error('Error generating insight:', error);
+
+    // Handle rate limit (429) gracefully with a fallback
+    if (error?.status === 429 || error?.message?.includes('429') || error?.message?.includes('quota')) {
+      return NextResponse.json({
+        success: true,
+        insight: 'AI analiz hizmeti şu anda yoğun. Lütfen birkaç dakika sonra tekrar deneyin.',
+        critical_alert: null,
+        rate_limited: true
+      });
+    }
+
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },
       { status: 500 }
