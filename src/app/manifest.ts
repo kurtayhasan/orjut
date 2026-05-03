@@ -32,5 +32,19 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: 'maskable',
       },
     ],
+    screenshots: [
+      {
+        src: 'https://www.orjut.com/screenshot-desktop.png',
+        sizes: '1280x720',
+        type: 'image/png',
+        form_factor: 'wide',
+      },
+      {
+        src: 'https://www.orjut.com/screenshot-mobile.png',
+        sizes: '720x1280',
+        type: 'image/png',
+        form_factor: 'narrow',
+      },
+    ],
   };
 }
