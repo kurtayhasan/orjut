@@ -14,19 +14,19 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ['agriculture', 'business', 'productivity'],
     icons: [
       {
-        src: '/icon-192x192.png',
+        src: 'https://www.orjut.com/icon-192x192.png',
         sizes: '192x192',
         type: 'image/png',
         purpose: 'any',
       },
       {
-        src: '/icon-512x512.png',
+        src: 'https://www.orjut.com/icon-512x512.png',
         sizes: '512x512',
         type: 'image/png',
         purpose: 'any',
       },
       {
-        src: '/icon.svg',
+        src: 'https://www.orjut.com/icon.svg',
         sizes: 'any',
         type: 'image/svg+xml',
         purpose: 'maskable',
