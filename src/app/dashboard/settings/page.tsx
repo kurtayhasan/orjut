@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '@/context/AppContext';
-import { Settings as SettingsIcon, Bell, Shield, User, Smartphone, LogOut, ChevronRight, Check, Globe, Moon } from 'lucide-react';
+import Link from 'next/link';
+import { Settings as SettingsIcon, Bell, Shield, User, Smartphone, LogOut, ChevronRight, Check, Globe, Moon, Trash2 } from 'lucide-react';
 import { requestNotificationPermission } from '@/lib/notifications';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -162,6 +163,21 @@ export default function SettingsPage() {
                   <span className="text-sm font-medium text-zinc-700">Şifre Değiştir</span>
                 </div>
                 <ChevronRight size={18} className="text-zinc-300 group-hover:text-zinc-500" />
+              </div>
+              
+              <div className="pt-4 mt-2 border-t border-zinc-100">
+                <Link href="/delete-account" className="flex items-center justify-between group cursor-pointer bg-rose-50 hover:bg-rose-100 p-4 rounded-xl transition-all border border-rose-100/50">
+                  <div className="flex items-center gap-4">
+                    <div className="p-2.5 bg-white text-rose-600 rounded-lg shadow-sm">
+                      <Trash2 size={20} />
+                    </div>
+                    <div>
+                      <span className="text-sm font-black text-rose-700 block mb-0.5">Hesabımı ve Verilerimi Sil</span>
+                      <span className="text-xs text-rose-600/70 font-medium">Bu işlem geri alınamaz ve onay gerektirir.</span>
+                    </div>
+                  </div>
+                  <ChevronRight size={20} className="text-rose-400 group-hover:text-rose-600" />
+                </Link>
               </div>
             </div>
           </div>
