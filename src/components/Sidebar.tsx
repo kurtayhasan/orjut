@@ -37,7 +37,7 @@ export default function Sidebar() {
         <div className="w-8 h-8 bg-emerald-100 rounded-lg border border-emerald-200 flex items-center justify-center">
           <Leaf size={18} className="text-emerald-700" />
         </div>
-        <span className="font-semibold text-zinc-800 tracking-tight">Orjut AgTech OS</span>
+        <span className="font-semibold text-zinc-800 tracking-tight">ZiraiAsistan by Orjut</span>
       </div>
       
       <div className="p-4">

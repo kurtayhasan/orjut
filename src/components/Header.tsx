@@ -59,7 +59,7 @@ export default function Header() {
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center sm:hidden">
               <span className="text-white text-xs">O</span>
             </div>
-            <span className="hidden sm:block">Orjut Command Center</span>
+            <span className="hidden sm:block">ZiraiAsistan Paneli</span>
           </div>
         </div>
         

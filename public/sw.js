@@ -1,5 +1,5 @@
 self.addEventListener('push', function(event) {
-  let data = { title: 'Orjut AgTech OS', body: 'Yeni bildiriminiz var.', url: '/' };
+  let data = { title: 'ZiraiAsistan by Orjut', body: 'Yeni bildiriminiz var.', url: '/' };
   
   if (event.data) {
     try {
