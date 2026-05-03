@@ -349,7 +349,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const userId = localStorage.getItem('user_id');
     if (userId) {
       if (activeSeason) await supabase.from('seasons').update({ is_active: false }).eq('id', activeSeason.id);
-      const { data, error } = await supabase.from('seasons').insert([{ name, year: new Date(startDate).getFullYear(), is_active: true, org_id: userId }]).select();
+      const { data, error } = await supabase.from('seasons').insert([{ 
+        name, 
+        year: new Date(startDate).getFullYear(), 
+        start_date: startDate,
+        end_date: endDate,
+        is_active: true, 
+        org_id: userId 
+      }]).select();
       if (error) {
         toast.error("Sezon başlatılamadı: " + error.message);
         return;
