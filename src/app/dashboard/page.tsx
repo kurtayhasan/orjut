@@ -26,8 +26,6 @@ export default function DashboardPage() {
   
   // Cost Metric Logic (Memoized)
   const costPerDonum = React.useMemo(() => totalArea > 0 ? totalExpenses / totalArea : 0, [totalArea, totalExpenses]);
-  const averageCost = 1000; // Benchmark: average cost per dönüm in the region
-  const isRising = costPerDonum > averageCost;
 
   // Projected Profit Logic (Memoized)
   const projectedRevenue = React.useMemo(() => lands.reduce((sum, land) => {
@@ -128,15 +126,10 @@ export default function DashboardPage() {
           <div>
             <p className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-1">Maliyet Takibi (₺ / Dönüm)</p>
             <div className="flex items-baseline gap-2">
-              <h1 className={`text-4xl font-black tracking-tighter ${isRising ? 'text-rose-600' : 'text-emerald-600'}`}>
+              <h1 className={`text-4xl font-black tracking-tighter text-emerald-600`}>
                 ₺{costPerDonum.toFixed(0)}
               </h1>
             </div>
-          </div>
-
-          <div className={`mt-4 flex items-center gap-3 px-3 py-2 rounded-xl border text-sm ${isRising ? 'bg-rose-50 border-rose-100 text-rose-700' : 'bg-emerald-50 border-emerald-100 text-emerald-700'}`}>
-            {isRising ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
-            <span className="font-bold">{isRising ? 'Limit Üstü' : 'Normal'}</span>
           </div>
         </div>
 

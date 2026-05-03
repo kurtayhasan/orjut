@@ -181,10 +181,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           toast.success("Arazi başarıyla kaydedildi");
         }
       } catch (err: any) {
-        toast.error("Veritabanına kaydedilemedi: " + (err.message || "Bilinmeyen hata"));
-        // Hata durumunda rollback
-        setLands(prev => prev.filter(l => l.id !== tempId));
-        setTotalArea(prev => prev - Number(dbPayload.size_decare));
+        if (!navigator.onLine || err.message === 'Failed to fetch') {
+          const pendingLands = JSON.parse(localStorage.getItem('pending_lands') || '[]');
+          localStorage.setItem('pending_lands', JSON.stringify([...pendingLands, dbPayload]));
+          toast.success("Çevrimdışısınız. Arazi cihaza kaydedildi.");
+        } else {
+          toast.error("Veritabanına kaydedilemedi: " + (err.message || "Bilinmeyen hata"));
+          // Hata durumunda rollback
+          setLands(prev => prev.filter(l => l.id !== tempId));
+          setTotalArea(prev => prev - Number(dbPayload.size_decare));
+        }
       }
     }
   };
@@ -241,9 +247,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (data) setTransactions(prev => prev.map(tx => tx.id === tempId ? data : tx));
         toast.success("Masraf kaydedildi");
       } catch (err: any) {
-        toast.error("Masraf kaydedilemedi: " + err.message);
-        setTransactions(prev => prev.filter(tx => tx.id !== tempId));
-        setTotalExpenses(prev => prev - amount);
+        if (!navigator.onLine || err.message === 'Failed to fetch') {
+          const txPayload = { org_id: userId, amount, description: category, date, land_id, receipt_url, receipt_thumbnail_url, category: category, type: 'expense' };
+          const pendingTxs = JSON.parse(localStorage.getItem('pending_transactions') || '[]');
+          localStorage.setItem('pending_transactions', JSON.stringify([...pendingTxs, txPayload]));
+          toast.success("Çevrimdışısınız. Masraf cihaza kaydedildi.");
+        } else {
+          toast.error("Masraf kaydedilemedi: " + err.message);
+          setTransactions(prev => prev.filter(tx => tx.id !== tempId));
+          setTotalExpenses(prev => prev - amount);
+        }
       }
     }
   };

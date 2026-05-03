@@ -1,62 +1,62 @@
-self.addEventListener('push', function(event) {
-  let data = { title: 'ZiraiAsistan by Orjut', body: 'Yeni bildiriminiz var.', url: '/' };
-  
-  if (event.data) {
-    try {
-      data = event.data.json();
-    } catch (e) {
-      data.body = event.data.text();
-    }
-  }
+const CACHE_NAME = 'ziraiasistan-cache-v1';
+const OFFLINE_URL = '/';
 
-  const options = {
-    body: data.body,
-    icon: '/favicon.ico',
-    badge: '/favicon.ico',
-    data: {
-      url: data.url || '/'
-    }
-  };
-
-  event.waitUntil(
-    self.registration.showNotification(data.title, options)
-  );
-});
-
-self.addEventListener('notificationclick', function(event) {
-  event.notification.close();
-  event.waitUntil(
-    clients.openWindow(event.notification.data.url)
-  );
-});
-
-// Cache logic for offline syncing...
-const CACHE_NAME = 'orjut-cache-v2';
-const urlsToCache = [
+const CACHED_URLS = [
   '/',
-  '/icon-192x192.png',
-  '/icon-512x512.png',
+  '/dashboard',
+  '/dashboard/lands',
+  '/dashboard/seasons',
   '/icon.svg',
-  '/favicon.ico'
+  '/manifest.webmanifest'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(urlsToCache))
-      .then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(CACHED_URLS);
+    })
   );
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(clients.claim());
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames
+          .filter((name) => name !== CACHE_NAME)
+          .map((name) => caches.delete(name))
+      );
+    })
+  );
+  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
-  // Stale-while-revalidate strategy or network-first for MVP
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
-  );
+  const url = new URL(event.request.url);
+
+  // Ignore API and Supabase requests
+  if (url.pathname.startsWith('/api') || url.hostname.includes('supabase')) {
+    return;
+  }
+
+  // Intercept Maps requests (stale-while-revalidate for navigation and static assets)
+  if (event.request.mode === 'navigate' || event.request.method === 'GET') {
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        const fetchPromise = fetch(event.request).then((networkResponse) => {
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, networkResponse.clone());
+          });
+          return networkResponse;
+        }).catch(() => {
+          if (event.request.mode === 'navigate') {
+            return caches.match(OFFLINE_URL);
+          }
+        });
+
+        return cachedResponse || fetchPromise;
+      })
+    );
+  }
 });
