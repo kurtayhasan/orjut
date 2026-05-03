@@ -22,6 +22,8 @@ type AppContextType = {
   totalExpenses: number;
   totalArea: number;
   addExpense: (amount: number, category: string, date: string, land_id: string, receipt_url?: string, receipt_thumbnail_url?: string) => Promise<void>;
+  updateExpense: (id: string, updates: any) => Promise<void>;
+  deleteExpense: (id: string) => Promise<void>;
   weather: { temp: number | null, windspeed: number | null, loading: boolean, error: string | null };
   dailyInsight: string | null;
   criticalAlert: string | null;
@@ -263,6 +265,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateExpense = async (id: string, updates: any) => {
+    setTransactions(prev => prev.map(tx => tx.id === id ? { ...tx, ...updates } : tx));
+    if (updates.amount !== undefined) {
+       setTotalExpenses(prev => {
+          const oldAmount = transactions.find(t => t.id === id)?.amount || 0;
+          return prev - oldAmount + Number(updates.amount);
+       });
+    }
+    const { error } = await supabase.from('transactions').update(updates).eq('id', id);
+    if (error) toast.error("İşlem güncellenemedi: " + error.message);
+    else toast.success("İşlem başarıyla güncellendi");
+  };
+
+  const deleteExpense = async (id: string) => {
+    const tx = transactions.find(t => t.id === id);
+    if (tx) setTotalExpenses(prev => prev - Number(tx.amount || 0));
+    setTransactions(prev => prev.filter(t => t.id !== id));
+    const { error } = await supabase.from('transactions').delete().eq('id', id);
+    if (error) toast.error("İşlem silinemedi: " + error.message);
+    else toast.success("İşlem başarıyla silindi");
+  };
+
   const logSaving = async (amount: number, reason: string) => {
     setTotalSavings(prev => prev + amount);
     const userId = localStorage.getItem('user_id');
@@ -333,7 +357,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AppContext.Provider value={{ lang, setLang, t, totalExpenses, totalArea, addExpense, weather: { temp: weatherData?.temperature || null, windspeed: weatherData?.windSpeed || null, loading: false, error: null }, dailyInsight, criticalAlert, totalSavings, dailySpent, dailyActions, lands, transactions, isLoadingLands, isLoadingTransactions, addLand, updateLand, deleteLand, logSaving, requestWeatherAndInsight, startNewSeason, toggleSeasonStatus, isDemo: false, isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s) => setActiveSeason(s), weatherData, currentUserRole }}>
+    <AppContext.Provider value={{ lang, setLang, t, totalExpenses, totalArea, addExpense, updateExpense, deleteExpense, weather: { temp: weatherData?.temperature || null, windspeed: weatherData?.windSpeed || null, loading: false, error: null }, dailyInsight, criticalAlert, totalSavings, dailySpent, dailyActions, lands, transactions, isLoadingLands, isLoadingTransactions, addLand, updateLand, deleteLand, logSaving, requestWeatherAndInsight, startNewSeason, toggleSeasonStatus, isDemo: false, isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s) => setActiveSeason(s), weatherData, currentUserRole }}>
       {children}
     </AppContext.Provider>
   );

@@ -28,6 +28,7 @@ export default function LandsPage() {
   const [selectedLand, setSelectedLand] = React.useState<any>(null);
   const [mapFocusLand, setMapFocusLand] = React.useState<any>(null);
   const [landToEdit, setLandToEdit] = React.useState<any>(null);
+  const [deletingLand, setDeletingLand] = React.useState<any>(null);
   const [activeTab, setActiveTab] = React.useState<'details' | 'collaborators'>('details');
   
   // States for edit
@@ -89,6 +90,25 @@ export default function LandsPage() {
           </div>
         </div>
       </header>
+
+      {/* Delete Land Modal */}
+      {deletingLand && (
+        <div className="fixed inset-0 z-[10000] bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl text-center">
+            <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Trash2 size={28} />
+            </div>
+            <h3 className="font-black text-xl mb-2 text-zinc-900">Araziyi Sil</h3>
+            <p className="text-zinc-500 font-medium text-sm mb-6">
+              Bu araziyi (Ada {deletingLand.block_no} / Parsel {deletingLand.parcel_no}) silmek istediğinize emin misiniz? Tüm bağlı işlemler ve metrikler de etkilenebilir. Bu işlem geri alınamaz.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setDeletingLand(null)} className="flex-1 py-3 font-bold text-zinc-600 bg-zinc-100 rounded-xl hover:bg-zinc-200 transition-colors">İptal</button>
+              <button onClick={() => { deleteLand(deletingLand.id); setDeletingLand(null); }} className="flex-1 py-3 font-bold text-white bg-rose-600 rounded-xl hover:bg-rose-700 transition-colors">Evet, Sil</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[500px] lg:h-[calc(100vh-250px)]">
         
@@ -336,18 +356,17 @@ export default function LandsPage() {
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedLand(land);
-                              // If the user also wants to open the map edit modal, we could do:
-                              // setLandToEdit(land);
+                              setLandToEdit(land);
                             }}
                             className="p-2.5 text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
-                            title="Verim/Fiyat Düzenle"
+                            title="Düzenle"
                           >
                             <Edit2 size={18} />
                           </button>
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
-                              deleteLand(land.id);
+                              setDeletingLand(land);
                             }}
                             className="p-2.5 text-zinc-300 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
                             title="Sil"
