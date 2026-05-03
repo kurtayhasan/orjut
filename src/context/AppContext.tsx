@@ -159,7 +159,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       crop_type: land.crop_type,
       lat: land.lat,
       lng: land.lng,
-      planting_date: land.planting_date || new Date().toISOString()
+      planting_date: land.planting_date
     };
 
     // Optimistic Update (geçici ID ile ekrana yansıt)

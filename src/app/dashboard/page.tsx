@@ -18,9 +18,11 @@ export default function DashboardPage() {
 
   const categoryTotals = useCategoryTotals(transactions);
 
-  const filteredTransactions = activeFilter 
-    ? transactions.filter(t => t.description === activeFilter)
-    : transactions;
+  const filteredTransactions = React.useMemo(() => {
+    return activeFilter 
+      ? transactions.filter(t => t.description === activeFilter)
+      : transactions;
+  }, [activeFilter, transactions]);
   
   // Cost Metric Logic (Memoized)
   const costPerDonum = React.useMemo(() => totalArea > 0 ? totalExpenses / totalArea : 0, [totalArea, totalExpenses]);
@@ -38,16 +40,15 @@ export default function DashboardPage() {
 
   // Category & Budget Data (Memoized)
   const categoryData = React.useMemo(() => {
-    const estimatedTotalBudget = totalArea > 0 ? totalArea * 2000 : 0; // No fallback limit, purely dynamic
     return [
-      { name: 'Mazot', value: transactions.filter(t => t.description === 'Mazot').reduce((s, t) => s + t.amount, 0), color: '#F97316', budget: estimatedTotalBudget * 0.25 },
-      { name: 'Gübre', value: transactions.filter(t => t.description === 'Gübre').reduce((s, t) => s + t.amount, 0), color: '#22C55E', budget: estimatedTotalBudget * 0.20 },
-      { name: 'İlaç', value: transactions.filter(t => t.description === 'İlaç').reduce((s, t) => s + t.amount, 0), color: '#14B8A6', budget: estimatedTotalBudget * 0.12 },
-      { name: 'Tohum', value: transactions.filter(t => t.description === 'Tohum').reduce((s, t) => s + t.amount, 0), color: '#EF4444', budget: estimatedTotalBudget * 0.15 },
-      { name: 'İşçilik', value: transactions.filter(t => t.description === 'İşçilik').reduce((s, t) => s + t.amount, 0), color: '#3B82F6', budget: estimatedTotalBudget * 0.20 },
-      { name: 'Diğer', value: transactions.filter(t => !['Mazot', 'Gübre', 'İlaç', 'Tohum', 'İşçilik'].includes(t.description)).reduce((s, t) => s + t.amount, 0), color: '#94A3B8', budget: estimatedTotalBudget * 0.08 }
+      { name: 'Mazot', value: transactions.filter(t => t.description === 'Mazot').reduce((s, t) => s + t.amount, 0), color: '#F97316', budget: 0 },
+      { name: 'Gübre', value: transactions.filter(t => t.description === 'Gübre').reduce((s, t) => s + t.amount, 0), color: '#22C55E', budget: 0 },
+      { name: 'İlaç', value: transactions.filter(t => t.description === 'İlaç').reduce((s, t) => s + t.amount, 0), color: '#14B8A6', budget: 0 },
+      { name: 'Tohum', value: transactions.filter(t => t.description === 'Tohum').reduce((s, t) => s + t.amount, 0), color: '#EF4444', budget: 0 },
+      { name: 'İşçilik', value: transactions.filter(t => t.description === 'İşçilik').reduce((s, t) => s + t.amount, 0), color: '#3B82F6', budget: 0 },
+      { name: 'Diğer', value: transactions.filter(t => !['Mazot', 'Gübre', 'İlaç', 'Tohum', 'İşçilik'].includes(t.description)).reduce((s, t) => s + t.amount, 0), color: '#94A3B8', budget: 0 }
     ];
-  }, [transactions, totalArea]);
+  }, [transactions]);
 
   return (
     <div className="space-y-6 pb-48">

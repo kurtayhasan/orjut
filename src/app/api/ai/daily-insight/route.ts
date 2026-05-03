@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     try {
       data = JSON.parse(cleanResponse);
     } catch {
-      console.warn('JSON parse failed, returning raw text as insight');
+      console.error('JSON parse failed, returning raw text as insight');
       data = { insight: rawText.trim(), critical_alert: null };
     }
 
