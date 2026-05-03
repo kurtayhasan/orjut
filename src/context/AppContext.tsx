@@ -44,6 +44,7 @@ type AppContextType = {
   seasons: Season[];
   activeSeason: Season | null;
   setActiveSeason: (season: Season) => void;
+  toggleSeasonStatus: (id: string, currentStatus: boolean) => Promise<void>;
   weatherData: WeatherData | null;
   currentUserRole: 'owner' | 'editor' | 'viewer';
 };
@@ -159,6 +160,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       crop_type: land.crop_type,
       lat: land.lat,
       lng: land.lng,
+      boundaries: land.boundaries,
       planting_date: land.planting_date
     };
 
@@ -284,6 +286,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const toggleSeasonStatus = async (id: string, currentStatus: boolean) => {
+    const { error } = await supabase.from('seasons').update({ is_active: !currentStatus }).eq('id', id);
+    if (error) {
+      toast.error("Sezon durumu güncellenemedi: " + error.message);
+    } else {
+      setSeasons(prev => prev.map(s => s.id === id ? { ...s, is_active: !currentStatus } : s));
+      toast.success(currentStatus ? "Sezon kapatıldı" : "Sezon açıldı");
+      if (activeSeason?.id === id) {
+        setActiveSeason({ ...activeSeason, is_active: !currentStatus });
+      }
+    }
+  };
+
   const requestWeatherAndInsight = async () => {
     let lat = 37.7478, lon = 27.3971;
     if (lands.length > 0 && lands[0].lat && lands[0].lng) { lat = lands[0].lat; lon = lands[0].lng; }
@@ -318,7 +333,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AppContext.Provider value={{ lang, setLang, t, totalExpenses, totalArea, addExpense, weather: { temp: weatherData?.temperature || null, windspeed: weatherData?.windSpeed || null, loading: false, error: null }, dailyInsight, criticalAlert, totalSavings, dailySpent, dailyActions, lands, transactions, isLoadingLands, isLoadingTransactions, addLand, updateLand, deleteLand, logSaving, requestWeatherAndInsight, startNewSeason, isDemo: false, isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s) => setActiveSeason(s), weatherData, currentUserRole }}>
+    <AppContext.Provider value={{ lang, setLang, t, totalExpenses, totalArea, addExpense, weather: { temp: weatherData?.temperature || null, windspeed: weatherData?.windSpeed || null, loading: false, error: null }, dailyInsight, criticalAlert, totalSavings, dailySpent, dailyActions, lands, transactions, isLoadingLands, isLoadingTransactions, addLand, updateLand, deleteLand, logSaving, requestWeatherAndInsight, startNewSeason, toggleSeasonStatus, isDemo: false, isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s) => setActiveSeason(s), weatherData, currentUserRole }}>
       {children}
     </AppContext.Provider>
   );

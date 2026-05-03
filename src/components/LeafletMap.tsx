@@ -1,14 +1,17 @@
 'use client';
 
-import { MapContainer, TileLayer, Marker, useMapEvents, useMap, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap, Popup, FeatureGroup, GeoJSON } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useAppContext } from '@/context/AppContext';
-import { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { toast } from 'sonner';
 import { MapPin, X, Save, TreePine, Ruler, Search, Layers, Globe, ChevronDown } from 'lucide-react';
 import { WMSTileLayer, LayersControl } from 'react-leaflet';
 import { Country, State, City, ICountry, IState, ICity } from 'country-state-city';
+import { EditControl } from 'react-leaflet-draw';
+import * as turf from '@turf/turf';
+import 'leaflet-draw/dist/leaflet.draw.css';
 
 // Fix Leaflet default icon issues in Next.js
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -25,17 +28,7 @@ const CROP_TYPES = [
   'Soğan', 'Elma', 'Üzüm', 'Portakal', 'Kahve'
 ];
 
-function MapClickHandler({ onLocationSelect }: { onLocationSelect: (latlng: L.LatLng) => void }) {
-  const map = useMapEvents({
-    click(e) {
-      // Prevent click if clicking on a marker or other element
-      if ((e.originalEvent.target as HTMLElement).classList.contains('leaflet-container')) {
-        onLocationSelect(e.latlng);
-      }
-    },
-  });
-  return null;
-}
+// MapClickHandler removed in favor of EditControl
 
 function MapController({ selectedLand }: { selectedLand: any }) {
   const map = useMap();
@@ -52,6 +45,8 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
   const [markerPosition, setMarkerPosition] = useState<L.LatLng | null>(null);
   const [showCropSelector, setShowCropSelector] = useState(false);
   const [editingLandId, setEditingLandId] = useState<string | null>(null);
+  const [boundaries, setBoundaries] = useState<any>(null);
+  const drawGroupRef = useRef<L.FeatureGroup>(null);
   
   // Location dropdown states
   const [selectedCountryCode, setSelectedCountryCode] = useState('TR');
@@ -79,13 +74,65 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
     }
   }, [editLand]);
 
-  const handleLocationSelect = (latlng: L.LatLng) => {
-    // Check if clicking near an existing land (simple heuristic)
-    // For now, assume a click on empty space is a NEW land.
-    setEditingLandId(null);
-    resetForm();
-    setMarkerPosition(latlng);
-    setShowCropSelector(true);
+  const onCreated = async (e: any) => {
+    const { layerType, layer } = e;
+    if (layerType === 'polygon') {
+      const geojson = layer.toGeoJSON();
+      const areaSqm = turf.area(geojson);
+      const decares = (areaSqm / 1000).toFixed(2);
+      
+      const centroid = turf.centroid(geojson);
+      const lng = centroid.geometry.coordinates[0];
+      const lat = centroid.geometry.coordinates[1];
+
+      setEditingLandId(null);
+      resetForm();
+      setMarkerPosition(new L.LatLng(lat, lng));
+      setPlotSize(decares);
+      setBoundaries(geojson);
+      setShowCropSelector(true);
+      
+      if (drawGroupRef.current) {
+         drawGroupRef.current.clearLayers();
+      }
+
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+        const data = await res.json();
+        if (data && data.address) {
+          const addr = data.address;
+          const countryCode = addr.country_code ? addr.country_code.toUpperCase() : 'TR';
+          setSelectedCountryCode(countryCode);
+          
+          const detectedState = addr.province || addr.state;
+          if (detectedState) {
+            const allStates = State.getStatesOfCountry(countryCode);
+            const cleanState = detectedState.toLowerCase().replace(' province', '').replace(' ili', '');
+            const matchedState = allStates.find(s => s.name.toLowerCase().includes(cleanState) || cleanState.includes(s.name.toLowerCase()));
+            if (matchedState) {
+              setSelectedStateCode(matchedState.isoCode);
+              setCity(matchedState.name);
+            } else {
+              setCity(detectedState);
+            }
+          }
+          
+          const detectedDistrict = addr.town || addr.county || addr.city || addr.district;
+          if (detectedDistrict) {
+            setDistrict(detectedDistrict);
+          }
+          
+          const detectedNeighborhood = addr.neighbourhood || addr.village || addr.quarter || addr.suburb;
+          if (detectedNeighborhood) {
+            setNeighborhood(detectedNeighborhood);
+          }
+          
+          toast.success("Konum bilgileri haritadan otomatik dolduruldu!");
+        }
+      } catch (err) {
+        console.error("Reverse geocoding failed", err);
+      }
+    }
   };
 
   const handleEditPlot = (land: any) => {
@@ -98,6 +145,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
     setPlotSize(String(land.size_decare || land.size || ''));
     setSelectedCrop(land.crop_type || '');
     setPlantingDate(land.planting_date || '');
+    setBoundaries(land.boundaries || null);
     if (land.lat && land.lng) {
       setMarkerPosition(new L.LatLng(land.lat, land.lng));
     }
@@ -115,6 +163,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
     setPlotSize('');
     setSelectedCrop('');
     setPlantingDate('');
+    setBoundaries(null);
   };
 
   const handleSavePlot = async () => {
@@ -127,7 +176,8 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
       city, district, neighborhood, block_no: blockNo, parcel_no: parcelNo, 
       size: plotSize, size_decare: Number(plotSize), crop_type: selectedCrop, 
       planting_date: plantingDate,
-      lat: markerPosition?.lat, lng: markerPosition?.lng
+      lat: markerPosition?.lat, lng: markerPosition?.lng,
+      boundaries: boundaries
     };
 
     if (editingLandId) {
@@ -152,6 +202,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
     setMarkerPosition(null);
     setShowCropSelector(false);
     setEditingLandId(null);
+    setBoundaries(null);
   };
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -239,23 +290,50 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
           </LayersControl.Overlay>
         </LayersControl>
 
-        <MapClickHandler onLocationSelect={handleLocationSelect} />
+        <FeatureGroup ref={drawGroupRef}>
+          <EditControl
+            position='topright'
+            onCreated={onCreated}
+            draw={{
+              rectangle: false,
+              circle: false,
+              circlemarker: false,
+              marker: false,
+              polyline: false,
+              polygon: true
+            }}
+          />
+        </FeatureGroup>
+        
         <MapController selectedLand={focusLand} />
         
         {/* Render markers for all saved lands */}
         {lands.map((land: any) => (
-          land.lat && land.lng && (
-            <Marker 
-              key={land.id} 
-              position={[land.lat, land.lng]}
-              eventHandlers={{
-                click: (e) => {
-                  L.DomEvent.stopPropagation(e as any);
-                  handleEditPlot(land);
-                }
-              }}
-            />
-          )
+          <React.Fragment key={land.id}>
+            {land.boundaries ? (
+              <GeoJSON 
+                data={land.boundaries} 
+                eventHandlers={{
+                  click: (e) => {
+                    L.DomEvent.stopPropagation(e as any);
+                    handleEditPlot(land);
+                  }
+                }}
+              />
+            ) : (
+              land.lat && land.lng && (
+                <Marker 
+                  position={[land.lat, land.lng]}
+                  eventHandlers={{
+                    click: (e) => {
+                      L.DomEvent.stopPropagation(e as any);
+                      handleEditPlot(land);
+                    }
+                  }}
+                />
+              )
+            )}
+          </React.Fragment>
         ))}
 
         {markerPosition && !editingLandId && <Marker position={markerPosition} />}
@@ -381,7 +459,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
                   <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Dönüm</label>
                   <div className="relative">
                     <Ruler size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-300" />
-                    <input type="number" className={selectClass} placeholder="50" value={plotSize} onChange={(e) => setPlotSize(e.target.value)} />
+                    <input type="number" className={`${selectClass} bg-zinc-100`} placeholder="50" value={plotSize} onChange={(e) => setPlotSize(e.target.value)} readOnly title="Haritadaki çizime göre otomatik hesaplanır" />
                   </div>
                 </div>
               </div>

@@ -27,6 +27,7 @@ export interface Land {
   planting_date: string;
   expected_yield_per_decare?: number;
   expected_sell_price_unit?: number;
+  boundaries?: any;
 }
 
 export interface Transaction {

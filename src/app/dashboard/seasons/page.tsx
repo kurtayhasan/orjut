@@ -9,7 +9,7 @@ import { generateSeasonPDF, generateSeasonExcel, shareViaWhatsApp } from '@/lib/
 import { toast } from 'sonner';
 
 export default function SeasonsPage() {
-  const { seasons, activeSeason, setActiveSeason, transactions, lands, startNewSeason } = useAppContext();
+  const { seasons, activeSeason, setActiveSeason, toggleSeasonStatus, transactions, lands, startNewSeason } = useAppContext();
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [newSeasonName, setNewSeasonName] = React.useState(`${new Date().getFullYear()}-${new Date().getFullYear() + 1} Sezonu`);
   const [startDate, setStartDate] = React.useState(new Date().toISOString().split('T')[0]);
@@ -81,9 +81,20 @@ export default function SeasonsPage() {
                 >
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="font-bold text-zinc-900">{season.name}</h3>
-                    {season.is_active && (
-                      <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full">Aktif</span>
-                    )}
+                    <div className="flex gap-2 items-center">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleSeasonStatus(season.id, season.is_active);
+                        }}
+                        className={`text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-full border transition-colors ${season.is_active ? 'text-rose-700 bg-rose-50 border-rose-200 hover:bg-rose-100' : 'text-emerald-700 bg-emerald-50 border-emerald-200 hover:bg-emerald-100'}`}
+                      >
+                        {season.is_active ? 'Kapat' : 'Aç'}
+                      </button>
+                      {season.is_active && (
+                        <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full border border-emerald-200">Aktif</span>
+                      )}
+                    </div>
                   </div>
                   <div className="text-xs text-zinc-500 flex items-center gap-1 font-medium">
                     <Calendar size={14} />
