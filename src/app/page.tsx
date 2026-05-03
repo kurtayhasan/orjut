@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { User, ArrowRight, ShieldCheck, RefreshCcw, Lock, Map, TrendingUp, Leaf } from 'lucide-react';
