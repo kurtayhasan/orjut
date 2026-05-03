@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAppContext } from '@/context/AppContext';
 import { 
-  Leaf, LayoutDashboard, Map as MapIcon, Box, Wallet, Settings, CalendarDays, LogOut 
+  Leaf, LayoutDashboard, Map as MapIcon, Box, Wallet, Settings, CalendarDays, LogOut, Droplet 
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -46,6 +46,7 @@ export default function Sidebar() {
           <SidebarItem href="/dashboard" icon={<LayoutDashboard size={18} />} label={t('dashboard')} active={pathname === '/dashboard'} />
           <SidebarItem href="/dashboard/seasons" icon={<CalendarDays size={18} />} label="Sezonlar" active={pathname.includes('/seasons')} />
           <SidebarItem href="/dashboard/lands" icon={<MapIcon size={18} />} label={t('lands')} active={pathname.includes('/lands')} />
+          <SidebarItem href="/dashboard/irrigation" icon={<Droplet size={18} />} label="Sulama Takibi" active={pathname.includes('/irrigation')} />
           <SidebarItem href="/dashboard/inventory" icon={<Box size={18} />} label={t('inventory')} active={pathname.includes('/inventory')} />
           <SidebarItem href="/dashboard/finance" icon={<Wallet size={18} />} label={t('finance')} active={pathname.includes('/finance')} />
         </nav>

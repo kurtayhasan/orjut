@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { fetchWeather, WeatherData } from '@/lib/weatherService';
 import { buildAIPrompt, LandContext } from '@/lib/aiActionEngine';
-import { Transaction, Land, Season, Profile, CategoryTotals } from '@/types';
+import { Transaction, Land, Season, Profile, CategoryTotals, IrrigationLog } from '@/types';
 
 
 const translations = {
@@ -32,11 +32,14 @@ type AppContextType = {
   dailyActions: number;
   lands: Land[];
   transactions: Transaction[];
+  irrigationLogs: IrrigationLog[];
   isLoadingLands: boolean;
   isLoadingTransactions: boolean;
   addLand: (land: any) => Promise<void>;
   updateLand: (land: any) => Promise<void>;
   deleteLand: (id: string) => Promise<void>;
+  addIrrigationLog: (log: any) => Promise<void>;
+  deleteIrrigationLog: (id: string) => Promise<void>;
   logSaving: (amount: number, reason: string) => Promise<void>;
   requestWeatherAndInsight: () => Promise<void>;
   startNewSeason: (name: string, startDate: string, endDate: string) => Promise<void>;
@@ -64,6 +67,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [criticalAlert, setCriticalAlert] = useState<string | null>(null);
   const [lands, setLands] = useState<Land[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [irrigationLogs, setIrrigationLogs] = useState<IrrigationLog[]>([]);
   const [seasons, setSeasons] = useState<Season[]>([]);
   const [activeSeason, setActiveSeason] = useState<Season | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<'owner' | 'editor' | 'viewer'>('owner');
@@ -122,11 +126,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch (e) { console.error(e); }
   }, []);
 
+  const fetchIrrigationLogs = React.useCallback(async () => {
+    const userId = localStorage.getItem('user_id');
+    if (!userId) return;
+    try {
+      const { data } = await supabase.from('irrigation_logs').select('*').eq('org_id', userId).order('date', { ascending: false });
+      if (data) setIrrigationLogs(data as any);
+    } catch (e) { console.error(e); }
+  }, []);
+
   const syncOfflineData = React.useCallback(async () => {
     const userId = localStorage.getItem('user_id');
     if (!userId) return;
     const pendingTxs = JSON.parse(localStorage.getItem('pending_transactions') || '[]');
     const pendingLands = JSON.parse(localStorage.getItem('pending_lands') || '[]');
+    const pendingIrrigations = JSON.parse(localStorage.getItem('pending_irrigations') || '[]');
+    
     if (pendingTxs.length > 0) {
       const { error } = await supabase.from('transactions').insert(pendingTxs);
       if (!error) localStorage.removeItem('pending_transactions');
@@ -135,17 +150,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const { error } = await supabase.from('lands').insert(pendingLands);
       if (!error) localStorage.removeItem('pending_lands');
     }
-    if (pendingTxs.length > 0 || pendingLands.length > 0) {
-      toast.success("Çevrimdışı veriler eşitlendi!");
-      fetchLands(); fetchTransactions();
+    if (pendingIrrigations.length > 0) {
+      const { error } = await supabase.from('irrigation_logs').insert(pendingIrrigations);
+      if (!error) localStorage.removeItem('pending_irrigations');
     }
-  }, [fetchLands, fetchTransactions]);
+    if (pendingTxs.length > 0 || pendingLands.length > 0 || pendingIrrigations.length > 0) {
+      toast.success("Çevrimdışı veriler eşitlendi!");
+      fetchLands(); fetchTransactions(); fetchIrrigationLogs();
+    }
+  }, [fetchLands, fetchTransactions, fetchIrrigationLogs]);
 
   useEffect(() => {
-    fetchSeasons(); fetchLands(); fetchTransactions();
+    fetchSeasons(); fetchLands(); fetchTransactions(); fetchIrrigationLogs();
     window.addEventListener('online', syncOfflineData);
     return () => window.removeEventListener('online', syncOfflineData);
-  }, [syncOfflineData, fetchSeasons, fetchLands, fetchTransactions]);
+  }, [syncOfflineData, fetchSeasons, fetchLands, fetchTransactions, fetchIrrigationLogs]);
 
   const addLand = async (land: any) => {
     const userId = localStorage.getItem('user_id') || '';
@@ -214,6 +233,39 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const { error } = await supabase.from('lands').delete().eq('id', id);
     if (error) toast.error("Silme hatası: " + error.message);
     else toast.success("Arazi silindi");
+  };
+
+  const addIrrigationLog = async (log: any) => {
+    const userId = localStorage.getItem('user_id') || '';
+    const tempId = 'temp_' + Date.now();
+    const dbPayload = { ...log, org_id: userId, id: tempId };
+    
+    setIrrigationLogs(prev => [dbPayload, ...prev]);
+    
+    if (userId) {
+      try {
+        const { data, error } = await supabase.from('irrigation_logs').insert([{ ...log, org_id: userId }]).select().single();
+        if (error) throw error;
+        if (data) setIrrigationLogs(prev => prev.map(l => l.id === tempId ? data : l));
+        toast.success("Sulama kaydı eklendi");
+      } catch (err: any) {
+        if (!navigator.onLine || err.message === 'Failed to fetch') {
+          const pending = JSON.parse(localStorage.getItem('pending_irrigations') || '[]');
+          localStorage.setItem('pending_irrigations', JSON.stringify([...pending, { ...log, org_id: userId }]));
+          toast.success("Çevrimdışısınız. Kayıt cihaza eklendi.");
+        } else {
+          toast.error("Kaydedilemedi: " + err.message);
+          setIrrigationLogs(prev => prev.filter(l => l.id !== tempId));
+        }
+      }
+    }
+  };
+
+  const deleteIrrigationLog = async (id: string) => {
+    setIrrigationLogs(prev => prev.filter(l => l.id !== id));
+    const { error } = await supabase.from('irrigation_logs').delete().eq('id', id);
+    if (error) toast.error("Silme hatası: " + error.message);
+    else toast.success("Sulama kaydı silindi");
   };
 
   const addExpense = async (amount: number, category: string, date: string, land_id: string, receipt_url?: string, receipt_thumbnail_url?: string) => {
@@ -357,7 +409,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AppContext.Provider value={{ lang, setLang, t, totalExpenses, totalArea, addExpense, updateExpense, deleteExpense, weather: { temp: weatherData?.temperature || null, windspeed: weatherData?.windSpeed || null, loading: false, error: null }, dailyInsight, criticalAlert, totalSavings, dailySpent, dailyActions, lands, transactions, isLoadingLands, isLoadingTransactions, addLand, updateLand, deleteLand, logSaving, requestWeatherAndInsight, startNewSeason, toggleSeasonStatus, isDemo: false, isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s) => setActiveSeason(s), weatherData, currentUserRole }}>
+    <AppContext.Provider value={{ lang, setLang, t, totalExpenses, totalArea, addExpense, updateExpense, deleteExpense, weather: { temp: weatherData?.temperature || null, windspeed: weatherData?.windSpeed || null, loading: false, error: null }, dailyInsight, criticalAlert, totalSavings, dailySpent, dailyActions, lands, transactions, irrigationLogs, isLoadingLands, isLoadingTransactions, addLand, updateLand, deleteLand, addIrrigationLog, deleteIrrigationLog, logSaving, requestWeatherAndInsight, startNewSeason, toggleSeasonStatus, isDemo: false, isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s) => setActiveSeason(s), weatherData, currentUserRole }}>
       {children}
     </AppContext.Provider>
   );

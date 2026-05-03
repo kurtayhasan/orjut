@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { User, ArrowRight, ShieldCheck, RefreshCcw, Lock, Map, TrendingUp, Leaf } from 'lucide-react';
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
+import bcrypt from 'bcryptjs';
 
 export default function AuthPage() {
   const router = useRouter();
@@ -63,13 +64,15 @@ export default function AuthPage() {
         }
 
         // 1. Kayıt Ol / Güncelle (profiles tablosu)
+        const salt = bcrypt.genSaltSync(10);
+        const hashedPassword = bcrypt.hashSync(formData.password, salt);
         const { data, error } = await supabase
           .from('profiles')
           .upsert({ 
             phone: formData.phone,
             first_name: formData.firstName,
             last_name: formData.lastName,
-            password: formData.password // Simple text password for MVP
+            password: hashedPassword 
           }, { onConflict: 'phone' })
           .select()
           .single();
@@ -97,7 +100,8 @@ export default function AuthPage() {
         }
 
         // Check password
-        if (data.password !== formData.password) {
+        const isMatch = bcrypt.compareSync(formData.password, data.password);
+        if (!isMatch && data.password !== formData.password) {
           toast.error("Hatalı şifre. Lütfen tekrar deneyin.");
           setIsLoading(false);
           return;

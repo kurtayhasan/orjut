@@ -22,8 +22,9 @@ export const requestNotificationPermission = async () => {
     const registration = await navigator.serviceWorker.register('/sw.js');
     await navigator.serviceWorker.ready;
 
-    // Use a public VAPID key (mocked for demo purposes)
-    const publicVapidKey = 'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U';
+    // Use a public VAPID key
+    const publicVapidKey = process.env.NEXT_PUBLIC_VAPID_KEY || '';
+
     
     let subscription = await registration.pushManager.getSubscription();
     if (!subscription) {

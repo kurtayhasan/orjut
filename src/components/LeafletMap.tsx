@@ -59,6 +59,8 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
   const [plotSize, setPlotSize] = useState('');
   const [selectedCrop, setSelectedCrop] = useState('');
   const [plantingDate, setPlantingDate] = useState('');
+  const [soilType, setSoilType] = useState('');
+  const [isIrrigated, setIsIrrigated] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
 
@@ -145,6 +147,8 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
     setPlotSize(String(land.size_decare || land.size || ''));
     setSelectedCrop(land.crop_type || '');
     setPlantingDate(land.planting_date || '');
+    setSoilType(land.soil_type || '');
+    setIsIrrigated(land.is_irrigated || false);
     setBoundaries(land.boundaries || null);
     if (land.lat && land.lng) {
       setMarkerPosition(new L.LatLng(land.lat, land.lng));
@@ -163,6 +167,8 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
     setPlotSize('');
     setSelectedCrop('');
     setPlantingDate('');
+    setSoilType('');
+    setIsIrrigated(false);
     setBoundaries(null);
   };
 
@@ -176,6 +182,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
       city, district, neighborhood, block_no: blockNo, parcel_no: parcelNo, 
       size: plotSize, size_decare: Number(plotSize), crop_type: selectedCrop, 
       planting_date: plantingDate,
+      soil_type: soilType, is_irrigated: isIrrigated,
       lat: markerPosition?.lat, lng: markerPosition?.lng,
       boundaries: boundaries
     };
@@ -485,6 +492,35 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
                     onChange={(e) => setPlantingDate(e.target.value)} 
                     required
                   />
+                </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Toprak Tipi (Opsiyonel)</label>
+                  <div className="relative">
+                    <select className={selectClass} value={soilType} onChange={(e) => setSoilType(e.target.value)}>
+                      <option value="">Seçiniz...</option>
+                      <option value="Kumlu">Kumlu</option>
+                      <option value="Killi">Killi</option>
+                      <option value="Tınlı">Tınlı</option>
+                      <option value="Kireçli">Kireçli</option>
+                      <option value="Humuslu">Humuslu</option>
+                    </select>
+                    <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-300 pointer-events-none" />
+                  </div>
+                </div>
+                <div className="space-y-1 flex flex-col justify-end">
+                  <label className="flex items-center gap-2 p-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl cursor-pointer hover:bg-white hover:border-indigo-500 transition-all select-none">
+                    <input 
+                      type="checkbox" 
+                      className="w-4 h-4 text-indigo-600 rounded border-zinc-300 focus:ring-indigo-500" 
+                      checked={isIrrigated} 
+                      onChange={(e) => setIsIrrigated(e.target.checked)} 
+                    />
+                    <span className="text-sm font-semibold text-zinc-700">Sulu Tarım</span>
+                  </label>
                 </div>
               </div>
               

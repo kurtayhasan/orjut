@@ -28,6 +28,19 @@ export interface Land {
   expected_yield_per_decare?: number;
   expected_sell_price_unit?: number;
   boundaries?: any;
+  soil_type?: string;
+  is_irrigated?: boolean;
+}
+
+export interface IrrigationLog {
+  id: string;
+  org_id: string;
+  land_id: string;
+  date: string;
+  amount: number;
+  unit: 'saat' | 'ton' | 'litre';
+  method: string;
+  notes?: string;
 }
 
 export interface Transaction {
