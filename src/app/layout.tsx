@@ -10,15 +10,13 @@ import CookieConsent from '@/components/CookieConsent';
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 
 export const metadata: Metadata = {
-  title: "ZiraiAsistan by Orjut (Beta v.1) | Akıllı Tarım Uygulaması",
-  description: "Arazi takip, hasat, verim, gübreleme ve ilaçlama süreçlerinizi gerçek verilerle yönetin. Sıfır kayıp, maksimum hasat için hemen başlayın.",
-  keywords: ["arazi takip", "hasat", "verim", "gübreleme", "ilaçlama", "akıllı tarım", "ZiraiAsistan", "Orjut"],
+  title: "ZiraiAsistan by Orjut | Akıllı Tarım İşletim Sistemi",
+  description: "Çiftçiler ve ziraat mühendisleri için sıfır veri kaybı, maksimum hasat. Uydu destekli sulama, masraf ve arazi takip sistemi.",
+  keywords: ["Tarım yazılımı", "Zirai Takip", "Çiftçi Uygulaması", "Tarım ERP", "Akıllı Tarım", "Arazi Yönetimi"],
+  metadataBase: new URL('https://orjut.com'),
+  manifest: "/manifest.json",
   icons: {
-    icon: [
-      { url: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icon-512x512.png', sizes: '512x512', type: 'image/png' },
-    ],
-    apple: '/apple-touch-icon.png',
+    icon: "/icon.svg",
   },
   appleWebApp: {
     capable: true,
@@ -26,15 +24,11 @@ export const metadata: Metadata = {
     title: 'ZiraiAsistan',
   },
   openGraph: {
-    title: "ZiraiAsistan by Orjut | Akıllı Tarım Uygulaması",
-    description: "Yapay zeka destekli arazi, gübreleme, ilaçlama ve hasat takip uygulaması.",
+    title: "ZiraiAsistan by Orjut | Akıllı Tarım İşletim Sistemi",
+    description: "Çiftçiler ve ziraat mühendisleri için sıfır veri kaybı, maksimum hasat. Uydu destekli sulama, masraf ve arazi takip sistemi.",
     type: "website",
     locale: "tr_TR",
     siteName: "ZiraiAsistan by Orjut",
-  },
-  robots: {
-    index: true,
-    follow: true,
   },
   other: {
     'mobile-web-app-capable': 'yes',
