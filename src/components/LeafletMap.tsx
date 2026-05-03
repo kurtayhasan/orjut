@@ -493,7 +493,6 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
                     required
                   />
                 </div>
-                </div>
               </div>
               
               <div className="grid grid-cols-2 gap-3">
