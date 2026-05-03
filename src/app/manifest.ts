@@ -6,6 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: 'ZiraiAsistan',
     description: 'Gerçek verilerle sıfır kayıp, maksimum hasat. Arazi takip, hasat, verim, gübreleme ve ilaçlama süreçlerinizi yönetin.',
     start_url: '/',
+    id: '/',
     scope: '/',
     display: 'standalone',
     orientation: 'portrait',
