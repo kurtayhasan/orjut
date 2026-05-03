@@ -180,10 +180,18 @@ export default function AuthPage() {
             </div>
           </div>
 
-          <div className="mt-12 pt-6 border-t border-white/10 w-full">
+          <div className="mt-12 pt-6 border-t border-white/10 w-full flex items-center justify-between">
             <p className="text-white/40 text-xs font-medium">
               © 2026 Orjut.com — ZiraiAsistan
             </p>
+            <div className="flex gap-4">
+              <Link href="/legal" className="text-white/40 text-xs font-medium hover:text-white transition-colors">
+                Gizlilik
+              </Link>
+              <Link href="/delete-account" className="text-rose-400/50 text-xs font-medium hover:text-rose-400 transition-colors">
+                Hesap Silme
+              </Link>
+            </div>
           </div>
         </div>
       </div>
