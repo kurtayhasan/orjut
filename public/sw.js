@@ -31,9 +31,21 @@ self.addEventListener('notificationclick', function(event) {
 });
 
 // Cache logic for offline syncing...
-const CACHE_NAME = 'orjut-cache-v1';
+const CACHE_NAME = 'orjut-cache-v2';
+const urlsToCache = [
+  '/',
+  '/icon-192x192.png',
+  '/icon-512x512.png',
+  '/icon.svg',
+  '/favicon.ico'
+];
+
 self.addEventListener('install', (event) => {
-  self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(urlsToCache))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', (event) => {
