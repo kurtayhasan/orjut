@@ -22,30 +22,32 @@ export default function DashboardPage() {
     ? transactions.filter(t => t.description === activeFilter)
     : transactions;
   
-  // Cost Metric Logic
-  const costPerDonum = totalArea > 0 ? totalExpenses / totalArea : 0;
+  // Cost Metric Logic (Memoized)
+  const costPerDonum = React.useMemo(() => totalArea > 0 ? totalExpenses / totalArea : 0, [totalArea, totalExpenses]);
   const averageCost = 1000; // Benchmark: average cost per dönüm in the region
   const isRising = costPerDonum > averageCost;
 
-  // Projected Profit Logic
-  const projectedRevenue = lands.reduce((sum, land) => {
+  // Projected Profit Logic (Memoized)
+  const projectedRevenue = React.useMemo(() => lands.reduce((sum, land) => {
     const yieldAmt = Number(land.expected_yield_per_decare) || 0;
     const price = Number(land.expected_sell_price_unit) || 0;
     return sum + (yieldAmt * price);
-  }, 0);
-  const projectedProfit = projectedRevenue > 0 ? projectedRevenue - totalExpenses : 0;
+  }, 0), [lands]);
+  
+  const projectedProfit = React.useMemo(() => projectedRevenue > 0 ? projectedRevenue - totalExpenses : 0, [projectedRevenue, totalExpenses]);
 
-  // Category & Budget Data (computed from real transactions)
-  // Dynamic budget estimate: totalArea * 2000 TL distributed across categories
-  const estimatedTotalBudget = totalArea > 0 ? totalArea * 2000 : 100000;
-  const categoryData = [
-    { name: 'Mazot', value: transactions.filter(t => t.description === 'Mazot').reduce((s, t) => s + t.amount, 0), color: '#F97316', budget: estimatedTotalBudget * 0.25 },
-    { name: 'Gübre', value: transactions.filter(t => t.description === 'Gübre').reduce((s, t) => s + t.amount, 0), color: '#22C55E', budget: estimatedTotalBudget * 0.20 },
-    { name: 'İlaç', value: transactions.filter(t => t.description === 'İlaç').reduce((s, t) => s + t.amount, 0), color: '#14B8A6', budget: estimatedTotalBudget * 0.12 },
-    { name: 'Tohum', value: transactions.filter(t => t.description === 'Tohum').reduce((s, t) => s + t.amount, 0), color: '#EF4444', budget: estimatedTotalBudget * 0.15 },
-    { name: 'İşçilik', value: transactions.filter(t => t.description === 'İşçilik').reduce((s, t) => s + t.amount, 0), color: '#3B82F6', budget: estimatedTotalBudget * 0.20 },
-    { name: 'Diğer', value: transactions.filter(t => !['Mazot', 'Gübre', 'İlaç', 'Tohum', 'İşçilik'].includes(t.description)).reduce((s, t) => s + t.amount, 0), color: '#94A3B8', budget: estimatedTotalBudget * 0.08 }
-  ];
+  // Category & Budget Data (Memoized)
+  const categoryData = React.useMemo(() => {
+    const estimatedTotalBudget = totalArea > 0 ? totalArea * 2000 : 0; // No fallback limit, purely dynamic
+    return [
+      { name: 'Mazot', value: transactions.filter(t => t.description === 'Mazot').reduce((s, t) => s + t.amount, 0), color: '#F97316', budget: estimatedTotalBudget * 0.25 },
+      { name: 'Gübre', value: transactions.filter(t => t.description === 'Gübre').reduce((s, t) => s + t.amount, 0), color: '#22C55E', budget: estimatedTotalBudget * 0.20 },
+      { name: 'İlaç', value: transactions.filter(t => t.description === 'İlaç').reduce((s, t) => s + t.amount, 0), color: '#14B8A6', budget: estimatedTotalBudget * 0.12 },
+      { name: 'Tohum', value: transactions.filter(t => t.description === 'Tohum').reduce((s, t) => s + t.amount, 0), color: '#EF4444', budget: estimatedTotalBudget * 0.15 },
+      { name: 'İşçilik', value: transactions.filter(t => t.description === 'İşçilik').reduce((s, t) => s + t.amount, 0), color: '#3B82F6', budget: estimatedTotalBudget * 0.20 },
+      { name: 'Diğer', value: transactions.filter(t => !['Mazot', 'Gübre', 'İlaç', 'Tohum', 'İşçilik'].includes(t.description)).reduce((s, t) => s + t.amount, 0), color: '#94A3B8', budget: estimatedTotalBudget * 0.08 }
+    ];
+  }, [transactions, totalArea]);
 
   return (
     <div className="space-y-6 pb-48">
