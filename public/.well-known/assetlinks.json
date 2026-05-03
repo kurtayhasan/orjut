@@ -1,12 +1,8 @@
-[
-  {
-    "relation": ["delegate_permission/common.handle_all_urls"],
-    "target": {
-      "namespace": "android_app",
-      "package_name": "com.orjut.ziraiasistan",
-      "sha256_cert_fingerprints": [
-        "REPLACE_WITH_YOUR_SIGNING_KEY_SHA256_FINGERPRINT"
-      ]
-    }
-  }
-]
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.orjut.ziraiasistan",
+        "sha256_cert_fingerprints": ["C2:90:7D:C2:BA:76:24:07:9A:CD:66:0E:BB:B7:F4:FF:BC:4E:F3:D2:3D:FE:1B:9E:07:32:93:01:0E:3B:CF:A0"]
+      }
+    }]
