@@ -6,7 +6,7 @@ import 'leaflet/dist/leaflet.css';
 import { useAppContext } from '@/context/AppContext';
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { toast } from 'sonner';
-import { MapPin, X, Save, TreePine, Ruler, Search, Layers, Globe, ChevronDown } from 'lucide-react';
+import { MapPin, X, Save, TreePine, Ruler, Search, Layers, Globe, ChevronDown, Lock, Radio } from 'lucide-react';
 import { WMSTileLayer, LayersControl } from 'react-leaflet';
 import { Country, State, City, ICountry, IState, ICity } from 'country-state-city';
 import { EditControl } from 'react-leaflet-draw';
@@ -41,7 +41,9 @@ function MapController({ selectedLand }: { selectedLand: any }) {
 }
 
 export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, editLand?: any }) {
-  const { addLand, updateLand, lands } = useAppContext();
+  const { addLand, updateLand, lands, userProfile, isDarkMode } = useAppContext();
+  const [isNDVIActive, setIsNDVIActive] = useState(false);
+  const isPremium = userProfile?.is_premium;
   const [markerPosition, setMarkerPosition] = useState<L.LatLng | null>(null);
   const [showCropSelector, setShowCropSelector] = useState(false);
   const [editingLandId, setEditingLandId] = useState<string | null>(null);
@@ -248,11 +250,36 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
     return [37.3122, 40.7339]; // Mardin
   }, [focusLand, lands]);
 
-  // Select styling helper
-  const selectClass = "w-full px-3 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition-all text-sm font-semibold appearance-none cursor-pointer";
+  // select class helper
+  const selectClass = "w-full px-3 py-3 bg-zinc-50 dark:bg-zinc-800 border-2 border-zinc-100 dark:border-zinc-700 rounded-xl outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-700 transition-all text-sm font-semibold appearance-none cursor-pointer text-zinc-900 dark:text-zinc-100";
+
+  const handleNDVIToggle = () => {
+    if (!isPremium) {
+      toast.error("NDVI Uydu Analizi sadece Premium üyeler içindir.", {
+        description: "Hemen yükseltin ve tarlanızı uzaydan izleyin!",
+        action: {
+          label: "Yükselt",
+          onClick: () => window.location.href = '/settings/billing'
+        }
+      });
+      return;
+    }
+    setIsNDVIActive(!isNDVIActive);
+  };
 
   return (
     <div className="relative w-full h-full group">
+      {/* NDVI Toggle Overlay */}
+      <div className="absolute top-20 left-4 z-[1000] flex flex-col gap-2">
+        <button 
+          onClick={handleNDVIToggle}
+          className={`p-3 rounded-2xl shadow-xl backdrop-blur-md transition-all border flex items-center gap-2 ${isNDVIActive ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-white/90 dark:bg-zinc-900/90 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-white'}`}
+        >
+          {isPremium ? <Radio size={18} className={isNDVIActive ? 'animate-pulse' : ''} /> : <Lock size={18} className="text-amber-500" />}
+          <span className="text-xs font-black uppercase tracking-widest hidden sm:inline">🛰️ NDVI Isı Haritası</span>
+        </button>
+      </div>
+
       {/* Search Bar */}
       <div className="absolute top-4 left-4 right-4 z-[1000] flex gap-2 pointer-events-none">
         <form onSubmit={handleSearch} className="flex-1 max-w-md pointer-events-auto">
@@ -263,7 +290,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
               placeholder="Şehir, ilçe veya mevki ara..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 bg-white/90 backdrop-blur-md border border-zinc-200 rounded-2xl shadow-xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium text-sm"
+              className="w-full pl-11 pr-4 py-3 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium text-sm text-zinc-900 dark:text-zinc-100"
             />
             {isSearching && (
               <div className="absolute right-4 top-1/2 -translate-y-1/2">
@@ -285,7 +312,10 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
           <LayersControl.BaseLayer checked name="OpenStreetMap">
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              url={isDarkMode 
+                ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              }
             />
           </LayersControl.BaseLayer>
           <LayersControl.BaseLayer name="Uydu Görünümü">
@@ -295,15 +325,14 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
             />
           </LayersControl.BaseLayer>
 
-          <LayersControl.Overlay checked name="Tapu Kadastro (Parsel)">
-            <WMSTileLayer
-              url="https://parselsorgu.tkgm.gov.tr/mapserver/services/WMS?"
-              layers="parsel"
-              format="image/png"
-              transparent={true}
-              attribution="&copy; TKGM"
-            />
-          </LayersControl.Overlay>
+          {isNDVIActive && focusLand && 
+            <LayersControl.Overlay checked name="NDVI Analizi">
+              <TileLayer
+                url={`https://api.agromonitoring.com/tile/1.0/{z}/{x}/{y}/NDVI/{id}?appid=${process.env.NEXT_PUBLIC_AGROMONITORING_API_KEY}`}
+                opacity={0.7}
+              />
+            </LayersControl.Overlay>
+          }
         </LayersControl>
 
         <FeatureGroup ref={drawGroupRef}>
@@ -358,18 +387,18 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
       {/* TKGM Crop & Size Selector */}
       {showCropSelector && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[10000] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg animate-in fade-in zoom-in-95 duration-300 max-h-[90vh] flex flex-col border border-zinc-100 my-auto relative overflow-hidden">
+          <div className="bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl w-full max-w-lg animate-in fade-in zoom-in-95 duration-300 max-h-[90vh] flex flex-col border border-zinc-100 dark:border-zinc-800 my-auto relative overflow-hidden">
             {/* Header - Sticky */}
-            <div className="p-6 border-b border-zinc-50">
+            <div className="p-6 border-b border-zinc-50 dark:border-zinc-800">
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="text-xl font-black text-zinc-900 tracking-tight">
+                  <h3 className="text-xl font-black text-zinc-900 dark:text-zinc-100 tracking-tight">
                     {editingLandId ? 'Araziyi Düzenle' : 'Yeni Arazi Tanımla'}
                   </h3>
-                  <p className="text-zinc-500 text-xs font-medium uppercase tracking-wider mt-1">Tapu ve Ürün Bilgileri</p>
+                  <p className="text-zinc-500 dark:text-zinc-400 text-xs font-medium uppercase tracking-wider mt-1">Tapu ve Ürün Bilgileri</p>
                 </div>
-                <button onClick={handleCancelPlot} className="p-2 hover:bg-zinc-100 rounded-full transition-colors">
-                  <X size={20} className="text-zinc-400" />
+                <button onClick={handleCancelPlot} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors">
+                  <X size={20} className="text-zinc-400 dark:text-zinc-500" />
                 </button>
               </div>
             </div>
@@ -379,19 +408,19 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
               
               {/* Environment Type Toggle */}
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Arazi Tipi</label>
-                <div className="flex p-1 bg-zinc-100 rounded-xl">
+                <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest ml-1">Arazi Tipi</label>
+                <div className="flex p-1 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
                   <button 
                     type="button"
                     onClick={() => setEnvironmentType('acik_tarla')}
-                    className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${environmentType === 'acik_tarla' ? 'bg-white shadow-sm text-indigo-600' : 'text-zinc-500 hover:text-zinc-700'}`}
+                    className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${environmentType === 'acik_tarla' ? 'bg-white dark:bg-zinc-700 shadow-sm text-indigo-600 dark:text-indigo-400' : 'text-zinc-500 hover:text-zinc-700'}`}
                   >
                     Açık Tarla
                   </button>
                   <button 
                     type="button"
                     onClick={() => setEnvironmentType('sera')}
-                    className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${environmentType === 'sera' ? 'bg-white shadow-sm text-indigo-600' : 'text-zinc-500 hover:text-zinc-700'}`}
+                    className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${environmentType === 'sera' ? 'bg-white dark:bg-zinc-700 shadow-sm text-indigo-600 dark:text-indigo-400' : 'text-zinc-500 hover:text-zinc-700'}`}
                   >
                     Sera
                   </button>
@@ -550,14 +579,14 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
                   </div>
                 </div>
                 <div className="space-y-1 flex flex-col justify-end">
-                  <label className="flex items-center gap-2 p-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl cursor-pointer hover:bg-white hover:border-indigo-500 transition-all select-none">
+                  <label className="flex items-center gap-2 p-3 bg-zinc-50 dark:bg-zinc-800 border-2 border-zinc-100 dark:border-zinc-700 rounded-xl cursor-pointer hover:bg-white dark:hover:bg-zinc-700 hover:border-indigo-500 transition-all select-none">
                     <input 
                       type="checkbox" 
-                      className="w-4 h-4 text-indigo-600 rounded border-zinc-300 focus:ring-indigo-500" 
+                      className="w-4 h-4 text-indigo-600 rounded border-zinc-300 dark:border-zinc-600 focus:ring-indigo-500" 
                       checked={isIrrigated} 
                       onChange={(e) => setIsIrrigated(e.target.checked)} 
                     />
-                    <span className="text-sm font-semibold text-zinc-700">Sulu Tarım</span>
+                    <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Sulu Tarım</span>
                   </label>
                 </div>
               </div>
@@ -567,9 +596,9 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
             </div>
 
             {/* Footer - Sticky */}
-            <div className="p-6 border-t border-zinc-50 bg-zinc-50/50 rounded-b-[2rem]">
+            <div className="p-6 border-t border-zinc-50 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 rounded-b-[2rem]">
               <div className="flex gap-3">
-                <button onClick={handleCancelPlot} className="flex-1 py-3.5 text-zinc-500 font-bold bg-white border border-zinc-200 hover:bg-zinc-100 rounded-xl transition-all active:scale-[0.98]">İptal</button>
+                <button onClick={handleCancelPlot} className="flex-1 py-3.5 text-zinc-500 dark:text-zinc-400 font-bold bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded-xl transition-all active:scale-[0.98]">İptal</button>
                 <button 
                   onClick={handleSavePlot} 
                   disabled={!selectedCrop || !plotSize || !city || !plantingDate} 

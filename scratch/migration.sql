@@ -57,3 +57,22 @@ ALTER TABLE public.transactions ADD COLUMN IF NOT EXISTS unit TEXT;
 
 -- Envanter tablosunda Birim kolonu yoksa onu da garantiye alalım
 ALTER TABLE public.inventory ADD COLUMN IF NOT EXISTS unit TEXT;
+-- Premium status ekleyelim
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS is_premium BOOLEAN DEFAULT false;
+
+-- NDVI Snapshots tablosu (Uydu verileri)
+CREATE TABLE IF NOT EXISTS public.ndvi_snapshots (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    land_id UUID REFERENCES public.lands(id) ON DELETE CASCADE,
+    date DATE DEFAULT CURRENT_DATE,
+    mean NUMERIC,
+    min NUMERIC,
+    max NUMERIC,
+    cloud_cover NUMERIC,
+    tile_url TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- RLS for NDVI
+ALTER TABLE public.ndvi_snapshots ENABLE ROW LEVEL SECURITY;
+-- CREATE POLICY "Users can see NDVI for their lands" ON ndvi_snapshots FOR SELECT USING (EXISTS (SELECT 1 FROM lands WHERE id = land_id AND org_id = auth.uid()));

@@ -63,6 +63,8 @@ type AppContextType = {
   addInventoryItem: (item: any) => Promise<void>;
   updateInventoryItem: (id: string, updates: Partial<InventoryItem>) => Promise<void>;
   deleteInventoryItem: (id: string) => Promise<void>;
+  isDarkMode: boolean;
+  toggleDarkMode: () => void;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -90,6 +92,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [fieldOperations, setFieldOperations] = useState<FieldOperation[]>([]);
   const [scoutingLogs, setScoutingLogs] = useState<ScoutingLog[]>([]);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   const t = (key: keyof typeof translations['en']) => translations[lang][key] || key;
 
@@ -203,6 +206,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [fetchLands, fetchTransactions, fetchIrrigationLogs]);
 
   useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initialDarkMode = savedTheme === 'dark' || (!savedTheme && systemPrefersDark);
+    setIsDarkMode(initialDarkMode);
+    if (initialDarkMode) document.documentElement.classList.add('dark');
+    
     const userId = localStorage.getItem('user_id');
     if (userId) {
       const hydrateProfile = async () => {
@@ -215,6 +224,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     window.addEventListener('online', syncOfflineData);
     return () => window.removeEventListener('online', syncOfflineData);
   }, [syncOfflineData, fetchSeasons, fetchLands, fetchTransactions, fetchIrrigationLogs, fetchFieldOperations, fetchScoutingLogs, fetchInventory]);
+
+  const toggleDarkMode = () => {
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
+    localStorage.setItem('theme', newMode ? 'dark' : 'light');
+    if (newMode) document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
+  };
 
   const addLand = async (land: any) => {
     const userId = localStorage.getItem('user_id') || '';
@@ -573,7 +590,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AppContext.Provider value={{ lang, setLang, t, totalExpenses, totalArea, addExpense, updateExpense, deleteExpense, weather: { temp: weatherData?.temperature || null, windspeed: weatherData?.windSpeed || null, loading: false, error: null }, dailyInsight, criticalAlert, totalSavings, dailySpent, dailyActions, lands, transactions, irrigationLogs, isLoadingLands, isLoadingTransactions, addLand, updateLand, deleteLand, addIrrigationLog, deleteIrrigationLog, logSaving, requestWeatherAndInsight, startNewSeason, toggleSeasonStatus, isDemo: false, isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s) => setActiveSeason(s), weatherData, currentUserRole, userProfile, fieldOperations, scoutingLogs, addFieldOperation, deleteFieldOperation, addScoutingLog, deleteScoutingLog, inventory, addInventoryItem, updateInventoryItem, deleteInventoryItem }}>
+    <AppContext.Provider value={{ lang, setLang, t, totalExpenses, totalArea, addExpense, updateExpense, deleteExpense, weather: { temp: weatherData?.temperature || null, windspeed: weatherData?.windSpeed || null, loading: false, error: null }, dailyInsight, criticalAlert, totalSavings, dailySpent, dailyActions, lands, transactions, irrigationLogs, isLoadingLands, isLoadingTransactions, addLand, updateLand, deleteLand, addIrrigationLog, deleteIrrigationLog, logSaving, requestWeatherAndInsight, startNewSeason, toggleSeasonStatus, isDemo: false, isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s) => setActiveSeason(s), weatherData, currentUserRole, userProfile, fieldOperations, scoutingLogs, addFieldOperation, deleteFieldOperation, addScoutingLog, deleteScoutingLog, inventory, addInventoryItem, updateInventoryItem, deleteInventoryItem, isDarkMode, toggleDarkMode }}>
       {children}
     </AppContext.Provider>
   );

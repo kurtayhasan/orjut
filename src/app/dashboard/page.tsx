@@ -11,9 +11,10 @@ import CategoryPieChart from '@/components/budget/CategoryPieChart';
 import CategorySummaryBar from '@/components/budget/CategorySummaryBar';
 import { useCategoryTotals } from '@/hooks/useCategoryTotals';
 import BudgetProgressBar from '@/components/budget/BudgetProgressBar';
+import { toast } from 'sonner';
 
 export default function DashboardPage() {
-  const { totalExpenses, totalArea, dailyInsight, criticalAlert, totalSavings, requestWeatherAndInsight, weather, transactions, isLoadingTransactions, isLoadingLands, lands, activeSeason, weatherData, inventory, scoutingLogs, fieldOperations } = useAppContext();
+  const { totalExpenses, totalArea, dailyInsight, criticalAlert, totalSavings, requestWeatherAndInsight, weather, transactions, isLoadingTransactions, isLoadingLands, lands, activeSeason, weatherData, inventory, scoutingLogs, fieldOperations, userProfile } = useAppContext();
   const [activeFilter, setActiveFilter] = React.useState<string | null>(null);
   
   const [widgetPrefs, setWidgetPrefs] = React.useState({
@@ -23,6 +24,8 @@ export default function DashboardPage() {
     recent: true
   });
   const [showCustomize, setShowCustomize] = React.useState(false);
+  const [isAnalyzing, setIsAnalyzing] = React.useState(false);
+  const [aiResult, setAiResult] = React.useState<any>(null);
 
   React.useEffect(() => {
     const saved = localStorage.getItem('dashboard_widget_prefs');
@@ -100,58 +103,119 @@ export default function DashboardPage() {
             
             {!dailyInsight && (
               <button 
-                onClick={requestWeatherAndInsight}
-                className="bg-white text-indigo-600 font-black px-6 py-3 rounded-2xl text-sm hover:bg-indigo-50 transition-all shadow-lg active:scale-95 shrink-0 whitespace-nowrap"
+                onClick={async () => {
+                  if (!userProfile?.is_premium) {
+                    toast.error("Yapay Zeka Analizi sadece Premium üyeler içindir.", {
+                      description: "Verilerinizi profesyonel bir ziraat mühendisi gibi analiz ettirmek için yükseltin.",
+                      action: { label: "Yükselt", onClick: () => window.location.href = '/settings/billing' }
+                    });
+                    return;
+                  }
+                  
+                  if (!lands[0]?.id) {
+                    toast.error("Analiz için en az bir arazi kaydınız olmalıdır.");
+                    return;
+                  }
+
+                  setIsAnalyzing(true);
+                  try {
+                    const res = await fetch('/api/ai/analyze', {
+                      method: 'POST',
+                      body: JSON.stringify({ landId: lands[0].id, userId: localStorage.getItem('user_id') })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                      setAiResult(data.analysis);
+                      toast.success("Analiz tamamlandı!");
+                    } else {
+                      throw new Error(data.error);
+                    }
+                  } catch (err: any) {
+                    toast.error("Hata: " + err.message);
+                  } finally {
+                    setIsAnalyzing(false);
+                  }
+                }}
+                disabled={isAnalyzing}
+                className="bg-white text-indigo-600 font-black px-6 py-3 rounded-2xl text-sm hover:bg-indigo-50 transition-all shadow-lg active:scale-95 shrink-0 whitespace-nowrap flex items-center gap-2"
               >
-                Analizi Başlat
+                {isAnalyzing ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                    Analiz Ediliyor...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={16} />
+                    Derin Analizi Başlat
+                  </>
+                )}
               </button>
             )}
           </div>
+          
+          {aiResult && (
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+              <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
+                <p className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1">Risk Durumu</p>
+                <p className="font-bold text-sm">{aiResult.risk}</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
+                <p className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1">Önerilen Aksiyon</p>
+                <p className="font-bold text-sm">{aiResult.action}</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
+                <p className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-1">Aciliyet</p>
+                <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase ${aiResult.urgency === 'yüksek' ? 'bg-rose-500 text-white' : aiResult.urgency === 'orta' ? 'bg-amber-500 text-white' : 'bg-emerald-500 text-white'}`}>
+                  {aiResult.urgency}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Widget Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {widgetPrefs.weather && (
-          <div className="bg-white border border-zinc-100 p-4 rounded-3xl shadow-sm flex items-center gap-4 group hover:shadow-md transition-all">
-            <div className="w-12 h-12 bg-sky-50 text-sky-600 rounded-2xl flex items-center justify-center shrink-0">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 p-4 rounded-3xl shadow-sm flex items-center gap-4 group hover:shadow-md transition-all">
+            <div className="w-12 h-12 bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400 rounded-2xl flex items-center justify-center shrink-0">
               <Cloud size={24} />
             </div>
             <div>
-              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Hava Durumu</p>
-              <h3 className="font-black text-zinc-800 leading-tight">
+              <p className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Hava Durumu</p>
+              <h3 className="font-black text-zinc-800 dark:text-zinc-100 leading-tight">
                 {lands[0]?.city || 'Kızıltepe'} - {weatherData?.condition || 'Açık'}
-                <span className="block text-sky-600">{weatherData?.temperature || weather.temp || '--'}°C</span>
+                <span className="block text-sky-600 dark:text-sky-400">{weatherData?.temperature || weather.temp || '--'}°C</span>
               </h3>
             </div>
           </div>
         )}
 
         {widgetPrefs.finance && (
-          <div className="bg-white border border-zinc-100 p-4 rounded-3xl shadow-sm flex items-center gap-4 group hover:shadow-md transition-all">
-            <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center shrink-0">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 p-4 rounded-3xl shadow-sm flex items-center gap-4 group hover:shadow-md transition-all">
+            <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center shrink-0">
               <Wallet size={24} />
             </div>
             <div>
-              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Finansal Özet</p>
-              <h3 className="font-black text-zinc-800 leading-tight">
+              <p className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Finansal Özet</p>
+              <h3 className="font-black text-zinc-800 dark:text-zinc-100 leading-tight">
                 Toplam Harcama
-                <span className="block text-indigo-600">₺{totalExpenses.toLocaleString()}</span>
+                <span className="block text-indigo-600 dark:text-indigo-400">₺{totalExpenses.toLocaleString()}</span>
               </h3>
             </div>
           </div>
         )}
 
         {widgetPrefs.stock && (
-          <div className="bg-white border border-zinc-100 p-4 rounded-3xl shadow-sm flex items-center gap-4 group hover:shadow-md transition-all">
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${inventory.filter(i => i.quantity < 10).length > 0 ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}>
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 p-4 rounded-3xl shadow-sm flex items-center gap-4 group hover:shadow-md transition-all">
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${inventory.filter(i => i.quantity < 10).length > 0 ? 'bg-rose-50 dark:bg-rose-900/20 text-rose-600' : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600'}`}>
               <AlertTriangle size={24} />
             </div>
             <div>
-              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Kritik Stok</p>
-              <h3 className="font-black text-zinc-800 leading-tight">
+              <p className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Kritik Stok</p>
+              <h3 className="font-black text-zinc-800 dark:text-zinc-100 leading-tight">
                 {inventory.filter(i => i.quantity < 10).length} Ürün Azaldı
-                <span className={`block ${inventory.filter(i => i.quantity < 10).length > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                <span className={`block ${inventory.filter(i => i.quantity < 10).length > 0 ? 'text-rose-600' : 'text-emerald-600 dark:text-emerald-400'}`}>
                   {inventory.filter(i => i.quantity < 10).length > 0 ? 'Hemen Sipariş Ver' : 'Stoklar Yeterli'}
                 </span>
               </h3>
@@ -178,57 +242,54 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* 2. Total Active Lands Stat Card */}
-        <div className={`bg-white border-2 border-zinc-100 rounded-3xl p-6 shadow-sm flex flex-col justify-between transition-all hover:border-zinc-200 ${isLoadingLands ? 'animate-pulse' : ''}`}>
+        <div className={`bg-white dark:bg-zinc-900 border-2 border-zinc-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm flex flex-col justify-between transition-all hover:border-zinc-200 dark:hover:border-zinc-700 ${isLoadingLands ? 'animate-pulse' : ''}`}>
           <div>
             <div className="flex items-center gap-2 mb-1">
               <MapIcon size={16} className="text-zinc-400" />
               <p className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Kayıtlı Arazi</p>
             </div>
             <div className="flex items-baseline gap-2">
-              <h1 className="text-4xl font-black tracking-tighter text-zinc-900">
+              <h1 className="text-4xl font-black tracking-tighter text-zinc-900 dark:text-zinc-100">
                 {totalArea.toFixed(0)}
               </h1>
-              <span className="text-zinc-500 font-medium text-lg">Dönüm</span>
+              <span className="text-zinc-500 dark:text-zinc-400 font-medium text-lg">Dönüm</span>
             </div>
           </div>
           
-          <Link href="/dashboard/lands" className="mt-6 w-full py-3 bg-emerald-50 text-emerald-700 font-bold rounded-xl hover:bg-emerald-100 transition-colors flex items-center justify-center gap-2">
+          <Link href="/dashboard/lands" className="mt-6 w-full py-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 font-bold rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors flex items-center justify-center gap-2">
             <Plus size={18} />
             <span>Yeni Arazi Ekle</span>
           </Link>
         </div>
 
         {/* 3. Cost Shock Metric */}
-        <div className={`bg-white border-2 border-zinc-100 rounded-3xl p-6 shadow-sm flex flex-col justify-between transition-all hover:border-zinc-200 ${isLoadingTransactions ? 'animate-pulse' : ''}`}>
+        <div className={`bg-white dark:bg-zinc-900 border-2 border-zinc-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm flex flex-col justify-between transition-all hover:border-zinc-200 dark:hover:border-zinc-700 ${isLoadingTransactions ? 'animate-pulse' : ''}`}>
           <div>
-            <p className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-1">Maliyet Takibi (₺ / Dönüm)</p>
+            <p className="text-sm font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1">Maliyet Takibi (₺ / Dönüm)</p>
             <div className="flex items-baseline gap-2">
-              <h1 className={`text-4xl font-black tracking-tighter text-emerald-600`}>
+              <h1 className={`text-4xl font-black tracking-tighter text-emerald-600 dark:text-emerald-400`}>
                 ₺{costPerDonum.toFixed(0)}
               </h1>
             </div>
           </div>
         </div>
 
-        {/* 4. Projected Profit */}
-        <div className={`bg-white border-2 border-zinc-100 rounded-3xl p-6 shadow-sm flex flex-col justify-between transition-all hover:border-zinc-200 ${isLoadingLands ? 'animate-pulse' : ''}`}>
+        <div className={`bg-white dark:bg-zinc-900 border-2 border-zinc-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm flex flex-col justify-between transition-all hover:border-zinc-200 dark:hover:border-zinc-700 ${isLoadingLands ? 'animate-pulse' : ''}`}>
           <div>
-            <p className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-1">Tahmini Sezon Kârı</p>
+            <p className="text-sm font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1">Tahmini Sezon Kârı</p>
             <div className="flex items-baseline gap-2">
-              <h1 className="text-4xl font-black tracking-tighter text-indigo-600">
+              <h1 className="text-4xl font-black tracking-tighter text-indigo-600 dark:text-indigo-400">
                 ₺{projectedProfit.toLocaleString()}
               </h1>
             </div>
           </div>
-          <div className="mt-4 flex items-center gap-3 px-3 py-2 rounded-xl border text-sm bg-indigo-50 border-indigo-100 text-indigo-700">
+          <div className="mt-4 flex items-center gap-3 px-3 py-2 rounded-xl border text-sm bg-indigo-50 dark:bg-indigo-900/20 border-indigo-100 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300">
             <Sparkles size={16} />
             <span className="font-bold">Projelendirilen</span>
           </div>
         </div>
 
-        {/* 5. Savings Counter */}
-        <div className={`bg-emerald-600 text-white border-2 border-emerald-500 rounded-3xl p-6 shadow-sm flex flex-col justify-center relative overflow-hidden transition-all hover:shadow-emerald-100 ${isLoadingTransactions ? 'animate-pulse' : ''}`}>
+        <div className={`bg-emerald-600 dark:bg-emerald-700 text-white border-2 border-emerald-500 dark:border-emerald-600 rounded-3xl p-6 shadow-sm flex flex-col justify-center relative overflow-hidden transition-all hover:shadow-emerald-100 ${isLoadingTransactions ? 'animate-pulse' : ''}`}>
           <div className="absolute top-0 right-0 p-4 opacity-20">
             <Sparkles size={64} />
           </div>
@@ -242,19 +303,18 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* 5. Zero-Friction Entry */}
-      <div className="pt-8 border-t border-zinc-100">
-        <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-6">Hızlı Masraf Gir</h3>
+      <div className="pt-8 border-t border-zinc-100 dark:border-zinc-800">
+        <h3 className="text-sm font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-6">Hızlı Masraf Gir</h3>
         <BottomBar />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Activity Feed */}
-        <div className="bg-white border-2 border-zinc-100 rounded-3xl overflow-hidden shadow-sm flex flex-col transition-all hover:border-zinc-200 lg:col-span-2">
-          <div className="p-5 border-b border-zinc-100 bg-white">
-            <h2 className="text-base font-bold text-zinc-900">Son İşlemler</h2>
+        <div className="bg-white dark:bg-zinc-900 border-2 border-zinc-100 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-sm flex flex-col transition-all hover:border-zinc-200 dark:hover:border-zinc-700 lg:col-span-2">
+          <div className="p-5 border-b border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+            <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-100">Son İşlemler</h2>
           </div>
-          <div className="divide-y divide-zinc-50 max-h-[400px] overflow-y-auto">
+          <div className="divide-y divide-zinc-50 dark:divide-zinc-800 max-h-[400px] overflow-y-auto">
             {isLoadingTransactions ? (
               <ListSkeleton />
             ) : (!filteredTransactions || filteredTransactions.length === 0) ? (
@@ -326,7 +386,6 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-      
     </div>
   );
 }

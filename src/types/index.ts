@@ -4,6 +4,7 @@ export interface Profile {
   last_name: string;
   phone: string;
   password?: string;
+  is_premium?: boolean;
 }
 
 export interface Season {
@@ -57,6 +58,17 @@ export interface InventoryItem {
   type: 'gubre' | 'ilac' | 'tohum' | 'diger';
   quantity: number;
   unit: string;
+}
+
+export interface NDVISnapshot {
+  id: string;
+  land_id: string;
+  date: string;
+  mean: number;
+  min: number;
+  max: number;
+  cloud_cover: number;
+  tile_url: string;
 }
 
 export interface ScoutingLog {

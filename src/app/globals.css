@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-zinc-50 text-zinc-900 antialiased;
+    @apply bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 antialiased;
   }
 }
 
@@ -17,11 +17,11 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  @apply bg-zinc-200 rounded-full;
+  @apply bg-zinc-200 dark:bg-zinc-800 rounded-full;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  @apply bg-zinc-300;
+  @apply bg-zinc-300 dark:bg-zinc-700;
 }
 
 /* Map fix */
@@ -30,11 +30,11 @@
 }
 
 .leaflet-popup-content-wrapper {
-  @apply !rounded-2xl !shadow-2xl !border !border-zinc-100;
+  @apply !rounded-2xl !shadow-2xl !border !border-zinc-100 dark:!border-zinc-800 dark:!bg-zinc-900 dark:!text-white;
 }
 
 .leaflet-popup-tip {
-  @apply !bg-white;
+  @apply !bg-white dark:!bg-zinc-900;
 }
 
 /* Phone Input Dark Theme */

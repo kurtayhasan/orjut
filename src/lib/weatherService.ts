@@ -7,6 +7,7 @@ export interface WeatherData {
   rainfall: number;         // mm (bugün)
   windSpeed: number;        // km/h
   uvIndex: number;          // 0-11
+  condition: string;        // "Açık", "Yağmurlu" vb.
   forecast: {               // önümüzdeki 3 gün
     date: string;
     maxTemp: number;
@@ -45,6 +46,7 @@ export async function fetchWeather(lat: number, lon: number): Promise<WeatherDat
     rainfall: data.current.rain,
     windSpeed: data.current.wind_speed_10m,
     uvIndex: data.current.uv_index,
+    condition: getWeatherDescription(data.daily.weathercode[0]),
     forecast: data.daily.time.slice(1, 4).map((time: string, i: number) => ({
       date: time,
       maxTemp: data.daily.temperature_2m_max[i+1],
