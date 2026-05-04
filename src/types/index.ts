@@ -22,7 +22,9 @@ export interface Land {
   district: string;
   block_no?: string;
   parcel_no?: string;
-  size_decare: number; // Hectares -> Decare (Dönüm)
+  size_decare: number;
+  size_sqm?: number;
+  environment_type?: 'acik_tarla' | 'sera';
   crop_type: string;
   lat: number;
   lng: number;
@@ -32,6 +34,29 @@ export interface Land {
   boundaries?: any;
   soil_type?: string;
   is_irrigated?: boolean;
+}
+
+export interface FieldOperation {
+  id: string;
+  org_id: string;
+  land_id: string;
+  type: 'su' | 'gubre' | 'ilac';
+  date: string;
+  amount: number;
+  unit: string;
+  method: string;
+  period_days?: number;
+  notes?: string;
+}
+
+export interface ScoutingLog {
+  id: string;
+  org_id: string;
+  land_id: string;
+  date: string;
+  growth_stage: 'cimlenme' | 'ciceklenme' | 'meyve_tutumu' | 'hasat';
+  health_status: 'saglikli' | 'hastalik' | 'zararli';
+  notes?: string;
 }
 
 export interface IrrigationLog {

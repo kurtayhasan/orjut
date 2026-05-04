@@ -63,6 +63,8 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
   const [isIrrigated, setIsIrrigated] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [environmentType, setEnvironmentType] = useState<'acik_tarla' | 'sera'>('acik_tarla');
+  const [sizeSqm, setSizeSqm] = useState<number>(0);
 
   // Country/State/City data from country-state-city
   const countries = useMemo(() => Country.getAllCountries(), []);
@@ -91,6 +93,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
       resetForm();
       setMarkerPosition(new L.LatLng(lat, lng));
       setPlotSize(decares);
+      setSizeSqm(areaSqm);
       setBoundaries(geojson);
       setShowCropSelector(true);
       
@@ -149,6 +152,8 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
     setPlantingDate(land.planting_date || '');
     setSoilType(land.soil_type || '');
     setIsIrrigated(land.is_irrigated || false);
+    setEnvironmentType(land.environment_type || 'acik_tarla');
+    setSizeSqm(land.size_sqm || 0);
     setBoundaries(land.boundaries || null);
     if (land.lat && land.lng) {
       setMarkerPosition(new L.LatLng(land.lat, land.lng));
@@ -169,6 +174,8 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
     setPlantingDate('');
     setSoilType('');
     setIsIrrigated(false);
+    setEnvironmentType('acik_tarla');
+    setSizeSqm(0);
     setBoundaries(null);
   };
 
@@ -183,6 +190,8 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
       size: plotSize, size_decare: Number(plotSize), crop_type: selectedCrop, 
       planting_date: plantingDate,
       soil_type: soilType, is_irrigated: isIrrigated,
+      environment_type: environmentType,
+      size_sqm: sizeSqm,
       lat: markerPosition?.lat, lng: markerPosition?.lng,
       boundaries: boundaries
     };
@@ -368,6 +377,27 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
             {/* Scrollable Content */}
             <div className="p-6 overflow-y-auto flex-1 space-y-4 custom-scrollbar">
               
+              {/* Environment Type Toggle */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Arazi Tipi</label>
+                <div className="flex p-1 bg-zinc-100 rounded-xl">
+                  <button 
+                    type="button"
+                    onClick={() => setEnvironmentType('acik_tarla')}
+                    className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${environmentType === 'acik_tarla' ? 'bg-white shadow-sm text-indigo-600' : 'text-zinc-500 hover:text-zinc-700'}`}
+                  >
+                    Açık Tarla
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setEnvironmentType('sera')}
+                    className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${environmentType === 'sera' ? 'bg-white shadow-sm text-indigo-600' : 'text-zinc-500 hover:text-zinc-700'}`}
+                  >
+                    Sera
+                  </button>
+                </div>
+              </div>
+
               {/* Country Selector */}
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Ülke</label>
@@ -463,10 +493,19 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
                   <input type="text" className={selectClass} placeholder="42" value={parcelNo} onChange={(e) => setParcelNo(e.target.value)} />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Dönüm</label>
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">
+                    {environmentType === 'sera' ? 'Metrekare' : 'Dönüm'}
+                  </label>
                   <div className="relative">
                     <Ruler size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-300" />
-                    <input type="number" className={`${selectClass} bg-zinc-100`} placeholder="50" value={plotSize} onChange={(e) => setPlotSize(e.target.value)} readOnly title="Haritadaki çizime göre otomatik hesaplanır" />
+                    <input 
+                      type="text" 
+                      className={`${selectClass} bg-zinc-100`} 
+                      placeholder="50" 
+                      value={environmentType === 'sera' ? `${Math.round(sizeSqm)} m²` : `${plotSize} Dn`} 
+                      readOnly 
+                      title="Haritadaki çizime göre otomatik hesaplanır" 
+                    />
                   </div>
                 </div>
               </div>

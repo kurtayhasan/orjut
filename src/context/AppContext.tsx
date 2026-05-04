@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { fetchWeather, WeatherData } from '@/lib/weatherService';
 import { buildAIPrompt, LandContext } from '@/lib/aiActionEngine';
-import { Transaction, Land, Season, Profile, CategoryTotals, IrrigationLog } from '@/types';
+import { Transaction, Land, Season, Profile, CategoryTotals, IrrigationLog, FieldOperation, ScoutingLog } from '@/types';
 
 
 const translations = {
@@ -52,6 +52,13 @@ type AppContextType = {
   toggleSeasonStatus: (id: string, currentStatus: boolean) => Promise<void>;
   weatherData: WeatherData | null;
   currentUserRole: 'owner' | 'editor' | 'viewer';
+  userProfile: Profile | null;
+  fieldOperations: FieldOperation[];
+  scoutingLogs: ScoutingLog[];
+  addFieldOperation: (op: any) => Promise<void>;
+  deleteFieldOperation: (id: string) => Promise<void>;
+  addScoutingLog: (log: any) => Promise<void>;
+  deleteScoutingLog: (id: string) => Promise<void>;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -75,6 +82,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [userProfile, setUserProfile] = useState<Profile | null>(null);
+  const [fieldOperations, setFieldOperations] = useState<FieldOperation[]>([]);
+  const [scoutingLogs, setScoutingLogs] = useState<ScoutingLog[]>([]);
 
   const t = (key: keyof typeof translations['en']) => translations[lang][key] || key;
 
@@ -135,6 +145,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch (e) { console.error(e); }
   }, []);
 
+  const fetchFieldOperations = React.useCallback(async () => {
+    const userId = localStorage.getItem('user_id');
+    if (!userId) return;
+    try {
+      const { data } = await supabase.from('field_operations').select('*').eq('org_id', userId).order('date', { ascending: false });
+      if (data) setFieldOperations(data as any);
+    } catch (e) { console.error(e); }
+  }, []);
+
+  const fetchScoutingLogs = React.useCallback(async () => {
+    const userId = localStorage.getItem('user_id');
+    if (!userId) return;
+    try {
+      const { data } = await supabase.from('scouting_logs').select('*').eq('org_id', userId).order('date', { ascending: false });
+      if (data) setScoutingLogs(data as any);
+    } catch (e) { console.error(e); }
+  }, []);
+
   const syncOfflineData = React.useCallback(async () => {
     const userId = localStorage.getItem('user_id');
     if (!userId) return;
@@ -161,10 +189,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [fetchLands, fetchTransactions, fetchIrrigationLogs]);
 
   useEffect(() => {
-    fetchSeasons(); fetchLands(); fetchTransactions(); fetchIrrigationLogs();
+    const userId = localStorage.getItem('user_id');
+    if (userId) {
+      const hydrateProfile = async () => {
+        const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
+        if (data) setUserProfile(data);
+      };
+      hydrateProfile();
+      fetchSeasons(); fetchLands(); fetchTransactions(); fetchIrrigationLogs(); fetchFieldOperations(); fetchScoutingLogs();
+    }
     window.addEventListener('online', syncOfflineData);
     return () => window.removeEventListener('online', syncOfflineData);
-  }, [syncOfflineData, fetchSeasons, fetchLands, fetchTransactions, fetchIrrigationLogs]);
+  }, [syncOfflineData, fetchSeasons, fetchLands, fetchTransactions, fetchIrrigationLogs, fetchFieldOperations, fetchScoutingLogs]);
 
   const addLand = async (land: any) => {
     const userId = localStorage.getItem('user_id') || '';
@@ -259,6 +295,56 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       }
     }
+  };
+
+  const addFieldOperation = async (op: any) => {
+    const userId = localStorage.getItem('user_id') || '';
+    const tempId = 'temp_' + Date.now();
+    const dbPayload = { ...op, org_id: userId, id: tempId };
+    setFieldOperations(prev => [dbPayload, ...prev]);
+    if (userId) {
+      try {
+        const { data, error } = await supabase.from('field_operations').insert([{ ...op, org_id: userId }]).select().single();
+        if (error) throw error;
+        if (data) setFieldOperations(prev => prev.map(o => o.id === tempId ? data : o));
+        toast.success("İşlem kaydedildi");
+      } catch (err: any) {
+        toast.error("Kaydedilemedi: " + err.message);
+        setFieldOperations(prev => prev.filter(o => o.id !== tempId));
+      }
+    }
+  };
+
+  const deleteFieldOperation = async (id: string) => {
+    setFieldOperations(prev => prev.filter(o => o.id !== id));
+    const { error } = await supabase.from('field_operations').delete().eq('id', id);
+    if (error) toast.error("Silme hatası: " + error.message);
+    else toast.success("İşlem silindi");
+  };
+
+  const addScoutingLog = async (log: any) => {
+    const userId = localStorage.getItem('user_id') || '';
+    const tempId = 'temp_' + Date.now();
+    const dbPayload = { ...log, org_id: userId, id: tempId };
+    setScoutingLogs(prev => [dbPayload, ...prev]);
+    if (userId) {
+      try {
+        const { data, error } = await supabase.from('scouting_logs').insert([{ ...log, org_id: userId }]).select().single();
+        if (error) throw error;
+        if (data) setScoutingLogs(prev => prev.map(s => s.id === tempId ? data : s));
+        toast.success("Gözlem kaydı eklendi");
+      } catch (err: any) {
+        toast.error("Kaydedilemedi: " + err.message);
+        setScoutingLogs(prev => prev.filter(s => s.id !== tempId));
+      }
+    }
+  };
+
+  const deleteScoutingLog = async (id: string) => {
+    setScoutingLogs(prev => prev.filter(s => s.id !== id));
+    const { error } = await supabase.from('scouting_logs').delete().eq('id', id);
+    if (error) toast.error("Silme hatası: " + error.message);
+    else toast.success("Gözlem kaydı silindi");
   };
 
   const deleteIrrigationLog = async (id: string) => {
@@ -416,7 +502,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AppContext.Provider value={{ lang, setLang, t, totalExpenses, totalArea, addExpense, updateExpense, deleteExpense, weather: { temp: weatherData?.temperature || null, windspeed: weatherData?.windSpeed || null, loading: false, error: null }, dailyInsight, criticalAlert, totalSavings, dailySpent, dailyActions, lands, transactions, irrigationLogs, isLoadingLands, isLoadingTransactions, addLand, updateLand, deleteLand, addIrrigationLog, deleteIrrigationLog, logSaving, requestWeatherAndInsight, startNewSeason, toggleSeasonStatus, isDemo: false, isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s) => setActiveSeason(s), weatherData, currentUserRole }}>
+    <AppContext.Provider value={{ lang, setLang, t, totalExpenses, totalArea, addExpense, updateExpense, deleteExpense, weather: { temp: weatherData?.temperature || null, windspeed: weatherData?.windSpeed || null, loading: false, error: null }, dailyInsight, criticalAlert, totalSavings, dailySpent, dailyActions, lands, transactions, irrigationLogs, isLoadingLands, isLoadingTransactions, addLand, updateLand, deleteLand, addIrrigationLog, deleteIrrigationLog, logSaving, requestWeatherAndInsight, startNewSeason, toggleSeasonStatus, isDemo: false, isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s) => setActiveSeason(s), weatherData, currentUserRole, userProfile, fieldOperations, scoutingLogs, addFieldOperation, deleteFieldOperation, addScoutingLog, deleteScoutingLog }}>
       {children}
     </AppContext.Provider>
   );
