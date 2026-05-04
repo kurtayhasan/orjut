@@ -73,9 +73,9 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6 pb-48">
       {/* AI Daily Insight Widget */}
-      <div className="bg-gradient-to-br from-indigo-600 via-violet-600 to-indigo-700 text-white rounded-3xl p-6 shadow-xl shadow-indigo-100 overflow-hidden relative group">
-        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
-          <Sparkles size={120} />
+      <div className="bg-gradient-to-br from-indigo-700 via-indigo-600 to-violet-700 text-white rounded-[2rem] p-6 shadow-2xl shadow-indigo-500/10 dark:shadow-none overflow-hidden relative group transition-all duration-500 hover:shadow-indigo-500/20">
+        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 group-hover:opacity-20 transition-all duration-700 pointer-events-none">
+          <Sparkles size={140} />
         </div>
         
         <div className="relative z-10">
@@ -242,64 +242,78 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className={`bg-white dark:bg-zinc-900 border-2 border-zinc-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm flex flex-col justify-between transition-all hover:border-zinc-200 dark:hover:border-zinc-700 ${isLoadingLands ? 'animate-pulse' : ''}`}>
+        <div className={`bg-white dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800 rounded-[2rem] p-6 shadow-sm flex flex-col justify-between transition-all hover:border-indigo-500/30 dark:hover:border-indigo-500/30 ${isLoadingLands ? 'animate-pulse' : ''}`}>
           <div>
             <div className="flex items-center gap-2 mb-1">
               <MapIcon size={16} className="text-zinc-400" />
-              <p className="text-sm font-bold text-zinc-400 uppercase tracking-wider">Kayıtlı Arazi</p>
+              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Kayıtlı Arazi</p>
             </div>
             <div className="flex items-baseline gap-2">
               <h1 className="text-4xl font-black tracking-tighter text-zinc-900 dark:text-zinc-100">
                 {totalArea.toFixed(0)}
               </h1>
-              <span className="text-zinc-500 dark:text-zinc-400 font-medium text-lg">Dönüm</span>
+              <span className="text-zinc-500 dark:text-zinc-400 font-bold text-lg">Dönüm</span>
             </div>
           </div>
           
-          <Link href="/dashboard/lands" className="mt-6 w-full py-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 font-bold rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors flex items-center justify-center gap-2">
+          <Link href="/dashboard/lands" className="mt-6 w-full py-3 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-black rounded-2xl hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-widest">
             <Plus size={18} />
             <span>Yeni Arazi Ekle</span>
           </Link>
         </div>
 
         {/* 3. Cost Shock Metric */}
-        <div className={`bg-white dark:bg-zinc-900 border-2 border-zinc-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm flex flex-col justify-between transition-all hover:border-zinc-200 dark:hover:border-zinc-700 ${isLoadingTransactions ? 'animate-pulse' : ''}`}>
+        <div className={`bg-white dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800 rounded-[2rem] p-6 shadow-sm flex flex-col justify-between transition-all hover:border-indigo-500/30 dark:hover:border-indigo-500/30 ${isLoadingTransactions ? 'animate-pulse' : ''}`}>
           <div>
-            <p className="text-sm font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1">Maliyet Takibi (₺ / Dönüm)</p>
+            <div className="flex items-center gap-2 mb-1">
+              <Activity size={16} className="text-zinc-400" />
+              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Maliyet Takibi</p>
+            </div>
             <div className="flex items-baseline gap-2">
               <h1 className={`text-4xl font-black tracking-tighter text-emerald-600 dark:text-emerald-400`}>
-                ₺{costPerDonum.toFixed(0)}
+                ₺{costPerDonum.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}
               </h1>
+              <span className="text-zinc-500 dark:text-zinc-400 font-bold text-lg">/ Dn</span>
             </div>
           </div>
+          <p className="mt-4 text-[11px] font-bold text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
+            {costPerDonum > 5000 ? <AlertTriangle size={14} className="text-amber-500" /> : <CheckCircle2 size={14} className="text-emerald-500" />}
+            {costPerDonum > 5000 ? 'Maliyetler hedefin üzerinde' : 'Maliyetler kontrol altında'}
+          </p>
         </div>
 
-        <div className={`bg-white dark:bg-zinc-900 border-2 border-zinc-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm flex flex-col justify-between transition-all hover:border-zinc-200 dark:hover:border-zinc-700 ${isLoadingLands ? 'animate-pulse' : ''}`}>
+        <div className={`bg-white dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800 rounded-[2rem] p-6 shadow-sm flex flex-col justify-between transition-all hover:border-indigo-500/30 dark:hover:border-indigo-500/30 ${isLoadingLands ? 'animate-pulse' : ''}`}>
           <div>
-            <p className="text-sm font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-1">Tahmini Sezon Kârı</p>
+            <div className="flex items-center gap-2 mb-1">
+              <TrendingUp size={16} className="text-zinc-400" />
+              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Beklenen Kar</p>
+            </div>
             <div className="flex items-baseline gap-2">
               <h1 className="text-4xl font-black tracking-tighter text-indigo-600 dark:text-indigo-400">
-                ₺{projectedProfit.toLocaleString()}
+                ₺{projectedProfit.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}
               </h1>
             </div>
           </div>
-          <div className="mt-4 flex items-center gap-3 px-3 py-2 rounded-xl border text-sm bg-indigo-50 dark:bg-indigo-900/20 border-indigo-100 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300">
-            <Sparkles size={16} />
-            <span className="font-bold">Projelendirilen</span>
+          <div className="mt-4 flex items-center justify-between">
+            <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Hasat Tahmini</span>
+            <span className="text-emerald-500 font-black text-xs">+{((projectedProfit / (totalExpenses || 1)) * 100).toFixed(0)}% ROI</span>
           </div>
         </div>
 
-        <div className={`bg-emerald-600 dark:bg-emerald-700 text-white border-2 border-emerald-500 dark:border-emerald-600 rounded-3xl p-6 shadow-sm flex flex-col justify-center relative overflow-hidden transition-all hover:shadow-emerald-100 ${isLoadingTransactions ? 'animate-pulse' : ''}`}>
-          <div className="absolute top-0 right-0 p-4 opacity-20">
-            <Sparkles size={64} />
+        <div className={`bg-emerald-600 dark:bg-emerald-500/10 border border-emerald-500/20 dark:border-emerald-500/20 rounded-[2rem] p-6 shadow-sm flex flex-col justify-center relative overflow-hidden transition-all hover:border-emerald-500/40 ${isLoadingTransactions ? 'animate-pulse' : ''}`}>
+          <div className="absolute top-0 right-0 p-6 opacity-20 pointer-events-none">
+            <Sparkles size={100} className="text-emerald-700 dark:text-emerald-400" />
           </div>
-          <p className="text-sm font-bold text-emerald-200 uppercase tracking-wider mb-1">Orjut Tasarrufu</p>
+          <div className="flex items-center gap-2 mb-1">
+            <Wallet size={16} className="text-emerald-700 dark:text-emerald-400" />
+            <p className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">Orjut Tasarrufu</p>
+          </div>
           <div className="flex items-baseline gap-2 z-10">
-            <h1 className="text-4xl font-black tracking-tighter text-white">
+            <h1 className="text-4xl font-black tracking-tighter text-emerald-700 dark:text-emerald-400">
               +₺{totalSavings.toLocaleString()}
             </h1>
           </div>
-          <p className="text-sm text-emerald-100 mt-2 z-10 font-medium">Önlenen tahmini zararlar.</p>
+          <p className="text-[11px] text-emerald-600/80 dark:text-emerald-400/80 mt-2 z-10 font-bold uppercase tracking-wider">Verimlilik Kazancı</p>
         </div>
       </div>
 

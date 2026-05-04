@@ -225,13 +225,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('online', syncOfflineData);
   }, [syncOfflineData, fetchSeasons, fetchLands, fetchTransactions, fetchIrrigationLogs, fetchFieldOperations, fetchScoutingLogs, fetchInventory]);
 
-  const toggleDarkMode = () => {
-    const newMode = !isDarkMode;
-    setIsDarkMode(newMode);
-    localStorage.setItem('theme', newMode ? 'dark' : 'light');
-    if (newMode) document.documentElement.classList.add('dark');
-    else document.documentElement.classList.remove('dark');
-  };
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDarkMode]);
+
+  const toggleDarkMode = () => setIsDarkMode(prev => !prev);
 
   const addLand = async (land: any) => {
     const userId = localStorage.getItem('user_id') || '';

@@ -32,16 +32,19 @@ export default function Sidebar() {
         />
       )}
       
-      <aside className={`fixed inset-y-0 left-0 z-[2000] w-64 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col shrink-0 h-full transform transition-transform duration-300 md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-      <div className="p-6 flex items-center gap-3 border-b border-zinc-100 dark:border-zinc-800">
-        <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg border border-emerald-200 dark:border-emerald-800 flex items-center justify-center">
-          <Leaf size={18} className="text-emerald-700 dark:text-emerald-500" />
+      <aside className={`fixed inset-y-0 left-0 z-[2000] w-64 bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 flex flex-col shrink-0 h-full transform transition-all duration-300 md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}`}>
+      <div className="p-6 flex items-center gap-3 border-b border-zinc-100 dark:border-zinc-900">
+        <div className="w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <Leaf size={20} className="text-white" />
         </div>
-        <span className="font-semibold text-zinc-800 dark:text-zinc-100 tracking-tight">ZiraiAsistan by Orjut</span>
+        <div>
+          <span className="font-black text-zinc-900 dark:text-zinc-100 tracking-tighter text-lg leading-none block">ORJUT</span>
+          <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest leading-none">ZiraiAsistan</span>
+        </div>
       </div>
       
-      <div className="p-4">
-        <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 tracking-wider uppercase mb-3 px-3">Menü</p>
+      <div className="p-4 overflow-y-auto flex-1 custom-scrollbar">
+        <p className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 tracking-widest uppercase mb-4 px-3">Ana Menü</p>
         <nav className="flex flex-col gap-1 w-full">
           <SidebarItem href="/dashboard" icon={<LayoutDashboard size={18} />} label={t('dashboard')} active={pathname === '/dashboard'} />
           <SidebarItem href="/dashboard/seasons" icon={<CalendarDays size={18} />} label="Sezonlar" active={pathname.includes('/seasons')} />
@@ -53,26 +56,30 @@ export default function Sidebar() {
         </nav>
       </div>
 
-      <div className="mt-auto p-4 border-t border-zinc-100 dark:border-zinc-800 space-y-1">
-        <button
-          onClick={toggleDarkMode}
-          className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800"
-        >
-          <div className="flex items-center gap-3">
-            {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-            {isDarkMode ? 'Aydınlık Mod' : 'Karanlık Mod'}
-          </div>
-          <div className={`w-8 h-4 rounded-full transition-all relative ${isDarkMode ? 'bg-indigo-600' : 'bg-zinc-300'}`}>
-            <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${isDarkMode ? 'left-4.5' : 'left-0.5'}`} />
-          </div>
-        </button>
+      <div className="p-4 border-t border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/50 space-y-2">
+        <div className="p-1 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex">
+          <button
+            onClick={() => !isDarkMode && toggleDarkMode()}
+            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all ${isDarkMode ? 'bg-zinc-700 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
+          >
+            <Moon size={14} />
+            Karanlık
+          </button>
+          <button
+            onClick={() => isDarkMode && toggleDarkMode()}
+            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all ${!isDarkMode ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-400'}`}
+          >
+            <Sun size={14} />
+            Aydınlık
+          </button>
+        </div>
         
         <SidebarItem href="/dashboard/settings" icon={<Settings size={18} />} label={t('settings')} active={pathname.includes('/settings')} />
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 group"
         >
-          <LogOut size={18} />
+          <LogOut size={18} className="transition-transform group-hover:-translate-x-1" />
           Çıkış Yap
         </button>
       </div>
