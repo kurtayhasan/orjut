@@ -51,3 +51,9 @@ ALTER TABLE scouting_logs ENABLE ROW LEVEL SECURITY;
 -- Add RLS Policies (Update these based on your specific auth logic)
 -- CREATE POLICY "Users can see their own operations" ON field_operations FOR SELECT USING (auth.uid() = org_id);
 -- ... repeat for other operations
+-- İşlemler (Masraf) tablosuna Miktar ve Birim kolonlarını ekleyelim
+ALTER TABLE public.transactions ADD COLUMN IF NOT EXISTS quantity NUMERIC;
+ALTER TABLE public.transactions ADD COLUMN IF NOT EXISTS unit TEXT;
+
+-- Envanter tablosunda Birim kolonu yoksa onu da garantiye alalım
+ALTER TABLE public.inventory ADD COLUMN IF NOT EXISTS unit TEXT;

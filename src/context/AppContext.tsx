@@ -424,7 +424,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       type: 'expense', 
       category: category, 
       land_id, 
-      org_id: userId
+      org_id: userId,
+      quantity: inventoryData?.quantity,
+      unit: inventoryData?.unit
     };
     setTransactions(prev => [newTx, ...prev]);
 
@@ -439,7 +441,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           receipt_url, 
           receipt_thumbnail_url,
           category: category,
-          type: 'expense'
+          type: 'expense',
+          quantity: inventoryData?.quantity,
+          unit: inventoryData?.unit
         }]).select().single();
 
         if (error) throw error;
@@ -453,7 +457,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         toast.success("Masraf kaydedildi");
       } catch (err: any) {
         if (!navigator.onLine || err.message === 'Failed to fetch') {
-          const txPayload = { org_id: userId, amount, description: category, date, land_id, receipt_url, receipt_thumbnail_url, category: category, type: 'expense' };
+          const txPayload = { 
+            org_id: userId, amount, description: category, date, land_id, receipt_url, receipt_thumbnail_url, category: category, type: 'expense',
+            quantity: inventoryData?.quantity,
+            unit: inventoryData?.unit
+          };
           const pendingTxs = JSON.parse(localStorage.getItem('pending_transactions') || '[]');
           localStorage.setItem('pending_transactions', JSON.stringify([...pendingTxs, txPayload]));
           toast.success("Çevrimdışısınız. Masraf cihaza kaydedildi.");

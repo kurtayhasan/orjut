@@ -13,9 +13,11 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: { isO
   const [receiptUrl, setReceiptUrl] = useState('');
   const [receiptThumbnail, setReceiptThumbnail] = useState('');
   const [addToInventory, setAddToInventory] = useState(false);
-  const [invQuantity, setInvQuantity] = useState('');
-  const [invUnit, setInvUnit] = useState('kg');
   const [invName, setInvName] = useState('');
+  
+  // Unified Quantity and Unit for both Transaction and Inventory
+  const [quantity, setQuantity] = useState('');
+  const [unit, setUnit] = useState('kg');
 
   // Update category if default changes when modal opens
   React.useEffect(() => {
@@ -30,18 +32,19 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: { isO
       const inventoryData = addToInventory ? {
         name: invName || category,
         type: category === 'Gübre/İlaç' ? 'gubre' : category === 'Tohum' ? 'tohum' : 'diger',
-        quantity: Number(invQuantity),
-        unit: invUnit
+        quantity: Number(quantity),
+        unit: unit
       } : undefined;
 
       await addExpense(Number(amount), category, date, landId, receiptUrl, receiptThumbnail, inventoryData);
       setAmount('');
+      setQuantity('');
+      setUnit('kg');
       setDate(new Date().toISOString().split('T')[0]);
       setLandId('');
       setReceiptUrl('');
       setReceiptThumbnail('');
       setAddToInventory(false);
-      setInvQuantity('');
       setInvName('');
       onClose();
     }
@@ -86,17 +89,47 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: { isO
         
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <div className="flex flex-col gap-4">
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 text-2xl font-medium">₺</span>
-              <input 
-                type="number"
-                className="w-full border-2 border-zinc-200 text-3xl font-bold text-zinc-900 py-4 pl-12 pr-4 rounded-xl focus:border-indigo-600 focus:ring-0 outline-none transition-colors"
-                placeholder="0.00"
-                value={amount}
-                onChange={e => setAmount(e.target.value)}
-                required
-                autoFocus
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 text-2xl font-medium">₺</span>
+                <input 
+                  type="number"
+                  className="w-full border-2 border-zinc-200 text-3xl font-bold text-zinc-900 py-4 pl-12 pr-4 rounded-xl focus:border-indigo-600 focus:ring-0 outline-none transition-colors"
+                  placeholder="0.00"
+                  value={amount}
+                  onChange={e => setAmount(e.target.value)}
+                  required
+                  autoFocus
+                />
+              </div>
+              
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1 ml-1">Miktar</label>
+                  <input 
+                    type="number"
+                    className="w-full border-2 border-zinc-200 text-lg font-bold text-zinc-900 py-3.5 px-4 rounded-xl focus:border-indigo-600 focus:ring-0 outline-none transition-colors"
+                    placeholder="0"
+                    value={quantity}
+                    onChange={e => setQuantity(e.target.value)}
+                  />
+                </div>
+                <div className="w-24">
+                  <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1 ml-1">Birim</label>
+                  <select 
+                    className="w-full border-2 border-zinc-200 text-lg font-bold text-zinc-900 py-3.5 px-3 rounded-xl focus:border-indigo-600 focus:ring-0 outline-none transition-colors bg-white appearance-none"
+                    value={unit}
+                    onChange={e => setUnit(e.target.value)}
+                  >
+                    <option value="kg">kg</option>
+                    <option value="lt">lt</option>
+                    <option value="ton">ton</option>
+                    <option value="paket">pkt</option>
+                    <option value="cuval">çvl</option>
+                    <option value="adet">adt</option>
+                  </select>
+                </div>
+              </div>
             </div>
             
             <div>
@@ -148,7 +181,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: { isO
                 {addToInventory && (
                   <div className="grid grid-cols-1 gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
                     <div>
-                      <label className="block text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">Ürün/Marka Adı</label>
+                      <label className="block text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">Ürün/Marka Adı (Stok Kaydı İçin)</label>
                       <input 
                         type="text"
                         placeholder="Örn: Üre 46, Can Gübre vb."
@@ -157,32 +190,6 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: { isO
                         onChange={e => setInvName(e.target.value)}
                         required={addToInventory}
                       />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">Miktar</label>
-                        <input 
-                          type="number"
-                          placeholder="0"
-                          className="w-full bg-white border border-indigo-100 rounded-xl px-3 py-2 text-sm font-bold outline-none focus:border-indigo-500 transition-all"
-                          value={invQuantity}
-                          onChange={e => setInvQuantity(e.target.value)}
-                          required={addToInventory}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">Birim</label>
-                        <select 
-                          className="w-full bg-white border border-indigo-100 rounded-xl px-3 py-2 text-sm font-bold outline-none focus:border-indigo-500 transition-all cursor-pointer"
-                          value={invUnit}
-                          onChange={e => setInvUnit(e.target.value)}
-                        >
-                          <option value="kg">kg</option>
-                          <option value="lt">lt</option>
-                          <option value="paket">paket</option>
-                          <option value="cuval">çuval</option>
-                        </select>
-                      </div>
                     </div>
                   </div>
                 )}

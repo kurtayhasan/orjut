@@ -90,6 +90,8 @@ export interface Transaction {
   category: string;
   land_id: string;
   lands?: { block_no: string; parcel_no: string };
+  quantity?: number;
+  unit?: string;
 }
 
 export interface CategoryTotals {
