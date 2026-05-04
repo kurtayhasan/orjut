@@ -177,14 +177,36 @@ export default function OperationsPage() {
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Birim</label>
-                  <input 
-                    type="text"
+                  <select 
                     required
-                    placeholder="kg, lt, saat"
-                    className="w-full px-4 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition-all text-sm font-semibold"
+                    className="w-full px-4 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition-all text-sm font-semibold appearance-none cursor-pointer"
                     value={unit}
                     onChange={e => setUnit(e.target.value)}
-                  />
+                  >
+                    <option value="" disabled>Seçiniz</option>
+                    {type === 'su' ? (
+                      <>
+                        <option value="saat">Saat</option>
+                        <option value="ton">Ton</option>
+                        <option value="m3">m³</option>
+                        <option value="litre">Litre</option>
+                      </>
+                    ) : type === 'gubre' ? (
+                      <>
+                        <option value="kg">kg</option>
+                        <option value="paket">Paket</option>
+                        <option value="lt">Litre</option>
+                        <option value="cuval">Çuval</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="lt">Litre</option>
+                        <option value="cc">cc</option>
+                        <option value="gr">Gram</option>
+                        <option value="paket">Paket</option>
+                      </>
+                    )}
+                  </select>
                 </div>
               </div>
 
@@ -217,15 +239,38 @@ export default function OperationsPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Yöntem / İlaç Adı</label>
-                  <input 
-                    type="text"
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Yöntem / Uygulama</label>
+                  <select 
                     required
-                    placeholder="Damlama, Üre vb."
-                    className="w-full px-4 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition-all text-sm font-semibold"
+                    className="w-full px-4 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition-all text-sm font-semibold appearance-none cursor-pointer"
                     value={method}
                     onChange={e => setMethod(e.target.value)}
-                  />
+                  >
+                    <option value="" disabled>Yöntem seçin...</option>
+                    {type === 'su' ? (
+                      <>
+                        <option value="Damlama">Damlama</option>
+                        <option value="Salma">Salma</option>
+                        <option value="Yağmurlama">Yağmurlama</option>
+                        <option value="Pivot">Pivot</option>
+                      </>
+                    ) : type === 'gubre' ? (
+                      <>
+                        <option value="Taban Gübresi">Taban Gübresi</option>
+                        <option value="Üst Gübre">Üst Gübre</option>
+                        <option value="Yaprak Gübresi">Yaprak Gübresi</option>
+                        <option value="Fertigasyon">Fertigasyon (Damlama ile)</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="Pülverizatör">Pülverizatör (Traktör)</option>
+                        <option value="Atomizör">Atomizör</option>
+                        <option value="Sırt Pompası">Sırt Pompası</option>
+                        <option value="Dron">Dron ile Uygulama</option>
+                      </>
+                    )}
+                    <option value="Diger">Diğer</option>
+                  </select>
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Periyot (Gün)</label>

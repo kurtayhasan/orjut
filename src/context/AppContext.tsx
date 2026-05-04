@@ -60,7 +60,9 @@ type AppContextType = {
   addScoutingLog: (log: any) => Promise<void>;
   deleteScoutingLog: (id: string) => Promise<void>;
   inventory: InventoryItem[];
+  addInventoryItem: (item: any) => Promise<void>;
   updateInventoryItem: (id: string, updates: Partial<InventoryItem>) => Promise<void>;
+  deleteInventoryItem: (id: string) => Promise<void>;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -342,8 +344,32 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const { error } = await supabase.from('inventory').update(updates).eq('id', id);
     if (error) {
       console.error("Inventory update error:", error);
-      // Optional: Rollback state if critical
     }
+  };
+
+  const addInventoryItem = async (item: any) => {
+    const userId = localStorage.getItem('user_id') || '';
+    const tempId = 'temp_' + Date.now();
+    const dbPayload = { ...item, org_id: userId, id: tempId };
+    setInventory(prev => [...prev, dbPayload]);
+    if (userId) {
+      try {
+        const { data, error } = await supabase.from('inventory').insert([{ ...item, org_id: userId }]).select().single();
+        if (error) throw error;
+        if (data) setInventory(prev => prev.map(i => i.id === tempId ? data : i));
+        toast.success("Ürün envantere eklendi");
+      } catch (err: any) {
+        toast.error("Kaydedilemedi: " + err.message);
+        setInventory(prev => prev.filter(i => i.id !== tempId));
+      }
+    }
+  };
+
+  const deleteInventoryItem = async (id: string) => {
+    setInventory(prev => prev.filter(i => i.id !== id));
+    const { error } = await supabase.from('inventory').delete().eq('id', id);
+    if (error) toast.error("Silme hatası: " + error.message);
+    else toast.success("Ürün silindi");
   };
 
   const deleteFieldOperation = async (id: string) => {
@@ -533,7 +559,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AppContext.Provider value={{ lang, setLang, t, totalExpenses, totalArea, addExpense, updateExpense, deleteExpense, weather: { temp: weatherData?.temperature || null, windspeed: weatherData?.windSpeed || null, loading: false, error: null }, dailyInsight, criticalAlert, totalSavings, dailySpent, dailyActions, lands, transactions, irrigationLogs, isLoadingLands, isLoadingTransactions, addLand, updateLand, deleteLand, addIrrigationLog, deleteIrrigationLog, logSaving, requestWeatherAndInsight, startNewSeason, toggleSeasonStatus, isDemo: false, isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s) => setActiveSeason(s), weatherData, currentUserRole, userProfile, fieldOperations, scoutingLogs, addFieldOperation, deleteFieldOperation, addScoutingLog, deleteScoutingLog, inventory, updateInventoryItem }}>
+    <AppContext.Provider value={{ lang, setLang, t, totalExpenses, totalArea, addExpense, updateExpense, deleteExpense, weather: { temp: weatherData?.temperature || null, windspeed: weatherData?.windSpeed || null, loading: false, error: null }, dailyInsight, criticalAlert, totalSavings, dailySpent, dailyActions, lands, transactions, irrigationLogs, isLoadingLands, isLoadingTransactions, addLand, updateLand, deleteLand, addIrrigationLog, deleteIrrigationLog, logSaving, requestWeatherAndInsight, startNewSeason, toggleSeasonStatus, isDemo: false, isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s) => setActiveSeason(s), weatherData, currentUserRole, userProfile, fieldOperations, scoutingLogs, addFieldOperation, deleteFieldOperation, addScoutingLog, deleteScoutingLog, inventory, addInventoryItem, updateInventoryItem, deleteInventoryItem }}>
       {children}
     </AppContext.Provider>
   );
