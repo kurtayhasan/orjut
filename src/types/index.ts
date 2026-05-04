@@ -40,6 +40,7 @@ export interface FieldOperation {
   id: string;
   org_id: string;
   land_id: string;
+  inventory_id?: string;
   type: 'su' | 'gubre' | 'ilac';
   date: string;
   amount: number;
@@ -47,6 +48,15 @@ export interface FieldOperation {
   method: string;
   period_days?: number;
   notes?: string;
+}
+
+export interface InventoryItem {
+  id: string;
+  org_id: string;
+  name: string;
+  type: 'gubre' | 'ilac' | 'tohum' | 'diger';
+  quantity: number;
+  unit: string;
 }
 
 export interface ScoutingLog {

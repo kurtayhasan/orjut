@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useAppContext } from '@/context/AppContext';
 import BottomBar from '@/components/BottomBar';
-import { Sparkles, TrendingDown, TrendingUp, Plus, Map as MapIcon, Wallet, PieChart } from 'lucide-react';
+import { Sparkles, TrendingDown, TrendingUp, Plus, Map as MapIcon, Wallet, PieChart, Cloud, Activity, AlertTriangle, Settings2, CheckCircle2, ChevronDown, Droplets, ClipboardCheck } from 'lucide-react';
 import EmptyState from '@/components/EmptyState';
 import { ListSkeleton } from '@/components/Skeleton';
 import CategoryPieChart from '@/components/budget/CategoryPieChart';
@@ -13,8 +13,27 @@ import { useCategoryTotals } from '@/hooks/useCategoryTotals';
 import BudgetProgressBar from '@/components/budget/BudgetProgressBar';
 
 export default function DashboardPage() {
-  const { totalExpenses, totalArea, dailyInsight, criticalAlert, totalSavings, requestWeatherAndInsight, weather, transactions, isLoadingTransactions, isLoadingLands, lands, activeSeason, weatherData } = useAppContext();
+  const { totalExpenses, totalArea, dailyInsight, criticalAlert, totalSavings, requestWeatherAndInsight, weather, transactions, isLoadingTransactions, isLoadingLands, lands, activeSeason, weatherData, inventory, scoutingLogs, fieldOperations } = useAppContext();
   const [activeFilter, setActiveFilter] = React.useState<string | null>(null);
+  
+  const [widgetPrefs, setWidgetPrefs] = React.useState({
+    weather: true,
+    finance: true,
+    stock: true,
+    recent: true
+  });
+  const [showCustomize, setShowCustomize] = React.useState(false);
+
+  React.useEffect(() => {
+    const saved = localStorage.getItem('dashboard_widget_prefs');
+    if (saved) setWidgetPrefs(JSON.parse(saved));
+  }, []);
+
+  const toggleWidget = (key: keyof typeof widgetPrefs) => {
+    const newPrefs = { ...widgetPrefs, [key]: !widgetPrefs[key] };
+    setWidgetPrefs(newPrefs);
+    localStorage.setItem('dashboard_widget_prefs', JSON.stringify(newPrefs));
+  };
 
   const categoryTotals = useCategoryTotals(transactions);
 
@@ -51,13 +70,121 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6 pb-48">
       {/* Welcome Section with Glass Effect */}
-      {activeSeason && (
-        <div className="flex items-center gap-2 mb-2">
-          <span className="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full border border-indigo-200">
-            Aktif Sezon: {activeSeason.name}
-          </span>
+      <div className="flex justify-between items-center gap-2 mb-2">
+        <div className="flex gap-2">
+          {activeSeason && (
+            <span className="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full border border-indigo-200">
+              Aktif Sezon: {activeSeason.name}
+            </span>
+          )}
         </div>
-      )}
+        
+        <div className="relative">
+          <button 
+            onClick={() => setShowCustomize(!showCustomize)}
+            className="flex items-center gap-2 px-3 py-1.5 bg-white border border-zinc-200 rounded-full text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition-all shadow-sm"
+          >
+            <Settings2 size={14} />
+            Görünümü Özelleştir
+            <ChevronDown size={14} className={`transition-transform ${showCustomize ? 'rotate-180' : ''}`} />
+          </button>
+          
+          {showCustomize && (
+            <div className="absolute right-0 mt-2 w-56 bg-white border border-zinc-100 rounded-2xl shadow-2xl z-50 p-3 animate-in fade-in zoom-in-95 duration-200">
+              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-3 px-2">Widget Görünümü</p>
+              <div className="space-y-1">
+                {[
+                  { id: 'weather', label: 'Hava Durumu Özet', icon: <Cloud size={14} /> },
+                  { id: 'finance', label: 'Finansal Genel Bakış', icon: <Wallet size={14} /> },
+                  { id: 'stock', label: 'Kritik Stok Uyarıları', icon: <AlertTriangle size={14} /> },
+                  { id: 'recent', label: 'Son Aktiviteler', icon: <Activity size={14} /> },
+                ].map(w => (
+                  <button 
+                    key={w.id}
+                    onClick={() => toggleWidget(w.id as any)}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-zinc-50 transition-all group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-zinc-400 group-hover:text-indigo-500 transition-colors">{w.icon}</span>
+                      <span className="text-xs font-bold text-zinc-700">{w.label}</span>
+                    </div>
+                    <div className={`w-8 h-4 rounded-full transition-all relative ${widgetPrefs[w.id as keyof typeof widgetPrefs] ? 'bg-indigo-600' : 'bg-zinc-200'}`}>
+                      <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${widgetPrefs[w.id as keyof typeof widgetPrefs] ? 'left-4.5' : 'left-0.5'}`} />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Widget Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {widgetPrefs.weather && (
+          <div className="bg-white border border-zinc-100 p-4 rounded-3xl shadow-sm flex items-center gap-4 group hover:shadow-md transition-all">
+            <div className="w-12 h-12 bg-sky-50 text-sky-600 rounded-2xl flex items-center justify-center shrink-0">
+              <Cloud size={24} />
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Hava Durumu</p>
+              <h3 className="font-black text-zinc-800 leading-tight">
+                {lands[0]?.city || 'Kızıltepe'} - {weatherData?.condition || 'Açık'}
+                <span className="block text-sky-600">{weatherData?.temperature || weather.temp || '--'}°C</span>
+              </h3>
+            </div>
+          </div>
+        )}
+
+        {widgetPrefs.finance && (
+          <div className="bg-white border border-zinc-100 p-4 rounded-3xl shadow-sm flex items-center gap-4 group hover:shadow-md transition-all">
+            <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center shrink-0">
+              <Wallet size={24} />
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Finansal Özet</p>
+              <h3 className="font-black text-zinc-800 leading-tight">
+                Toplam Harcama
+                <span className="block text-indigo-600">₺{totalExpenses.toLocaleString()}</span>
+              </h3>
+            </div>
+          </div>
+        )}
+
+        {widgetPrefs.stock && (
+          <div className="bg-white border border-zinc-100 p-4 rounded-3xl shadow-sm flex items-center gap-4 group hover:shadow-md transition-all">
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${inventory.filter(i => i.quantity < 10).length > 0 ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}>
+              <AlertTriangle size={24} />
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Kritik Stok</p>
+              <h3 className="font-black text-zinc-800 leading-tight">
+                {inventory.filter(i => i.quantity < 10).length} Ürün Azaldı
+                <span className={`block ${inventory.filter(i => i.quantity < 10).length > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                  {inventory.filter(i => i.quantity < 10).length > 0 ? 'Hemen Sipariş Ver' : 'Stoklar Yeterli'}
+                </span>
+              </h3>
+            </div>
+          </div>
+        )}
+
+        {widgetPrefs.recent && (
+          <div className="bg-white border border-zinc-100 p-4 rounded-3xl shadow-sm flex items-center gap-4 group hover:shadow-md transition-all">
+            <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center shrink-0">
+              <Activity size={24} />
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Son Aktivite</p>
+              <h3 className="font-black text-zinc-800 leading-tight truncate max-w-[120px]">
+                {fieldOperations[0]?.method || scoutingLogs[0]?.notes || 'Kayıt yok'}
+                <span className="block text-amber-600">
+                  {fieldOperations[0] ? new Date(fieldOperations[0].date).toLocaleDateString('tr-TR') : 'Bugün'}
+                </span>
+              </h3>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* 1. Today's Action Plan (Hero Section) */}
       <div className="bg-indigo-600 text-white rounded-3xl p-6 shadow-xl shadow-indigo-100 transition-all hover:shadow-indigo-200">

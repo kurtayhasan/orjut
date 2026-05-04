@@ -2,13 +2,14 @@
 
 import React, { useState } from 'react';
 import { useAppContext } from '@/context/AppContext';
-import { Droplet, Plus, Trash2, Calendar, MapPin, Search, FlaskConical, Bug, Filter, Clock } from 'lucide-react';
+import { Droplet, Plus, Trash2, Calendar, MapPin, Search, FlaskConical, Bug, Filter, Clock, Box } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function OperationsPage() {
-  const { lands, fieldOperations, addFieldOperation, deleteFieldOperation } = useAppContext();
+  const { lands, fieldOperations, addFieldOperation, deleteFieldOperation, inventory } = useAppContext();
   
   const [selectedLandId, setSelectedLandId] = useState('');
+  const [selectedInventoryId, setSelectedInventoryId] = useState('');
   const [type, setType] = useState<'su' | 'gubre' | 'ilac'>('su');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [amount, setAmount] = useState('');
@@ -36,6 +37,7 @@ export default function OperationsPage() {
       unit,
       method,
       period_days: periodDays ? Number(periodDays) : undefined,
+      inventory_id: selectedInventoryId || undefined,
       notes
     });
     setIsSubmitting(false);
@@ -185,6 +187,33 @@ export default function OperationsPage() {
                   />
                 </div>
               </div>
+
+              {/* Inventory Linkage */}
+              {(type === 'gubre' || type === 'ilac') && (
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Stoktan Düş (Opsiyonel)</label>
+                  <div className="relative">
+                    <Box size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+                    <select 
+                      className="w-full pl-10 pr-4 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition-all text-sm font-semibold appearance-none cursor-pointer"
+                      value={selectedInventoryId}
+                      onChange={e => {
+                        setSelectedInventoryId(e.target.value);
+                        const item = inventory.find(i => i.id === e.target.value);
+                        if (item) {
+                          setUnit(item.unit);
+                          setMethod(item.name);
+                        }
+                      }}
+                    >
+                      <option value="">Stok seçilmedi</option>
+                      {inventory.filter(i => i.type === type).map(i => (
+                        <option key={i.id} value={i.id}>{i.name} (Kalan: {i.quantity} {i.unit})</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">

@@ -1,11 +1,23 @@
 -- Migration script for Unified Operations and Scouting
 -- Run this in your Supabase SQL Editor
 
+-- Create inventory table
+CREATE TABLE IF NOT EXISTS inventory (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    org_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,
+    type VARCHAR(50) CHECK (type IN ('gubre', 'ilac', 'tohum', 'diger')),
+    quantity DECIMAL NOT NULL DEFAULT 0,
+    unit VARCHAR(20) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Create field_operations table
 CREATE TABLE IF NOT EXISTS field_operations (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     org_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     land_id UUID REFERENCES lands(id) ON DELETE CASCADE,
+    inventory_id UUID REFERENCES inventory(id) ON DELETE SET NULL,
     type VARCHAR(50) CHECK (type IN ('su', 'gubre', 'ilac')),
     date DATE NOT NULL,
     amount DECIMAL NOT NULL,

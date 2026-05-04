@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { fetchWeather, WeatherData } from '@/lib/weatherService';
 import { buildAIPrompt, LandContext } from '@/lib/aiActionEngine';
-import { Transaction, Land, Season, Profile, CategoryTotals, IrrigationLog, FieldOperation, ScoutingLog } from '@/types';
+import { Transaction, Land, Season, Profile, CategoryTotals, IrrigationLog, FieldOperation, ScoutingLog, InventoryItem } from '@/types';
 
 
 const translations = {
@@ -59,6 +59,8 @@ type AppContextType = {
   deleteFieldOperation: (id: string) => Promise<void>;
   addScoutingLog: (log: any) => Promise<void>;
   deleteScoutingLog: (id: string) => Promise<void>;
+  inventory: InventoryItem[];
+  updateInventoryItem: (id: string, updates: Partial<InventoryItem>) => Promise<void>;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -85,6 +87,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
   const [fieldOperations, setFieldOperations] = useState<FieldOperation[]>([]);
   const [scoutingLogs, setScoutingLogs] = useState<ScoutingLog[]>([]);
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
 
   const t = (key: keyof typeof translations['en']) => translations[lang][key] || key;
 
@@ -163,6 +166,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch (e) { console.error(e); }
   }, []);
 
+  const fetchInventory = React.useCallback(async () => {
+    const userId = localStorage.getItem('user_id');
+    if (!userId) return;
+    try {
+      const { data } = await supabase.from('inventory').select('*').eq('org_id', userId);
+      if (data) setInventory(data as any);
+    } catch (e) { console.error(e); }
+  }, []);
+
   const syncOfflineData = React.useCallback(async () => {
     const userId = localStorage.getItem('user_id');
     if (!userId) return;
@@ -196,11 +208,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (data) setUserProfile(data);
       };
       hydrateProfile();
-      fetchSeasons(); fetchLands(); fetchTransactions(); fetchIrrigationLogs(); fetchFieldOperations(); fetchScoutingLogs();
+      fetchSeasons(); fetchLands(); fetchTransactions(); fetchIrrigationLogs(); fetchFieldOperations(); fetchScoutingLogs(); fetchInventory();
     }
     window.addEventListener('online', syncOfflineData);
     return () => window.removeEventListener('online', syncOfflineData);
-  }, [syncOfflineData, fetchSeasons, fetchLands, fetchTransactions, fetchIrrigationLogs, fetchFieldOperations, fetchScoutingLogs]);
+  }, [syncOfflineData, fetchSeasons, fetchLands, fetchTransactions, fetchIrrigationLogs, fetchFieldOperations, fetchScoutingLogs, fetchInventory]);
 
   const addLand = async (land: any) => {
     const userId = localStorage.getItem('user_id') || '';
@@ -302,6 +314,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const tempId = 'temp_' + Date.now();
     const dbPayload = { ...op, org_id: userId, id: tempId };
     setFieldOperations(prev => [dbPayload, ...prev]);
+    
+    // Auto-deduct stock logic
+    if (op.inventory_id) {
+      const item = inventory.find(i => i.id === op.inventory_id);
+      if (item) {
+        const newQty = Math.max(0, item.quantity - op.amount);
+        updateInventoryItem(item.id, { quantity: newQty });
+      }
+    }
+
     if (userId) {
       try {
         const { data, error } = await supabase.from('field_operations').insert([{ ...op, org_id: userId }]).select().single();
@@ -312,6 +334,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         toast.error("Kaydedilemedi: " + err.message);
         setFieldOperations(prev => prev.filter(o => o.id !== tempId));
       }
+    }
+  };
+
+  const updateInventoryItem = async (id: string, updates: Partial<InventoryItem>) => {
+    setInventory(prev => prev.map(item => item.id === id ? { ...item, ...updates } : item));
+    const { error } = await supabase.from('inventory').update(updates).eq('id', id);
+    if (error) {
+      console.error("Inventory update error:", error);
+      // Optional: Rollback state if critical
     }
   };
 
@@ -502,7 +533,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AppContext.Provider value={{ lang, setLang, t, totalExpenses, totalArea, addExpense, updateExpense, deleteExpense, weather: { temp: weatherData?.temperature || null, windspeed: weatherData?.windSpeed || null, loading: false, error: null }, dailyInsight, criticalAlert, totalSavings, dailySpent, dailyActions, lands, transactions, irrigationLogs, isLoadingLands, isLoadingTransactions, addLand, updateLand, deleteLand, addIrrigationLog, deleteIrrigationLog, logSaving, requestWeatherAndInsight, startNewSeason, toggleSeasonStatus, isDemo: false, isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s) => setActiveSeason(s), weatherData, currentUserRole, userProfile, fieldOperations, scoutingLogs, addFieldOperation, deleteFieldOperation, addScoutingLog, deleteScoutingLog }}>
+    <AppContext.Provider value={{ lang, setLang, t, totalExpenses, totalArea, addExpense, updateExpense, deleteExpense, weather: { temp: weatherData?.temperature || null, windspeed: weatherData?.windSpeed || null, loading: false, error: null }, dailyInsight, criticalAlert, totalSavings, dailySpent, dailyActions, lands, transactions, irrigationLogs, isLoadingLands, isLoadingTransactions, addLand, updateLand, deleteLand, addIrrigationLog, deleteIrrigationLog, logSaving, requestWeatherAndInsight, startNewSeason, toggleSeasonStatus, isDemo: false, isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s) => setActiveSeason(s), weatherData, currentUserRole, userProfile, fieldOperations, scoutingLogs, addFieldOperation, deleteFieldOperation, addScoutingLog, deleteScoutingLog, inventory, updateInventoryItem }}>
       {children}
     </AppContext.Provider>
   );
