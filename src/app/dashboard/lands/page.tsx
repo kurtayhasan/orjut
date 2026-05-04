@@ -31,6 +31,11 @@ export default function LandsPage() {
   const [deletingLand, setDeletingLand] = React.useState<any>(null);
   const [activeTab, setActiveTab] = React.useState<'details' | 'collaborators'>('details');
   
+  // Filter States
+  const [cropFilter, setCropFilter] = React.useState('all');
+  const [envFilter, setEnvFilter] = React.useState('all');
+  const [irrigationFilter, setIrrigationFilter] = React.useState('all');
+  
   // States for edit
   const [editYield, setEditYield] = React.useState('');
   const [editPrice, setEditPrice] = React.useState('');
@@ -74,6 +79,15 @@ export default function LandsPage() {
       return null;
     }
   };
+
+  const filteredLands = lands.filter(land => {
+    const matchesCrop = cropFilter === 'all' || land.crop_type === cropFilter;
+    const matchesEnv = envFilter === 'all' || land.environment_type === envFilter;
+    const matchesIrrigation = irrigationFilter === 'all' || (irrigationFilter === 'irrigated' ? land.is_irrigated : !land.is_irrigated);
+    return matchesCrop && matchesEnv && matchesIrrigation;
+  });
+
+  const uniqueCrops = Array.from(new Set(lands.map(l => l.crop_type)));
 
   return (
     <div className="space-y-6 pb-48">
@@ -125,8 +139,54 @@ export default function LandsPage() {
 
         {/* Right Side: Data Table / List */}
         <div className="bg-white border-2 border-zinc-100 rounded-3xl overflow-hidden shadow-sm flex flex-col h-[500px] lg:h-full">
-          <div className="p-4 border-b border-zinc-100 bg-white">
-            <h2 className="text-base font-bold text-zinc-900">Kayıtlı Parseller</h2>
+          <div className="p-4 border-b border-zinc-100 bg-white space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-bold text-zinc-900">Kayıtlı Parseller</h2>
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{filteredLands.length} Sonuç</span>
+            </div>
+            
+            {/* Filter Bar */}
+            <div className="flex flex-wrap gap-2">
+              <select 
+                className="bg-zinc-50 border border-zinc-100 rounded-lg px-2 py-1.5 text-[11px] font-bold text-zinc-600 outline-none focus:border-indigo-500 transition-all cursor-pointer"
+                value={cropFilter}
+                onChange={e => setCropFilter(e.target.value)}
+              >
+                <option value="all">Tüm Ürünler</option>
+                {uniqueCrops.map(crop => (
+                  <option key={crop} value={crop}>{crop}</option>
+                ))}
+              </select>
+
+              <select 
+                className="bg-zinc-50 border border-zinc-100 rounded-lg px-2 py-1.5 text-[11px] font-bold text-zinc-600 outline-none focus:border-indigo-500 transition-all cursor-pointer"
+                value={envFilter}
+                onChange={e => setEnvFilter(e.target.value)}
+              >
+                <option value="all">Tüm Alanlar</option>
+                <option value="acik_tarla">Açık Tarla</option>
+                <option value="sera">Sera</option>
+              </select>
+
+              <select 
+                className="bg-zinc-50 border border-zinc-100 rounded-lg px-2 py-1.5 text-[11px] font-bold text-zinc-600 outline-none focus:border-indigo-500 transition-all cursor-pointer"
+                value={irrigationFilter}
+                onChange={e => setIrrigationFilter(e.target.value)}
+              >
+                <option value="all">Sulu/Kuru</option>
+                <option value="irrigated">Sulu Tarım</option>
+                <option value="dry">Kuru Tarım</option>
+              </select>
+
+              {(cropFilter !== 'all' || envFilter !== 'all' || irrigationFilter !== 'all') && (
+                <button 
+                  onClick={() => { setCropFilter('all'); setEnvFilter('all'); setIrrigationFilter('all'); }}
+                  className="text-[10px] font-black text-rose-500 uppercase tracking-widest hover:text-rose-600 transition-colors px-2"
+                >
+                  Sıfırla
+                </button>
+              )}
+            </div>
           </div>
           
           <div className="flex-1 overflow-y-auto">
@@ -285,7 +345,7 @@ export default function LandsPage() {
               </div>
             ) : (
               <div className="divide-y divide-zinc-100">
-                {lands.map((land) => (
+                {filteredLands.map((land) => (
                   <div 
                     key={land.id} 
                     onClick={() => {

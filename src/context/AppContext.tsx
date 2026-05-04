@@ -21,7 +21,7 @@ type AppContextType = {
   t: (key: keyof typeof translations['en']) => string;
   totalExpenses: number;
   totalArea: number;
-  addExpense: (amount: number, category: string, date: string, land_id: string, receipt_url?: string, receipt_thumbnail_url?: string) => Promise<void>;
+  addExpense: (amount: number, category: string, date: string, land_id: string, receipt_url?: string, receipt_thumbnail_url?: string, inventoryData?: { name: string, type: string, quantity: number, unit: string }) => Promise<void>;
   updateExpense: (id: string, updates: any) => Promise<void>;
   deleteExpense: (id: string) => Promise<void>;
   weather: { temp: number | null, windspeed: number | null, loading: boolean, error: string | null };
@@ -411,7 +411,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     else toast.success("Sulama kaydı silindi");
   };
 
-  const addExpense = async (amount: number, category: string, date: string, land_id: string, receipt_url?: string, receipt_thumbnail_url?: string) => {
+  const addExpense = async (amount: number, category: string, date: string, land_id: string, receipt_url?: string, receipt_thumbnail_url?: string, inventoryData?: { name: string, type: string, quantity: number, unit: string }) => {
     const userId = localStorage.getItem('user_id') || '';
     setTotalExpenses(prev => prev + amount);
     const tempId = 'temp_' + Date.now();
@@ -444,6 +444,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
         if (error) throw error;
         if (data) setTransactions(prev => prev.map(tx => tx.id === tempId ? data : tx));
+        
+        // If inventory link is requested, add to inventory
+        if (inventoryData) {
+          await addInventoryItem(inventoryData);
+        }
+        
         toast.success("Masraf kaydedildi");
       } catch (err: any) {
         if (!navigator.onLine || err.message === 'Failed to fetch') {

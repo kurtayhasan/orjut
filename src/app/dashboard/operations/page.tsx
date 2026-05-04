@@ -19,6 +19,8 @@ export default function OperationsPage() {
   const [notes, setNotes] = useState('');
   
   const [filter, setFilter] = useState<'all' | 'su' | 'gubre' | 'ilac'>('all');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,7 +56,12 @@ export default function OperationsPage() {
     return `${land.district || land.city} - Ada ${land.block_no} / Parsel ${land.parcel_no}`;
   };
 
-  const filteredOps = fieldOperations.filter(op => filter === 'all' || op.type === filter);
+  const filteredOps = fieldOperations.filter(op => {
+    const matchesType = filter === 'all' || op.type === filter;
+    const matchesStartDate = !startDate || new Date(op.date) >= new Date(startDate);
+    const matchesEndDate = !endDate || new Date(op.date) <= new Date(endDate);
+    return matchesType && matchesStartDate && matchesEndDate;
+  });
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -317,16 +324,34 @@ export default function OperationsPage() {
                 <Search size={20} className="text-zinc-400" /> İşlem Geçmişi
               </h2>
               
-              <div className="flex bg-zinc-100 p-1 rounded-xl">
-                {(['all', 'su', 'gubre', 'ilac'] as const).map(f => (
-                  <button
-                    key={f}
-                    onClick={() => setFilter(f)}
-                    className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${filter === f ? 'bg-white shadow-sm text-indigo-600' : 'text-zinc-500 hover:text-zinc-700'}`}
-                  >
-                    {f === 'all' ? 'Tümü' : getTypeLabel(f)}
-                  </button>
-                ))}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <div className="flex bg-zinc-100 p-1 rounded-xl">
+                  {(['all', 'su', 'gubre', 'ilac'] as const).map(f => (
+                    <button
+                      key={f}
+                      onClick={() => setFilter(f)}
+                      className={`px-3 py-1.5 text-[10px] font-bold rounded-lg transition-all ${filter === f ? 'bg-white shadow-sm text-indigo-600' : 'text-zinc-500 hover:text-zinc-700'}`}
+                    >
+                      {f === 'all' ? 'Tümü' : getTypeLabel(f)}
+                    </button>
+                  ))}
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <input 
+                    type="date" 
+                    className="bg-zinc-50 border border-zinc-100 rounded-lg px-2 py-1 text-[10px] font-bold text-zinc-600 outline-none"
+                    value={startDate}
+                    onChange={e => setStartDate(e.target.value)}
+                  />
+                  <span className="text-zinc-300">-</span>
+                  <input 
+                    type="date" 
+                    className="bg-zinc-50 border border-zinc-100 rounded-lg px-2 py-1 text-[10px] font-bold text-zinc-600 outline-none"
+                    value={endDate}
+                    onChange={e => setEndDate(e.target.value)}
+                  />
+                </div>
               </div>
             </div>
 

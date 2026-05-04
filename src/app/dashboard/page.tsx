@@ -69,53 +69,44 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6 pb-48">
-      {/* Welcome Section with Glass Effect */}
-      <div className="flex justify-between items-center gap-2 mb-2">
-        <div className="flex gap-2">
-          {activeSeason && (
-            <span className="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full border border-indigo-200">
-              Aktif Sezon: {activeSeason.name}
-            </span>
-          )}
+      {/* AI Daily Insight Widget */}
+      <div className="bg-gradient-to-br from-indigo-600 via-violet-600 to-indigo-700 text-white rounded-3xl p-6 shadow-xl shadow-indigo-100 overflow-hidden relative group">
+        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
+          <Sparkles size={120} />
         </div>
         
-        <div className="relative">
-          <button 
-            onClick={() => setShowCustomize(!showCustomize)}
-            className="flex items-center gap-2 px-3 py-1.5 bg-white border border-zinc-200 rounded-full text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition-all shadow-sm"
-          >
-            <Settings2 size={14} />
-            Görünümü Özelleştir
-            <ChevronDown size={14} className={`transition-transform ${showCustomize ? 'rotate-180' : ''}`} />
-          </button>
-          
-          {showCustomize && (
-            <div className="absolute right-0 mt-2 w-56 bg-white border border-zinc-100 rounded-2xl shadow-2xl z-50 p-3 animate-in fade-in zoom-in-95 duration-200">
-              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-3 px-2">Widget Görünümü</p>
-              <div className="space-y-1">
-                {[
-                  { id: 'weather', label: 'Hava Durumu Özet', icon: <Cloud size={14} /> },
-                  { id: 'finance', label: 'Finansal Genel Bakış', icon: <Wallet size={14} /> },
-                  { id: 'stock', label: 'Kritik Stok Uyarıları', icon: <AlertTriangle size={14} /> },
-                  { id: 'recent', label: 'Son Aktiviteler', icon: <Activity size={14} /> },
-                ].map(w => (
-                  <button 
-                    key={w.id}
-                    onClick={() => toggleWidget(w.id as any)}
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-zinc-50 transition-all group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-zinc-400 group-hover:text-indigo-500 transition-colors">{w.icon}</span>
-                      <span className="text-xs font-bold text-zinc-700">{w.label}</span>
-                    </div>
-                    <div className={`w-8 h-4 rounded-full transition-all relative ${widgetPrefs[w.id as keyof typeof widgetPrefs] ? 'bg-indigo-600' : 'bg-zinc-200'}`}>
-                      <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${widgetPrefs[w.id as keyof typeof widgetPrefs] ? 'left-4.5' : 'left-0.5'}`} />
-                    </div>
-                  </button>
-                ))}
-              </div>
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="bg-white/20 backdrop-blur-md p-2 rounded-xl">
+              <Sparkles size={20} className="text-white" />
             </div>
-          )}
+            <h2 className="font-black text-lg tracking-tight uppercase">Günün Zirai Özeti</h2>
+          </div>
+          
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="space-y-3 max-w-2xl">
+              <div className="flex items-center gap-4 text-xs font-black text-indigo-100/80 uppercase tracking-widest">
+                <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full border border-white/5">
+                  📍 {lands[0]?.city || 'Kızıltepe'}, {lands[0]?.district || 'Mardin'}
+                </span>
+                <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full border border-white/5">
+                  🌡️ {weatherData?.temperature || 35}°C, {weatherData?.condition || 'Açık'}
+                </span>
+              </div>
+              <p className="text-white text-xl md:text-2xl font-bold leading-tight">
+                {dailyInsight || "Sıcaklıklar mevsim normallerinin üzerinde seyrediyor. Mısır arazilerinizde sulama periyodunu sıklaştırmanız, buharlaşma kaybını önlemek için gece sulamasını tercih etmeniz önerilir."}
+              </p>
+            </div>
+            
+            {!dailyInsight && (
+              <button 
+                onClick={requestWeatherAndInsight}
+                className="bg-white text-indigo-600 font-black px-6 py-3 rounded-2xl text-sm hover:bg-indigo-50 transition-all shadow-lg active:scale-95 shrink-0 whitespace-nowrap"
+              >
+                Analizi Başlat
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -182,46 +173,6 @@ export default function DashboardPage() {
                 </span>
               </h3>
             </div>
-          </div>
-        )}
-      </div>
-
-      {/* 1. Today's Action Plan (Hero Section) */}
-      <div className="bg-indigo-600 text-white rounded-3xl p-6 shadow-xl shadow-indigo-100 transition-all hover:shadow-indigo-200">
-        <div className="flex items-center gap-2 mb-3">
-          <Sparkles size={20} className="text-indigo-200" />
-          <h2 className="font-bold text-lg tracking-tight">Günün Aksiyon Planı</h2>
-        </div>
-        
-        {dailyInsight ? (
-          <div className="space-y-4 animate-in slide-in-from-top-4 duration-500">
-            <div className="flex gap-4 text-xs font-bold text-white/70 mb-3 uppercase tracking-widest">
-              <span className="flex items-center gap-1">🌡️ {weatherData?.temperature || weather.temp || '--'}°C</span>
-              <span className="flex items-center gap-1">💧 {weatherData?.humidity || '--'}%</span>
-              <span className="flex items-center gap-1">🌧️ {weatherData?.rainfall || '--'}mm</span>
-              <span className="flex items-center gap-1">💨 {weatherData?.windSpeed || weather.windspeed || '--'}km/h</span>
-            </div>
-            <p className="text-indigo-50 text-lg leading-relaxed font-medium">
-              &quot;{dailyInsight}&quot;
-            </p>
-            {criticalAlert && (
-              <div className="bg-rose-500/20 border border-rose-400 text-white px-4 py-3 rounded-xl flex items-start gap-3">
-                <span className="text-2xl leading-none">⚠️</span>
-                <p className="font-medium text-rose-50">{criticalAlert}</p>
-              </div>
-            )}
-          </div>
-        ) : weather.loading ? (
-          <p className="text-indigo-200 animate-pulse">Hava durumu verileri analiz ediliyor...</p>
-        ) : (
-          <div className="flex items-center justify-between gap-4">
-            <p className="text-indigo-200 text-sm">Yerel hava durumuna göre günlük operasyonel tavsiyenizi alın.</p>
-            <button 
-              onClick={requestWeatherAndInsight}
-              className="px-5 py-2.5 bg-white text-indigo-700 font-bold rounded-xl text-sm hover:bg-indigo-50 transition-all shadow-lg active:scale-95 shrink-0"
-            >
-              Bugünü Analiz Et
-            </button>
           </div>
         )}
       </div>
