@@ -55,29 +55,29 @@ export default function InventoryPage() {
   return (
     <div className="space-y-6 pb-48">
       {/* Header */}
-      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border border-zinc-200 p-6 rounded-3xl shadow-sm">
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-3xl shadow-sm">
         <div className="flex items-center gap-4">
-          <div className="bg-emerald-100 p-3 rounded-2xl text-emerald-600">
+          <div className="bg-emerald-100 dark:bg-emerald-900/30 p-3 rounded-2xl text-emerald-600 dark:text-emerald-400">
             <Box size={28} />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-zinc-900 tracking-tight">Envanter Yönetimi</h1>
-            <p className="text-zinc-500 font-medium text-sm">Ürün gelişimleri ve stok takibi</p>
+            <h1 className="text-2xl font-black text-zinc-900 dark:text-zinc-100 tracking-tight">Envanter Yönetimi</h1>
+            <p className="text-zinc-500 dark:text-zinc-400 font-bold text-sm">Ürün gelişimleri ve stok takibi</p>
           </div>
         </div>
         
-        <div className="flex p-1 bg-zinc-100 rounded-xl w-full sm:w-auto">
+        <div className="flex p-1 bg-zinc-100 dark:bg-zinc-800 rounded-xl w-full sm:w-auto">
           <button 
             onClick={() => setView('crops')}
-            className={`flex-1 sm:flex-none px-6 py-2 text-xs font-bold rounded-lg transition-all ${view === 'crops' ? 'bg-white shadow-sm text-emerald-600' : 'text-zinc-500 hover:text-zinc-700'}`}
+            className={`flex-1 sm:flex-none px-6 py-2 text-xs font-black uppercase tracking-widest rounded-lg transition-all ${view === 'crops' ? 'bg-white dark:bg-zinc-900 shadow-sm text-emerald-600' : 'text-zinc-500 hover:text-zinc-700'}`}
           >
-            Ürünler (Arazide)
+            Ürünler
           </button>
           <button 
             onClick={() => setView('inputs')}
-            className={`flex-1 sm:flex-none px-6 py-2 text-xs font-bold rounded-lg transition-all ${view === 'inputs' ? 'bg-white shadow-sm text-emerald-600' : 'text-zinc-500 hover:text-zinc-700'}`}
+            className={`flex-1 sm:flex-none px-6 py-2 text-xs font-black uppercase tracking-widest rounded-lg transition-all ${view === 'inputs' ? 'bg-white dark:bg-zinc-900 shadow-sm text-emerald-600' : 'text-zinc-500 hover:text-zinc-700'}`}
           >
-            Stok (Depoda)
+            Stok
           </button>
         </div>
       </header>
@@ -86,38 +86,38 @@ export default function InventoryPage() {
         <>
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="bg-white border-2 border-zinc-100 rounded-3xl p-6 shadow-sm">
+            <div className="bg-white dark:bg-zinc-900 border-2 border-zinc-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm">
               <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1 text-center">Toplam Beklenen Hasat</p>
-              <div className="text-2xl font-black text-zinc-900 text-center">{(totalExpectedYield / 1000).toFixed(1)} Ton</div>
+              <div className="text-2xl font-black text-zinc-900 dark:text-zinc-100 text-center">{(totalExpectedYield / 1000).toFixed(1)} Ton</div>
             </div>
-            <div className="bg-white border-2 border-zinc-100 rounded-3xl p-6 shadow-sm">
+            <div className="bg-white dark:bg-zinc-900 border-2 border-zinc-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm">
               <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1 text-center">En Çok Ekili Ürün</p>
-              <div className="text-2xl font-black text-emerald-600 text-center">
+              <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 text-center">
                 {Object.entries(lands.reduce((acc, l) => {
                   acc[l.crop_type] = (acc[l.crop_type] || 0) + l.size_decare;
                   return acc;
                 }, {} as Record<string, number>)).sort((a, b) => b[1] - a[1])[0]?.[0] || '-'}
               </div>
             </div>
-            <div className="bg-white border-2 border-zinc-100 rounded-3xl p-6 shadow-sm">
+            <div className="bg-white dark:bg-zinc-900 border-2 border-zinc-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm">
               <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1 text-center">Ortalama Gelişim</p>
-              <div className="text-2xl font-black text-indigo-600 text-center">
+              <div className="text-2xl font-black text-indigo-600 dark:text-indigo-400 text-center">
                 {lands.length > 0 ? (lands.reduce((sum, l) => sum + getProgress(l.crop_type, l.planting_date), 0) / lands.length).toFixed(0) : 0}%
               </div>
             </div>
-            <div className="bg-white border-2 border-zinc-100 rounded-3xl p-6 shadow-sm">
+            <div className="bg-white dark:bg-zinc-900 border-2 border-zinc-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm">
               <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1 text-center">Hasada Kalan (Ort.)</p>
-              <div className="text-2xl font-black text-amber-600 text-center">
+              <div className="text-2xl font-black text-amber-600 dark:text-amber-400 text-center">
                 {lands.length > 0 ? Math.max(0, Math.floor(lands.reduce((sum, l) => sum + (CROP_LIFECYCLES[l.crop_type] || 150) - (calculateDays(l.planting_date) || 0), 0) / lands.length)) : 0} Gün
               </div>
             </div>
           </div>
 
           {/* Lands Inventory List */}
-          <div className="bg-white border-2 border-zinc-100 rounded-3xl overflow-hidden shadow-sm">
-            <div className="p-5 border-b border-zinc-100 bg-white flex justify-between items-center">
-              <h2 className="text-base font-bold text-zinc-900">Arazi Bazlı Ürün Takibi</h2>
-              <div className="text-xs font-black text-zinc-400 uppercase tracking-widest">{lands.length} Parsel</div>
+          <div className="bg-white dark:bg-zinc-900 border-2 border-zinc-100 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-sm">
+            <div className="p-5 border-b border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex justify-between items-center">
+              <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-100">Arazi Bazlı Ürün Takibi</h2>
+              <div className="text-xs font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">{lands.length} Parsel</div>
             </div>
             
             <div className="divide-y divide-zinc-50">
@@ -241,15 +241,21 @@ export default function InventoryPage() {
                           <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest">{item.type}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-6">
-                        <div className="text-right">
-                          <div className={`text-lg font-black ${item.quantity < 10 ? 'text-rose-500' : 'text-zinc-900'}`}>{item.quantity}</div>
-                          <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{item.unit}</div>
+                        <div className="text-right flex items-center gap-6">
+                          <div className="text-right">
+                            <div className={`text-lg font-black ${item.quantity < 10 ? 'text-rose-500' : 'text-zinc-900 dark:text-zinc-100'}`}>{item.quantity}</div>
+                            <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{item.unit}</div>
+                          </div>
+                          {item.last_unit_cost && (
+                            <div className="text-right hidden sm:block">
+                              <div className="text-sm font-black text-indigo-600 dark:text-indigo-400">₺{item.last_unit_cost.toFixed(2)}</div>
+                              <div className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Birim Maliyet</div>
+                            </div>
+                          )}
+                          <button onClick={() => deleteInventoryItem(item.id)} className="p-2 text-zinc-300 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                            <Trash2 size={16} />
+                          </button>
                         </div>
-                        <button onClick={() => deleteInventoryItem(item.id)} className="p-2 text-zinc-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
                     </div>
                   ))
                 ) : (

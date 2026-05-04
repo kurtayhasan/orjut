@@ -37,27 +37,36 @@ export async function fetchWeather(lat: number, lon: number): Promise<WeatherDat
     timezone: 'Europe/Istanbul'
   });
   
-  const res = await fetch(`${BASE_URL}?${params}`);
-  const data = await res.json();
-  
-  const weather: WeatherData = {
-    temperature: data.current.temperature_2m,
-    humidity: data.current.relative_humidity_2m,
-    rainfall: data.current.rain,
-    windSpeed: data.current.wind_speed_10m,
-    uvIndex: data.current.uv_index,
-    condition: getWeatherDescription(data.daily.weathercode[0]),
-    forecast: data.daily.time.slice(1, 4).map((time: string, i: number) => ({
-      date: time,
-      maxTemp: data.daily.temperature_2m_max[i+1],
-      minTemp: data.daily.temperature_2m_min[i+1],
-      rainfall: data.daily.precipitation_sum[i+1],
-      description: getWeatherDescription(data.daily.weathercode[i+1])
-    }))
-  };
+  try {
+    const res = await fetch(`${BASE_URL}?${params}`);
+    const data = await res.json();
+    
+    if (!data.current || !data.daily) throw new Error("Invalid weather data");
 
-  localStorage.setItem(cacheKey, JSON.stringify({ data: weather, timestamp: Date.now() }));
-  return weather;
+    const weather: WeatherData = {
+      temperature: data.current.temperature_2m,
+      humidity: data.current.relative_humidity_2m,
+      rainfall: data.current.rain,
+      windSpeed: data.current.wind_speed_10m,
+      uvIndex: data.current.uv_index,
+      condition: getWeatherDescription(data.daily.weathercode[0]),
+      forecast: data.daily.time.slice(1, 4).map((time: string, i: number) => ({
+        date: time,
+        maxTemp: data.daily.temperature_2m_max[i+1],
+        minTemp: data.daily.temperature_2m_min[i+1],
+        rainfall: data.daily.precipitation_sum[i+1],
+        description: getWeatherDescription(data.daily.weathercode[i+1])
+      }))
+    };
+
+    localStorage.setItem(cacheKey, JSON.stringify({ data: weather, timestamp: Date.now() }));
+    return weather;
+  } catch (error) {
+    console.error("Weather fetch failed:", error);
+    // Return a safe fallback or throw depending on UI requirements. 
+    // Here we throw to let the caller handle it or use cached data.
+    throw error;
+  }
 }
 
 // WMO weather code'larını Türkçe açıklamaya çevir

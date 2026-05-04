@@ -61,29 +61,25 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: { isO
     if (cat === 'Mazot') return '⛽';
     if (cat === 'Gübre/İlaç') return '🌱';
     if (cat === 'İşçilik') return '🧑‍🌾';
-    return '📦';
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[2000] flex items-end sm:items-center justify-center p-4">
-      <div className="bg-white p-6 rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-md animate-in slide-in-from-bottom-10">
+    return     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[2000] flex items-end sm:items-center justify-center p-4">
+      <div className="bg-white dark:bg-zinc-900 p-6 rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-md animate-in slide-in-from-bottom-10 border border-transparent dark:border-zinc-800">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center text-2xl">
+          <div className="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center text-2xl">
             {getEmoji(category)}
           </div>
           <div className="flex-1">
             <select 
               value={category} 
               onChange={e => setCategory(e.target.value)}
-              className="text-xl font-bold text-zinc-900 bg-transparent outline-none focus:ring-0 cursor-pointer w-full"
+              className="text-xl font-black text-zinc-900 dark:text-zinc-100 bg-transparent outline-none focus:ring-0 cursor-pointer w-full appearance-none"
             >
-              <option value="Mazot">⛽ Mazot Gideri</option>
-              <option value="Gübre/İlaç">🌱 Gübre/İlaç Gideri</option>
-              <option value="Tohum">🔴 Tohum Gideri</option>
-              <option value="İşçilik">🧑‍🌾 İşçilik Gideri</option>
-              <option value="Diğer">📦 Diğer Gider</option>
+              <option value="Mazot" className="dark:bg-zinc-900">⛽ Mazot Gideri</option>
+              <option value="Gübre/İlaç" className="dark:bg-zinc-900">🌱 Gübre/İlaç Gideri</option>
+              <option value="Tohum" className="dark:bg-zinc-900">🔴 Tohum Gideri</option>
+              <option value="İşçilik" className="dark:bg-zinc-900">🧑‍🌾 İşçilik Gideri</option>
+              <option value="Diğer" className="dark:bg-zinc-900">📦 Diğer Gider</option>
             </select>
-            <p className="text-sm text-zinc-500">Miktarı girin ve kaydedin.</p>
+            <p className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest mt-1">Gider Detayı</p>
           </div>
         </div>
         
@@ -91,10 +87,10 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: { isO
           <div className="flex flex-col gap-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 text-2xl font-medium">₺</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 text-2xl font-black">₺</span>
                 <input 
                   type="number"
-                  className="w-full border-2 border-zinc-200 text-3xl font-bold text-zinc-900 py-4 pl-12 pr-4 rounded-xl focus:border-indigo-600 focus:ring-0 outline-none transition-colors"
+                  className="w-full border-2 border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 text-3xl font-black text-zinc-900 dark:text-zinc-100 py-4 pl-12 pr-4 rounded-2xl focus:border-indigo-600 focus:ring-0 outline-none transition-all"
                   placeholder="0.00"
                   value={amount}
                   onChange={e => setAmount(e.target.value)}
@@ -105,44 +101,44 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: { isO
               
               <div className="flex gap-2">
                 <div className="flex-1">
-                  <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1 ml-1">Miktar</label>
+                  <label className="block text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1 ml-1">Miktar</label>
                   <input 
                     type="number"
-                    className="w-full border-2 border-zinc-200 text-lg font-bold text-zinc-900 py-3.5 px-4 rounded-xl focus:border-indigo-600 focus:ring-0 outline-none transition-colors"
+                    className="w-full border-2 border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 text-lg font-black text-zinc-900 dark:text-zinc-100 py-3.5 px-4 rounded-2xl focus:border-indigo-600 focus:ring-0 outline-none transition-all"
                     placeholder="0"
                     value={quantity}
                     onChange={e => setQuantity(e.target.value)}
                   />
                 </div>
                 <div className="w-24">
-                  <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1 ml-1">Birim</label>
+                  <label className="block text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1 ml-1">Birim</label>
                   <select 
-                    className="w-full border-2 border-zinc-200 text-lg font-bold text-zinc-900 py-3.5 px-3 rounded-xl focus:border-indigo-600 focus:ring-0 outline-none transition-colors bg-white appearance-none"
+                    className="w-full border-2 border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 text-lg font-black text-zinc-900 dark:text-zinc-100 py-3.5 px-3 rounded-2xl focus:border-indigo-600 focus:ring-0 outline-none transition-all appearance-none"
                     value={unit}
                     onChange={e => setUnit(e.target.value)}
                   >
-                    <option value="kg">kg</option>
-                    <option value="lt">lt</option>
-                    <option value="ton">ton</option>
-                    <option value="paket">pkt</option>
-                    <option value="cuval">çvl</option>
-                    <option value="adet">adt</option>
+                    <option value="kg" className="dark:bg-zinc-900">kg</option>
+                    <option value="lt" className="dark:bg-zinc-900">lt</option>
+                    <option value="ton" className="dark:bg-zinc-900">ton</option>
+                    <option value="paket" className="dark:bg-zinc-900">pkt</option>
+                    <option value="cuval" className="dark:bg-zinc-900">çvl</option>
+                    <option value="adet" className="dark:bg-zinc-900">adt</option>
                   </select>
                 </div>
               </div>
             </div>
             
             <div>
-              <label className="block text-sm font-semibold text-zinc-600 mb-1">Arazi Seç</label>
+              <label className="block text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1 ml-1">Arazi Seçimi</label>
               <select 
-                className="w-full border-2 border-zinc-200 text-lg font-bold text-zinc-900 py-3 px-4 rounded-xl focus:border-indigo-600 focus:ring-0 outline-none transition-colors bg-white"
+                className="w-full border-2 border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 text-lg font-black text-zinc-900 dark:text-zinc-100 py-3.5 px-4 rounded-2xl focus:border-indigo-600 focus:ring-0 outline-none transition-all appearance-none cursor-pointer"
                 value={landId}
                 onChange={e => setLandId(e.target.value)}
                 required
               >
-                <option value="" disabled>Seçiniz...</option>
+                <option value="" disabled className="dark:bg-zinc-900">Seçiniz...</option>
                 {lands.map((land: any) => (
-                  <option key={land.id} value={land.id}>
+                  <option key={land.id} value={land.id} className="dark:bg-zinc-900">
                     {land.district || land.city} - Ada {land.block_no} / Parsel {land.parcel_no}
                   </option>
                 ))}
@@ -150,10 +146,10 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: { isO
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-zinc-600 mb-1">Tarih</label>
+              <label className="block text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1 ml-1">İşlem Tarihi</label>
               <input 
                 type="date"
-                className="w-full border-2 border-zinc-200 text-lg font-bold text-zinc-900 py-3 px-4 rounded-xl focus:border-indigo-600 focus:ring-0 outline-none transition-colors"
+                className="w-full border-2 border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 text-lg font-black text-zinc-900 dark:text-zinc-100 py-3.5 px-4 rounded-2xl focus:border-indigo-600 focus:ring-0 outline-none transition-all"
                 value={date}
                 onChange={e => setDate(e.target.value)}
                 required
@@ -161,7 +157,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: { isO
             </div>
             
             <div>
-              <label className="block text-sm font-semibold text-zinc-600 mb-1">Makbuz (Opsiyonel)</label>
+              <label className="block text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1 ml-1">Makbuz / Fiş Yükle</label>
               <ReceiptUpload onUploadSuccess={handleUploadSuccess} />
             </div>
 

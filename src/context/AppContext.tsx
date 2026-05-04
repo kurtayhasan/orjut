@@ -65,6 +65,7 @@ type AppContextType = {
   deleteInventoryItem: (id: string) => Promise<void>;
   isDarkMode: boolean;
   toggleDarkMode: () => void;
+  calculateUnitCost: (amount: number, quantity: number) => number;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -236,6 +237,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [isDarkMode]);
 
   const toggleDarkMode = () => setIsDarkMode(prev => !prev);
+
+  const calculateUnitCost = (amount: number, quantity: number) => {
+    if (!quantity || quantity <= 0) return 0;
+    return amount / quantity;
+  };
 
   const addLand = async (land: any) => {
     const userId = localStorage.getItem('user_id') || '';
@@ -472,7 +478,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         
         // If inventory link is requested, add to inventory
         if (inventoryData) {
-          await addInventoryItem(inventoryData);
+          const unitCost = calculateUnitCost(amount, inventoryData.quantity);
+          await addInventoryItem({ ...inventoryData, last_unit_cost: unitCost });
         }
         
         toast.success("Masraf kaydedildi");
@@ -594,7 +601,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AppContext.Provider value={{ lang, setLang, t, totalExpenses, totalArea, addExpense, updateExpense, deleteExpense, weather: { temp: weatherData?.temperature || null, windspeed: weatherData?.windSpeed || null, loading: false, error: null }, dailyInsight, criticalAlert, totalSavings, dailySpent, dailyActions, lands, transactions, irrigationLogs, isLoadingLands, isLoadingTransactions, addLand, updateLand, deleteLand, addIrrigationLog, deleteIrrigationLog, logSaving, requestWeatherAndInsight, startNewSeason, toggleSeasonStatus, isDemo: false, isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s) => setActiveSeason(s), weatherData, currentUserRole, userProfile, fieldOperations, scoutingLogs, addFieldOperation, deleteFieldOperation, addScoutingLog, deleteScoutingLog, inventory, addInventoryItem, updateInventoryItem, deleteInventoryItem, isDarkMode, toggleDarkMode }}>
+    <AppContext.Provider value={{ lang, setLang, t, totalExpenses, totalArea, addExpense, updateExpense, deleteExpense, weather: { temp: weatherData?.temperature || null, windspeed: weatherData?.windSpeed || null, loading: false, error: null }, dailyInsight, criticalAlert, totalSavings, dailySpent, dailyActions, lands, transactions, irrigationLogs, isLoadingLands, isLoadingTransactions, addLand, updateLand, deleteLand, addIrrigationLog, deleteIrrigationLog, logSaving, requestWeatherAndInsight, startNewSeason, toggleSeasonStatus, isDemo: false, isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s) => setActiveSeason(s), weatherData, currentUserRole, userProfile, fieldOperations, scoutingLogs, addFieldOperation, deleteFieldOperation, addScoutingLog, deleteScoutingLog, inventory, addInventoryItem, updateInventoryItem, deleteInventoryItem, isDarkMode, toggleDarkMode, calculateUnitCost }}>
       {children}
     </AppContext.Provider>
   );

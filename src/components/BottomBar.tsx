@@ -18,32 +18,32 @@ export default function BottomBar() {
           <div className="mb-4 flex flex-col items-center gap-3 animate-in slide-in-from-bottom-10 fade-in duration-300 pointer-events-auto">
             <button 
               onClick={() => { setModalCategory('Diğer'); setIsMenuOpen(false); }}
-              className="flex items-center gap-3 bg-white border border-zinc-200 px-5 py-3 rounded-2xl shadow-xl hover:bg-zinc-50 transition-all group"
+              className="flex items-center gap-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-5 py-3 rounded-2xl shadow-xl hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-all group"
             >
-              <div className="bg-indigo-100 p-2 rounded-xl text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+              <div className="bg-indigo-100 dark:bg-indigo-900/50 p-2 rounded-xl text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
                 <Wallet size={18} />
               </div>
-              <span className="text-sm font-black text-zinc-700">Yeni Masraf</span>
+              <span className="text-sm font-black text-zinc-700 dark:text-zinc-200">Yeni Masraf</span>
             </button>
             
             <button 
               onClick={() => { router.push('/dashboard/operations'); setIsMenuOpen(false); }}
-              className="flex items-center gap-3 bg-white border border-zinc-200 px-5 py-3 rounded-2xl shadow-xl hover:bg-zinc-50 transition-all group"
+              className="flex items-center gap-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-5 py-3 rounded-2xl shadow-xl hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-all group"
             >
-              <div className="bg-emerald-100 p-2 rounded-xl text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+              <div className="bg-emerald-100 dark:bg-emerald-900/50 p-2 rounded-xl text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
                 <Sprout size={18} />
               </div>
-              <span className="text-sm font-black text-zinc-700">Zirai İşlem</span>
+              <span className="text-sm font-black text-zinc-700 dark:text-zinc-200">Zirai İşlem</span>
             </button>
 
             <button 
               onClick={() => { router.push('/dashboard/scouting'); setIsMenuOpen(false); }}
-              className="flex items-center gap-3 bg-white border border-zinc-200 px-5 py-3 rounded-2xl shadow-xl hover:bg-zinc-50 transition-all group"
+              className="flex items-center gap-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-5 py-3 rounded-2xl shadow-xl hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-all group"
             >
-              <div className="bg-amber-100 p-2 rounded-xl text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition-colors">
+              <div className="bg-amber-100 dark:bg-amber-900/50 p-2 rounded-xl text-amber-600 dark:text-amber-400 group-hover:bg-amber-600 group-hover:text-white transition-colors">
                 <ClipboardCheck size={18} />
               </div>
-              <span className="text-sm font-black text-zinc-700">Arazi Gözlemi</span>
+              <span className="text-sm font-black text-zinc-700 dark:text-zinc-200">Arazi Gözlemi</span>
             </button>
           </div>
         )}
@@ -51,13 +51,13 @@ export default function BottomBar() {
         {/* FAB Button */}
         <button 
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className={`w-16 h-16 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 pointer-events-auto ring-4 ring-white active:scale-90 ${isMenuOpen ? 'bg-zinc-900 rotate-45' : 'bg-indigo-600 hover:bg-indigo-700'}`}
+          className={`w-16 h-16 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 pointer-events-auto ring-4 ring-white dark:ring-zinc-900 active:scale-90 ${isMenuOpen ? 'bg-zinc-900 dark:bg-white dark:text-zinc-900 rotate-45 shadow-indigo-500/20' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/40'}`}
         >
-          {isMenuOpen ? <X size={28} className="text-white" /> : <Plus size={32} className="text-white" />}
+          {isMenuOpen ? <X size={28} /> : <Plus size={32} className="text-white" />}
         </button>
 
         {/* Existing Quick Categories (Optional: Hidden or Reduced) */}
-        <div className="mt-4 max-w-md w-full flex gap-1.5 sm:gap-3 bg-white/70 backdrop-blur-2xl border border-white/50 p-2 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] pointer-events-auto ring-1 ring-black/5 opacity-50 hover:opacity-100 transition-opacity hidden sm:flex">
+        <div className="mt-4 max-w-md w-full flex gap-1.5 sm:gap-3 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border border-white/50 dark:border-zinc-800 p-2 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] pointer-events-auto ring-1 ring-black/5 dark:ring-white/5 opacity-50 hover:opacity-100 transition-opacity hidden sm:flex">
           <button 
             onClick={() => setModalCategory('Mazot')}
             className="flex-1 flex flex-col items-center justify-center gap-1 bg-amber-500 text-white py-2.5 rounded-[1.2rem] hover:bg-amber-600 transition-all active:scale-95 shadow-lg shadow-amber-200/50"

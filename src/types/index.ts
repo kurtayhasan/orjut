@@ -58,6 +58,7 @@ export interface InventoryItem {
   type: 'gubre' | 'ilac' | 'tohum' | 'diger';
   quantity: number;
   unit: string;
+  last_unit_cost?: number;
 }
 
 export interface NDVISnapshot {
