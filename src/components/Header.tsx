@@ -44,12 +44,17 @@ export default function Header() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('user_id');
-    localStorage.removeItem('user_name');
-    localStorage.removeItem('user_phone');
-    toast.success("Başarıyla çıkış yapıldı.");
-    router.push('/');
+  const handleLogout = async () => {
+    try {
+      const { supabase } = await import('@/lib/supabase');
+      await supabase.auth.signOut();
+      localStorage.clear(); // Clear everything
+      toast.success("Başarıyla çıkış yapıldı.");
+      router.push('/');
+    } catch (err) {
+      console.error("Logout error:", err);
+      router.push('/');
+    }
   };
 
   const initials = userName

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useAppContext } from '@/context/AppContext';
 import { Wallet, TrendingUp, TrendingDown, Filter, Download, Plus, MapPin, Calendar, CreditCard, ChevronRight, Edit2, Trash2, X, Image as ImageIcon } from 'lucide-react';
 import { useCategoryTotals } from '@/hooks/useCategoryTotals';
-import { generateSeasonExcel, generateSeasonPDF } from '@/lib/reportGenerator';
+import { exportToPDF, exportToExcel } from '@/lib/reportGenerator';
 import { toast } from 'sonner';
 
 export default function FinancePage() {
@@ -21,36 +21,21 @@ export default function FinancePage() {
   });
 
   const handleExportPDF = () => {
-    if (!activeSeason) {
-      toast.error("Lütfen önce aktif bir sezon seçin.");
-      return;
-    }
-    generateSeasonPDF(activeSeason, transactions, lands);
-    toast.success("PDF Raporu oluşturuldu.");
-  };
-
-  const handleExportCSV = () => {
-    if (!transactions || transactions.length === 0) {
+    if (filteredTransactions.length === 0) {
       toast.error("Dışa aktarılacak işlem bulunamadı.");
       return;
     }
-    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + 
-      "Tarih,Kategori,Tutar,Açıklama\n" + 
-      filteredTransactions.map(t => {
-        const date = new Date(t.date).toLocaleDateString('tr-TR');
-        const category = t.category || '';
-        const amount = t.amount;
-        const desc = t.description || '';
-        return `"${date}","${category}","${amount}","${desc}"`;
-      }).join("\n");
-      
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `finans_raporu_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    exportToPDF(filteredTransactions, 'Finansal İşlem Raporu');
+    toast.success("PDF Raporu oluşturuldu.");
+  };
+
+  const handleExportExcel = () => {
+    if (filteredTransactions.length === 0) {
+      toast.error("Dışa aktarılacak işlem bulunamadı.");
+      return;
+    }
+    exportToExcel(filteredTransactions, 'finans_raporu');
+    toast.success("Excel Raporu oluşturuldu.");
   };
 
   const handleUpdateTx = () => {
@@ -75,14 +60,14 @@ export default function FinancePage() {
         </div>
         <div className="flex gap-2 w-full md:w-auto">
           <button 
-            onClick={handleExportCSV}
-            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-700 transition-all"
+            onClick={handleExportExcel}
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-500/20"
           >
-            <Download size={18} /> Excel İndir (CSV)
+            <Download size={18} /> Excel (XLSX)
           </button>
           <button 
             onClick={handleExportPDF}
-            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-zinc-900 text-white rounded-xl font-bold text-sm hover:bg-black transition-all"
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-zinc-900 text-white rounded-xl font-bold text-sm hover:bg-black transition-all shadow-lg shadow-black/10"
           >
             <Download size={18} /> PDF
           </button>

@@ -30,7 +30,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
     if (amount && !isNaN(Number(amount)) && landId) {
       const inventoryData = addToInventory ? {
         name: invName || category,
-        type: category === 'Gübre/İlaç' ? 'gubre' : category === 'Tohum' ? 'tohum' : 'diger',
+        type: category === 'Gübre/İlaç' ? 'gubre' : category === 'Tohum' ? 'tohum' : category === 'Mazot' ? 'yakit' : 'diger',
         quantity: Number(quantity),
         unit: unit
       } : undefined;
@@ -163,7 +163,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
           </div>
 
           <div className="min-h-[64px]">
-            {['Gübre/İlaç', 'Gübre', 'İlaç', 'Tohum'].includes(category) && (
+            {['Gübre/İlaç', 'Gübre', 'İlaç', 'Tohum', 'Mazot'].includes(category) && (
               <div className="bg-indigo-50 dark:bg-indigo-900/20 p-5 rounded-[2rem] space-y-4 border border-indigo-100 dark:border-indigo-900/30 transition-all duration-300">
                 <label className="flex items-center gap-3 cursor-pointer group">
                   <div className="relative flex items-center justify-center">

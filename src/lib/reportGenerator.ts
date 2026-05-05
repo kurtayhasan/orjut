@@ -76,6 +76,55 @@ export const generateSeasonExcel = (season: any, transactions: any[], lands: any
   }
 };
 
+export const exportToPDF = (transactions: any[], title: string = 'Finansal Rapor') => {
+  try {
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text(title, 14, 22);
+    doc.setFontSize(10);
+    doc.text(`Oluşturulma Tarihi: ${new Date().toLocaleDateString('tr-TR')}`, 14, 30);
+
+    const tableData = transactions.map(tx => [
+      new Date(tx.date).toLocaleDateString('tr-TR'),
+      tx.category || tx.description || '-',
+      tx.type === 'expense' ? 'Gider' : 'Gelir',
+      `${tx.amount.toLocaleString()} TL`
+    ]);
+
+    autoTable(doc, {
+      startY: 40,
+      head: [['Tarih', 'Kategori', 'Tür', 'Tutar']],
+      body: tableData,
+      theme: 'striped',
+      headStyles: { fillColor: [79, 70, 229] }
+    });
+
+    doc.save(`orjut_rapor_${Date.now()}.pdf`);
+  } catch (error) {
+    console.error('PDF Export Error:', error);
+    toast.error("PDF oluşturulamadı.");
+  }
+};
+
+export const exportToExcel = (transactions: any[], fileName: string = 'finans_raporu') => {
+  try {
+    const data = transactions.map(tx => ({
+      'Tarih': new Date(tx.date).toLocaleDateString('tr-TR'),
+      'Kategori': tx.category || tx.description || '-',
+      'Tür': tx.type === 'expense' ? 'Gider' : 'Gelir',
+      'Tutar (TL)': tx.amount
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Rapor');
+    XLSX.writeFile(wb, `${fileName}_${Date.now()}.xlsx`);
+  } catch (error) {
+    console.error('Excel Export Error:', error);
+    toast.error("Excel dosyası oluşturulamadı.");
+  }
+};
+
 export const shareViaWhatsApp = async (pdfBlob: Blob, seasonName: string) => {
   try {
     const file = new File([pdfBlob], `${seasonName}_Rapor.pdf`, { type: 'application/pdf' });

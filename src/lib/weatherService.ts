@@ -2,12 +2,13 @@
 const BASE_URL = 'https://api.open-meteo.com/v1/forecast';
 
 export interface WeatherData {
-  temperature: number;      // °C
+  temperature: number | null;      // °C
   humidity: number;         // %
   rainfall: number;         // mm (bugün)
-  windSpeed: number;        // km/h
+  windSpeed: number | null;        // km/h
   uvIndex: number;          // 0-11
   condition: string;        // "Açık", "Yağmurlu" vb.
+  isError?: boolean;
   forecast: {               // önümüzdeki 3 gün
     date: string;
     maxTemp: number;
@@ -61,11 +62,20 @@ export async function fetchWeather(lat: number, lon: number): Promise<WeatherDat
 
     localStorage.setItem(cacheKey, JSON.stringify({ data: weather, timestamp: Date.now() }));
     return weather;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Weather fetch failed:", error);
-    // Return a safe fallback or throw depending on UI requirements. 
-    // Here we throw to let the caller handle it or use cached data.
-    throw error;
+    
+    // Return fallback for 401, 404 or network errors
+    return {
+      temperature: null,
+      humidity: 0,
+      rainfall: 0,
+      windSpeed: null,
+      uvIndex: 0,
+      condition: "Hava durumu servisi bekleniyor...",
+      isError: true,
+      forecast: []
+    } as any;
   }
 }
 

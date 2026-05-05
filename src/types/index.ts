@@ -48,7 +48,7 @@ export interface InventoryItem {
   id: string;
   org_id: string;
   name: string;
-  type: 'gubre' | 'tohum' | 'ilac' | 'diger';
+  type: 'gubre' | 'tohum' | 'ilac' | 'diger' | 'yakit';
   quantity: number;
   unit: string;
   last_unit_cost?: number;

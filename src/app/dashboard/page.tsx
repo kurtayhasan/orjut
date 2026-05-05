@@ -115,10 +115,10 @@ export default function DashboardPage() {
             <div className="space-y-3 max-w-2xl">
               <div className="flex items-center gap-4 text-xs font-black text-indigo-100/80 uppercase tracking-widest">
                 <span>📍 {lands[0]?.city || 'Kızıltepe'}, {lands[0]?.district || 'Mardin'}</span>
-                <span>🌡️ {weatherData?.temperature || 35}°C, {weatherData?.condition || 'Açık'}</span>
+                <span>🌡️ {weatherData?.temperature !== null ? `${weatherData?.temperature}°C` : '--°C'}, {weatherData?.condition || 'Açık'}</span>
               </div>
               <p className="text-white text-xl md:text-2xl font-bold leading-tight">
-                {dailyInsight || "Verileriniz analiz ediliyor, lütfen bekleyin..."}
+                {weatherData?.isError ? "Hava durumu servisi şu an meşgul, lütfen daha sonra tekrar deneyin." : (dailyInsight || "Verileriniz analiz ediliyor, lütfen bekleyin...")}
               </p>
             </div>
             
