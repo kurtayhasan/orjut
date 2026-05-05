@@ -145,6 +145,7 @@ export interface CardProps {
   className?: string;
   padding?: 'none' | 'sm' | 'md' | 'lg';
   hoverable?: boolean;
+  onClick?: () => void;
 }
 
 export interface EmptyStateProps {

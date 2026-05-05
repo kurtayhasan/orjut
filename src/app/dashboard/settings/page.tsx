@@ -7,6 +7,7 @@ import { Settings as SettingsIcon, Bell, Shield, User, Smartphone, LogOut, Chevr
 import { requestNotificationPermission } from '@/lib/notifications';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { db } from '@/lib/db';
 
 export default function SettingsPage() {
   const { lang, setLang } = useAppContext();

@@ -7,7 +7,8 @@ export default function Card({
   children, 
   className = '', 
   padding = 'md',
-  hoverable = false 
+  hoverable = false,
+  onClick
 }: CardProps) {
   
   const paddings = {
@@ -18,12 +19,15 @@ export default function Card({
   };
 
   return (
-    <div className={`
+    <div 
+      onClick={onClick}
+      className={`
       bg-white dark:bg-zinc-900 
       border border-zinc-200/60 dark:border-zinc-800 
       rounded-[2rem] shadow-sm 
       transition-all duration-300
       ${hoverable ? 'hover:shadow-md hover:border-indigo-500/30' : ''}
+      ${onClick ? 'cursor-pointer active:scale-[0.98]' : ''}
       ${paddings[padding]} 
       ${className}
     `}>
