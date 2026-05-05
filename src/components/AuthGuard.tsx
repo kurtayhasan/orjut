@@ -12,31 +12,70 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        // Try to get session from local cache first
+        const { data: { session }, error } = await supabase.auth.getSession();
         
+        if (error) throw error;
+
         if (!session) {
-          // If no session, try localStorage as fallback for demo mode if applicable, 
-          // but for production strictly use session
-          const userId = localStorage.getItem('user_id');
-          if (!userId) {
+          // If no session and we are online, strictly redirect
+          if (navigator.onLine) {
             router.push('/login');
           } else {
-            setIsAuthenticated(true);
+            // If offline, check if we have a cached user_id as a fallback
+            const userId = localStorage.getItem('user_id');
+            if (!userId) {
+              router.push('/login');
+            } else {
+              setIsAuthenticated(true);
+            }
           }
         } else {
-          // Sync localStorage just in case parts of the app still rely on it
+          // Valid session found
           localStorage.setItem('user_id', session.user.id);
           setIsAuthenticated(true);
+          
+          if (!navigator.onLine) {
+            import('sonner').then(({ toast }) => {
+              toast.info("Çevrimdışı Çalışıyorsunuz", {
+                description: "Verileriniz bağlantı gelince eşitlenecektir.",
+                duration: 5000,
+              });
+            });
+          }
         }
       } catch (error) {
         console.error("Auth check failed:", error);
-        router.push('/login');
+        // Only redirect if online, if offline we try to stay in
+        if (navigator.onLine) {
+          router.push('/login');
+        } else {
+          const userId = localStorage.getItem('user_id');
+          if (userId) setIsAuthenticated(true);
+          else router.push('/login');
+        }
       } finally {
         setLoading(false);
       }
     };
 
     checkAuth();
+
+    // Listen for online/offline events
+    const handleOnline = () => {
+      import('sonner').then(({ toast }) => toast.success("Tekrar Çevrimiçisiniz!"));
+    };
+    const handleOffline = () => {
+      import('sonner').then(({ toast }) => toast.info("Bağlantı Kesildi - Çevrimdışı Mod"));
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, [router]);
 
   if (loading) {

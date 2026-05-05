@@ -89,7 +89,17 @@ export const db = {
     return supabase.from('inventory').select('*').eq('org_id', userId);
   },
   async insertInventoryItem(item: any) {
-    return supabase.from('inventory').insert([item]).select().single();
+    // Map frontend 'name' to DB 'item_name' if needed
+    const payload = {
+      ...item,
+      item_name: item.name || item.item_name,
+      unit_cost: item.last_unit_cost || item.unit_cost || 0
+    };
+    // Remove frontend-only aliases to avoid DB error
+    delete (payload as any).name;
+    delete (payload as any).last_unit_cost;
+    
+    return supabase.from('inventory').insert([payload]).select().single();
   },
   async updateInventoryItem(id: string, updates: Partial<InventoryItem>) {
     return supabase.from('inventory').update(updates).eq('id', id);

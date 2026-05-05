@@ -62,6 +62,7 @@ type AppContextType = {
   userRole: 'farmer' | 'engineer' | 'admin';
   selectedClientId: string | null;
   setSelectedClientId: (id: string | null) => void;
+  activeOrgId: string | null;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -95,14 +96,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const t = (key: keyof typeof translations['en']) => translations[lang][key] || key;
 
-  const getUserId = useCallback(() => localStorage.getItem('user_id'), []);
-  const getEffectiveUserId = useCallback(() => selectedClientId || localStorage.getItem('user_id'), [selectedClientId]);
+  const activeOrgId = useMemo(() => {
+    const myId = userProfile?.id || (typeof window !== 'undefined' ? localStorage.getItem('user_id') : null);
+    if (userRole === 'engineer' && selectedClientId) return selectedClientId;
+    return myId;
+  }, [userRole, selectedClientId, userProfile?.id]);
 
-  // Centralized Data Fetching
   const refreshAllData = useCallback(async () => {
-    const userId = getUserId();
-    const effectiveId = getEffectiveUserId();
-    if (!userId || !effectiveId) return;
+    const userId = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
+    if (!userId || !activeOrgId) return;
 
     setIsLoadingLands(true);
     setIsLoadingTransactions(true);
@@ -110,13 +112,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     try {
       const [p, l, t, s, i, fo, sl, inv] = await Promise.all([
         db.getProfile(userId),
-        db.getLands(effectiveId),
-        db.getTransactions(effectiveId, 20),
-        db.getSeasons(effectiveId),
-        db.getIrrigationLogs(effectiveId),
-        db.getFieldOperations(effectiveId),
-        db.getScoutingLogs(effectiveId),
-        db.getInventory(effectiveId)
+        db.getLands(activeOrgId),
+        db.getTransactions(activeOrgId, 20),
+        db.getSeasons(activeOrgId),
+        db.getIrrigationLogs(activeOrgId),
+        db.getFieldOperations(activeOrgId),
+        db.getScoutingLogs(activeOrgId),
+        db.getInventory(activeOrgId)
       ]);
 
       if (p.data) {
@@ -137,8 +139,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (sl.data) setScoutingLogs(sl.data);
       if (inv.data) setInventory(inv.data);
 
-      // Fetch all expense amounts for totals
-      const { data: allTx } = await db.getAllTransactionAmounts(effectiveId);
+      const { data: allTx } = await db.getAllTransactionAmounts(activeOrgId);
       if (allTx) setTotalExpenses(allTx.reduce((sum, tx) => sum + Number(tx.amount || 0), 0));
 
     } catch (e) {
@@ -147,13 +148,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setIsLoadingLands(false);
       setIsLoadingTransactions(false);
     }
-  }, [getUserId]);
+  }, [activeOrgId]);
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
+    const savedTheme = typeof window !== 'undefined' ? localStorage.getItem('theme') : null;
     setIsDarkMode(savedTheme === 'dark');
     refreshAllData();
-  }, [refreshAllData, selectedClientId]);
+  }, [refreshAllData]);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -170,173 +171,249 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return amount / quantity;
   };
 
-  // --- ACTIONS ---
-
   const addLand = async (land: any) => {
-    const effectiveId = getEffectiveUserId();
-    if (!effectiveId) return;
-
-    const tempId = 'temp_' + Date.now();
-    const dbPayload = { ...land, org_id: effectiveId };
-    
-    setLands(prev => [...prev, { ...dbPayload, id: tempId } as any]);
-    setTotalArea(prev => prev + Number(land.size_decare));
-
+    if (!activeOrgId) return;
     try {
-      const { data, error } = await db.insertLand(dbPayload);
+      const { data, error } = await db.insertLand({ ...land, org_id: activeOrgId });
       if (error) throw error;
-      if (data) setLands(prev => prev.map(l => l.id === tempId ? data : l));
-      toast.success("Arazi başarıyla kaydedildi");
+      if (data) {
+        setLands(prev => [...prev, data]);
+        setTotalArea(prev => prev + Number(land.size_decare));
+        toast.success("Arazi başarıyla kaydedildi");
+      }
     } catch (err: any) {
-      setLands(prev => prev.filter(l => l.id !== tempId));
-      setTotalArea(prev => prev - Number(land.size_decare));
       toast.error("Hata: " + err.message);
     }
   };
 
   const updateLand = async (land: any) => {
     const { id, ...updateData } = land;
-    setLands(prev => prev.map(l => l.id === id ? land : l));
-    const { error } = await db.updateLand(id, updateData);
-    if (error) toast.error("Güncelleme hatası");
-    else toast.success("Arazi güncellendi");
+    try {
+      const { error } = await db.updateLand(id, updateData);
+      if (error) throw error;
+      setLands(prev => prev.map(l => l.id === id ? { ...l, ...updateData } : l));
+      toast.success("Arazi güncellendi");
+    } catch (err: any) {
+      toast.error("Güncelleme hatası");
+    }
   };
 
   const deleteLand = async (id: string) => {
-    const land = lands.find(l => l.id === id);
-    if (land) setTotalArea(prev => prev - Number(land.size_decare || 0));
-    setLands(prev => prev.filter(l => l.id !== id));
-    const { error } = await db.deleteLand(id);
-    if (error) toast.error("Silme hatası");
+    try {
+      const land = lands.find(l => l.id === id);
+      const { error } = await db.deleteLand(id);
+      if (error) throw error;
+      if (land) setTotalArea(prev => prev - Number(land.size_decare || 0));
+      setLands(prev => prev.filter(l => l.id !== id));
+      toast.success("Arazi silindi");
+    } catch (err: any) {
+      toast.error("Silme hatası");
+    }
   };
 
   const addExpense = async (amount: number, category: string, date: string, land_id: string, receipt_url?: string, receipt_thumbnail_url?: string, inventoryData?: { name: string, type: string, quantity: number, unit: string }) => {
-    const effectiveId = getEffectiveUserId();
-    if (!effectiveId) return;
-
-    const tempId = 'temp_' + Date.now();
+    if (!activeOrgId) return;
     const newTx: any = { 
-      id: tempId, amount, description: category, date, type: 'expense', category, land_id, org_id: effectiveId,
+      amount, description: category, date, type: 'expense', category, land_id, org_id: activeOrgId,
       quantity: inventoryData?.quantity, unit: inventoryData?.unit, receipt_url, receipt_thumbnail_url
     };
-
-    setTransactions(prev => [newTx, ...prev]);
-    setTotalExpenses(prev => prev + amount);
-
     try {
       const { data, error } = await db.insertTransaction(newTx);
       if (error) throw error;
-      if (data) setTransactions(prev => prev.map(tx => tx.id === tempId ? data : tx));
-      
-      if (inventoryData) {
-        const unitCost = calculateUnitCost(amount, inventoryData.quantity);
-        await addInventoryItem({ ...inventoryData, last_unit_cost: unitCost });
+      if (data) {
+        setTransactions(prev => [data, ...prev]);
+        setTotalExpenses(prev => prev + amount);
+        if (inventoryData) {
+          const unitCost = calculateUnitCost(amount, inventoryData.quantity);
+          await addInventoryItem({ ...inventoryData, last_unit_cost: unitCost, last_purchase_date: date });
+        }
+        toast.success("Masraf kaydedildi");
       }
-      toast.success("Masraf kaydedildi");
     } catch (err: any) {
-      setTransactions(prev => prev.filter(tx => tx.id !== tempId));
-      setTotalExpenses(prev => prev - amount);
       toast.error("Hata: " + err.message);
     }
   };
 
-  const deleteExpense = async (id: string) => {
-    const tx = transactions.find(t => t.id === id);
-    if (tx) setTotalExpenses(prev => prev - Number(tx.amount || 0));
-    setTransactions(prev => prev.filter(t => t.id !== id));
-    const { error } = await db.deleteTransaction(id);
-    if (error) toast.error("Silme hatası");
-  };
-
-  // --- Inventory & Operations ---
-  
-  const updateInventoryItem = async (id: string, updates: Partial<InventoryItem>) => {
-    setInventory(prev => prev.map(item => item.id === id ? { ...item, ...updates } : item));
-    await db.updateInventoryItem(id, updates);
-  };
-
-  const addInventoryItem = async (item: any) => {
-    const effectiveId = getEffectiveUserId();
-    if (!effectiveId) return;
-    const { data } = await db.insertInventoryItem({ ...item, org_id: effectiveId });
-    if (data) setInventory(prev => [...prev, data]);
-  };
-
-  const deleteInventoryItem = async (id: string) => {
-    setInventory(prev => prev.filter(i => i.id !== id));
-    await db.deleteInventoryItem(id);
-  };
-
-  const addFieldOperation = async (op: any) => {
-    const effectiveId = getEffectiveUserId();
-    if (!effectiveId) return;
-    
-    const { data } = await db.insertFieldOperation({ ...op, org_id: effectiveId });
-    if (data) {
-      setFieldOperations(prev => [data, ...prev]);
-      if (op.inventory_id) {
-        const item = inventory.find(i => i.id === op.inventory_id);
-        if (item) updateInventoryItem(item.id, { quantity: Math.max(0, item.quantity - op.amount) });
-      }
-      toast.success("İşlem kaydedildi");
+  const updateExpense = async (id: string, updates: any) => {
+    try {
+      const { error } = await db.updateTransaction(id, updates);
+      if (error) throw error;
+      setTransactions(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
+      toast.success("İşlem güncellendi");
+    } catch (err: any) {
+      toast.error("Güncelleme hatası");
     }
   };
 
-  // --- AI & Weather ---
+  const deleteExpense = async (id: string) => {
+    try {
+      const tx = transactions.find(t => t.id === id);
+      const { error } = await db.deleteTransaction(id);
+      if (error) throw error;
+      if (tx) setTotalExpenses(prev => prev - Number(tx.amount || 0));
+      setTransactions(prev => prev.filter(t => t.id !== id));
+      toast.success("İşlem silindi");
+    } catch (err: any) {
+      toast.error("Silme hatası");
+    }
+  };
+
+  const startNewSeason = async (name: string, startDate: string, endDate: string) => {
+    if (!activeOrgId) return;
+    const year = new Date(startDate).getFullYear();
+    try {
+      if (activeSeason) await db.updateSeason(activeSeason.id, { is_active: false });
+      const { data, error } = await db.insertSeason({ org_id: activeOrgId, name, start_date: startDate, end_date: endDate, year, is_active: true });
+      if (error) throw error;
+      if (data && data[0]) {
+        setSeasons(prev => [data[0], ...prev.map(s => ({ ...s, is_active: false }))]);
+        setActiveSeason(data[0]);
+        toast.success("Yeni sezon başlatıldı");
+      }
+    } catch (err: any) {
+      toast.error("Hata: " + err.message);
+    }
+  };
+
+  const toggleSeasonStatus = async (id: string, currentStatus: boolean) => {
+    try {
+      const { error } = await db.updateSeason(id, { is_active: !currentStatus });
+      if (error) throw error;
+      setSeasons(prev => prev.map(s => s.id === id ? { ...s, is_active: !currentStatus } : s));
+      toast.success(`Sezon ${!currentStatus ? 'açıldı' : 'kapatıldı'}`);
+    } catch (err) {
+      toast.error("İşlem başarısız");
+    }
+  };
+
+  const addInventoryItem = async (item: any) => {
+    if (!activeOrgId) return;
+    try {
+      const { data, error } = await db.insertInventoryItem({ ...item, org_id: activeOrgId });
+      if (error) throw error;
+      if (data) setInventory(prev => [...prev, data]);
+    } catch (err) {
+      console.error("Inventory error:", err);
+    }
+  };
+
+  const updateInventoryItem = async (id: string, updates: Partial<InventoryItem>) => {
+    try {
+      const { error } = await db.updateInventoryItem(id, updates);
+      if (error) throw error;
+      setInventory(prev => prev.map(item => item.id === id ? { ...item, ...updates } : item));
+    } catch (err) {
+      toast.error("Güncelleme hatası");
+    }
+  };
+
+  const deleteInventoryItem = async (id: string) => {
+    try {
+      const { error } = await db.deleteInventoryItem(id);
+      if (error) throw error;
+      setInventory(prev => prev.filter(i => i.id !== id));
+      toast.success("Silindi");
+    } catch (err) {
+      toast.error("Silme hatası");
+    }
+  };
+
+  const addFieldOperation = async (op: any) => {
+    if (!activeOrgId) return;
+    try {
+      const { data, error } = await db.insertFieldOperation({ ...op, org_id: activeOrgId });
+      if (error) throw error;
+      if (data) {
+        setFieldOperations(prev => [data, ...prev]);
+        if (op.inventory_id) {
+          const item = inventory.find(i => i.id === op.inventory_id);
+          if (item) updateInventoryItem(item.id, { quantity: Math.max(0, item.quantity - op.amount) });
+        }
+        toast.success("İşlem kaydedildi");
+      }
+    } catch (err) {
+      toast.error("İşlem hatası");
+    }
+  };
+
+  const addIrrigationLog = async (log: any) => {
+    if (!activeOrgId) return;
+    try {
+      const { data, error } = await db.insertIrrigationLog({ ...log, org_id: activeOrgId });
+      if (error) throw error;
+      if (data) {
+        setIrrigationLogs(prev => [data, ...prev]);
+        toast.success("Sulama eklendi");
+      }
+    } catch (err) {
+      toast.error("Kayıt hatası");
+    }
+  };
+
+  const deleteIrrigationLog = async (id: string) => {
+    try {
+      const { error } = await db.deleteIrrigationLog(id);
+      if (error) throw error;
+      setIrrigationLogs(prev => prev.filter(l => l.id !== id));
+      toast.success("Silindi");
+    } catch (err) {
+      toast.error("Silme hatası");
+    }
+  };
+
+  const logSaving = async (amount: number, reason: string) => {
+    const userId = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
+    if (!userId) return;
+    try {
+      await db.insertSavingLog({ user_id: userId, amount, reason });
+      setTotalSavings(prev => prev + amount);
+    } catch (err) {
+      console.error("Saving log error:", err);
+    }
+  };
 
   const requestWeatherAndInsight = async () => {
     let lat = 37.7478, lon = 27.3971;
     if (lands.length > 0 && lands[0].lat && lands[0].lng) { lat = lands[0].lat; lon = lands[0].lng; }
-    
-    toast.loading("Veriler analiz ediliyor...", { id: 'ai-loading' });
-    
+    toast.loading("Analiz ediliyor...", { id: 'ai-loading' });
     try {
       const weather = await fetchWeather(lat, lon);
       setWeatherData(weather);
-      
       const landContexts: LandContext[] = lands.map(land => ({
         cropName: land.crop_type, sowingDate: land.planting_date || new Date().toISOString(),
         currentDay: land.planting_date ? Math.floor((Date.now() - new Date(land.planting_date).getTime()) / 86400000) : 0,
         totalArea: land.size_decare || 0
       }));
-      
       const prompt = buildAIPrompt({ weather, lands: landContexts, date: new Date().toLocaleDateString('tr-TR') });
       const res = await fetch('/api/ai/daily-insight', { method: 'POST', body: JSON.stringify({ prompt }) });
       const data = await res.json();
-      
       if (data.success) {
         setDailyInsight(data.insight);
         toast.success("Analiz tamamlandı", { id: 'ai-loading' });
-      } else {
-        throw new Error(data.error);
-      }
+      } else throw new Error(data.error);
     } catch (e: any) { 
       toast.error("Hata: " + e.message, { id: 'ai-loading' });
     }
   };
 
   const value = {
-    lang, setLang, t, totalExpenses, totalArea, addExpense, updateExpense: async () => {}, deleteExpense,
+    lang, setLang, t, totalExpenses, totalArea, addExpense, updateExpense, deleteExpense,
     weather: { temp: weatherData?.temperature || null, windspeed: weatherData?.windSpeed || null, loading: false, error: null },
     dailyInsight, criticalAlert, totalSavings, dailySpent, dailyActions, lands, transactions, irrigationLogs,
     isLoadingLands, isLoadingTransactions, addLand, updateLand, deleteLand,
-    addIrrigationLog: async () => {}, deleteIrrigationLog: async () => {}, logSaving: async () => {},
-    requestWeatherAndInsight, startNewSeason: async () => {}, toggleSeasonStatus: async () => {},
+    addIrrigationLog, deleteIrrigationLog, logSaving,
+    requestWeatherAndInsight, startNewSeason, toggleSeasonStatus,
     isDemo: false, isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s: Season) => setActiveSeason(s),
     weatherData, currentUserRole, userProfile, fieldOperations, scoutingLogs,
     addFieldOperation, deleteFieldOperation: async (id: string) => { setFieldOperations(prev => prev.filter(o => o.id !== id)); db.deleteFieldOperation(id); },
-    addScoutingLog: async (log: Omit<ScoutingLog, 'id'>) => { const { data } = await db.insertScoutingLog({ ...log, org_id: getEffectiveUserId() || '' }); if (data) setScoutingLogs(prev => [data, ...prev]); },
+    addScoutingLog: async (log: Omit<ScoutingLog, 'id'>) => { if (!activeOrgId) return; const { data } = await db.insertScoutingLog({ ...log, org_id: activeOrgId }); if (data) setScoutingLogs(prev => [data, ...prev]); },
     deleteScoutingLog: async (id: string) => { setScoutingLogs(prev => prev.filter(s => s.id !== id)); db.deleteScoutingLog(id); },
     inventory, addInventoryItem, updateInventoryItem, deleteInventoryItem,
     isDarkMode, toggleDarkMode: () => setIsDarkMode(!isDarkMode), calculateUnitCost,
-    userRole, selectedClientId, setSelectedClientId
+    userRole, selectedClientId, setSelectedClientId, activeOrgId
   };
 
-  return (
-    <AppContext.Provider value={value}>
-      {children}
-    </AppContext.Provider>
-  );
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
 
 export const useAppContext = () => {
