@@ -3,9 +3,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAppContext } from '@/context/AppContext';
 import EndOfDayModal from './EndOfDayModal';
-import { Bell, Menu, LogOut, User, Settings } from 'lucide-react';
+import { Bell, Menu, LogOut, User, Settings, ArrowLeft } from 'lucide-react';
 import NetworkStatus from './NetworkStatus';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
@@ -16,6 +16,7 @@ export default function Header() {
   const [userName, setUserName] = useState('');
   const profileRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const name = localStorage.getItem('user_name') || '';
@@ -33,6 +34,16 @@ export default function Header() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
+  const isSubPage = pathname !== '/dashboard' && pathname.length > 10; // Simple check for sub-pages
+
+  const handleBack = () => {
+    if (window.history.length > 2) {
+      router.back();
+    } else {
+      router.push('/dashboard');
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('user_id');
     localStorage.removeItem('user_name');
@@ -49,12 +60,21 @@ export default function Header() {
     <>
       <header className="bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 p-4 px-4 md:px-8 flex justify-between items-center z-10 shrink-0 h-16 sticky top-0 transition-colors duration-300">
         <div className="flex items-center gap-3">
-          <button 
-            onClick={() => setIsSidebarOpen(true)}
-            className="p-2 -ml-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl md:hidden transition-all active:scale-95"
-          >
-            <Menu size={24} />
-          </button>
+          {isSubPage ? (
+            <button 
+              onClick={handleBack}
+              className="p-2 -ml-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-all active:scale-95"
+            >
+              <ArrowLeft size={24} />
+            </button>
+          ) : (
+            <button 
+              onClick={() => setIsSidebarOpen(true)}
+              className="p-2 -ml-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl md:hidden transition-all active:scale-95"
+            >
+              <Menu size={24} />
+            </button>
+          )}
           <div className="font-bold text-indigo-600 flex items-center gap-2">
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center sm:hidden shadow-lg shadow-indigo-500/20">
               <span className="text-white text-xs font-black">O</span>
