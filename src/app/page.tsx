@@ -24,20 +24,8 @@ export default function LandingPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleGoogleLogin = async () => {
-    setIsLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/dashboard`
-        }
-      });
-      if (error) throw error;
-    } catch (err: any) {
-      toast.error("Giriş yapılamadı: " + err.message);
-      setIsLoading(false);
-    }
+  const handleStart = () => {
+    router.push('/login');
   };
 
   const scrollToFeatures = () => {
@@ -59,8 +47,8 @@ export default function LandingPage() {
           <div className="hidden md:flex items-center gap-8">
             <button onClick={scrollToFeatures} className="text-sm font-bold text-zinc-400 hover:text-white transition-colors">Özellikler</button>
             <Link href="#pricing" className="text-sm font-bold text-zinc-400 hover:text-white transition-colors">Fiyatlandırma</Link>
-            <Button variant="ghost" size="sm" onClick={handleGoogleLogin}>Giriş Yap</Button>
-            <Button size="sm" onClick={handleGoogleLogin} leftIcon={<Zap size={14} />}>Ücretsiz Başla</Button>
+            <Button variant="ghost" size="sm" onClick={handleStart}>Giriş Yap</Button>
+            <Button size="sm" onClick={handleStart} leftIcon={<Zap size={14} />}>Ücretsiz Başla</Button>
           </div>
         </div>
       </nav>
@@ -93,7 +81,7 @@ export default function LandingPage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-16 duration-1000 delay-300">
             <button 
-              onClick={handleGoogleLogin}
+              onClick={handleStart}
               disabled={isLoading}
               className="w-full sm:w-auto flex items-center justify-center gap-3 bg-white text-black px-8 py-5 rounded-2xl font-black text-lg hover:bg-zinc-200 transition-all shadow-2xl shadow-white/10 group active:scale-95"
             >
@@ -196,7 +184,7 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Button variant="outline" className="w-full" onClick={handleGoogleLogin}>Ücretsiz Başla</Button>
+              <Button variant="outline" className="w-full" onClick={handleStart}>Ücretsiz Başla</Button>
             </Card>
 
             {/* PRO */}
@@ -226,7 +214,7 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Button className="w-full !bg-emerald-600 hover:!bg-emerald-700" onClick={handleGoogleLogin}>Pro'ya Yüksel</Button>
+              <Button className="w-full !bg-emerald-600 hover:!bg-emerald-700" onClick={handleStart}>Pro'ya Yüksel</Button>
             </Card>
 
             {/* ENTERPRISE */}
@@ -253,7 +241,7 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Button variant="ghost" className="w-full !bg-white/5 hover:!bg-white/10" onClick={handleGoogleLogin}>İşletmeni Büyüt</Button>
+              <Button variant="ghost" className="w-full !bg-white/5 hover:!bg-white/10" onClick={handleStart}>İşletmeni Büyüt</Button>
             </Card>
           </div>
 
