@@ -58,15 +58,25 @@ export default function LoginPage() {
     try {
       if (isLogin) {
         // LOGIN (Phone-Password)
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           phone: formData.phone,
           password: formData.password
         });
         if (error) throw error;
+        
+        // Sync critical data to localStorage for legacy components
+        if (data.user) {
+          localStorage.setItem('user_id', data.user.id);
+          localStorage.setItem('user_phone', data.user.phone || '');
+        }
+        
         toast.success("Giriş başarılı! Yönlendiriliyorsunuz...");
+        // Use hard redirect to ensure context refresh
+        window.location.href = '/dashboard';
+        return; // Stop execution
       } else {
         // SIGNUP (Phone-Password)
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           phone: formData.phone,
           password: formData.password,
           options: {
@@ -80,9 +90,13 @@ export default function LoginPage() {
         if (error) throw error;
         toast.success("Kayıt başarılı! Şimdi giriş yapabilirsiniz.");
         setIsLogin(true);
+        // Do NOT redirect yet, let them log in or if autologin happens
+        if (data.user) {
+          localStorage.setItem('user_id', data.user.id);
+          window.location.href = '/dashboard';
+          return;
+        }
       }
-      
-      router.push('/dashboard');
     } catch (err: any) {
       console.error("Auth Error:", err);
       const message = err.message === 'Invalid login credentials' ? 'Telefon numarası veya şifre hatalı' : err.message;

@@ -10,18 +10,19 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 
 export default function Header() {
-  const { lang, setLang, setIsSidebarOpen } = useAppContext();
+  const { lang, setLang, setIsSidebarOpen, userProfile, userRole } = useAppContext();
   const [isEndModalOpen, setEndModalOpen] = useState(false);
   const [isProfileOpen, setProfileOpen] = useState(false);
   const [userName, setUserName] = useState('');
-  const profileRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
-    const name = localStorage.getItem('user_name') || '';
-    setUserName(name);
-  }, []);
+    if (userProfile) {
+      setUserName(`${userProfile.first_name} ${userProfile.last_name}`);
+    } else {
+      const name = localStorage.getItem('user_name') || '';
+      setUserName(name);
+    }
+  }, [userProfile]);
 
   // Dışarı tıklanınca menüyü kapat
   useEffect(() => {
@@ -133,7 +134,9 @@ export default function Header() {
               <div className="absolute right-0 top-14 w-60 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-100 dark:border-zinc-800 py-2 z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
                 <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
                   <p className="font-black text-sm text-zinc-900 dark:text-zinc-100 tracking-tight">{userName || 'Kullanıcı'}</p>
-                  <p className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Çiftçi Hesabı</p>
+                  <p className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
+                    {userRole === 'admin' ? 'Süper Yönetici' : userRole === 'engineer' ? 'Ziraat Mühendisi' : 'Çiftçi Hesabı'}
+                  </p>
                 </div>
                 <div className="p-1">
                   <Link

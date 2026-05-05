@@ -8,12 +8,12 @@ import Button from './ui/Button';
 import { ModalProps } from '@/types';
 
 export default function EndOfDayModal({ isOpen, onClose }: ModalProps) {
-  const { dailySpent, totalSavings, isDemo, currentUser } = useAppContext();
+  const { dailySpent, totalSavings, isDemo, userProfile } = useAppContext();
   const [closed, setClosed] = useState(false);
 
   const handleCloseDay = async () => {
     try {
-      if (!isDemo && currentUser) {
+      if (!isDemo && userProfile) {
         // Use central service layer if we had a daily_summaries helper, 
         // for now keeping it simple but using the centralized types/BaseModal
         // In a real Phase 3 I would add this to db.ts

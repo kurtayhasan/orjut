@@ -25,16 +25,46 @@ CREATE TABLE IF NOT EXISTS public.ndvi_snapshots (
 
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
+DECLARE
+    old_id UUID;
+    v_first_name TEXT;
+    v_last_name TEXT;
 BEGIN
-  INSERT INTO public.profiles (id, first_name, last_name, avatar_url, is_premium)
-  VALUES (
-    new.id,
-    COALESCE(new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'name', 'Yeni Kullanıcı'),
-    '',
-    new.raw_user_meta_data->>'avatar_url',
-    false
-  );
-  RETURN new;
+    -- 1. Extract names or use phone as fallback
+    v_first_name := COALESCE(new.raw_user_meta_data->>'first_name', SPLIT_PART(new.raw_user_meta_data->>'full_name', ' ', 1), 'Yeni');
+    v_last_name := COALESCE(new.raw_user_meta_data->>'last_name', SPLIT_PART(new.raw_user_meta_data->>'full_name', ' ', 2), 'Kullanıcı');
+
+    -- 2. Check for existing profile by phone (migration logic)
+    SELECT id INTO old_id FROM public.profiles 
+    WHERE phone = new.phone OR phone = ('+' || new.phone)
+    LIMIT 1;
+
+    -- 3. Create or Update Profile
+    IF old_id IS NOT NULL AND old_id != new.id THEN
+        -- Migration: Move data
+        UPDATE public.lands SET org_id = new.id WHERE org_id = old_id;
+        UPDATE public.transactions SET org_id = new.id WHERE org_id = old_id;
+        UPDATE public.inventory SET org_id = new.id WHERE org_id = old_id;
+        UPDATE public.seasons SET org_id = new.id WHERE org_id = old_id;
+        
+        DELETE FROM public.profiles WHERE id = old_id;
+    END IF;
+
+    INSERT INTO public.profiles (id, phone, first_name, last_name, is_premium, role)
+    VALUES (
+        new.id,
+        new.phone,
+        v_first_name,
+        v_last_name,
+        false,
+        'farmer'
+    )
+    ON CONFLICT (id) DO UPDATE 
+    SET phone = EXCLUDED.phone,
+        first_name = EXCLUDED.first_name,
+        last_name = EXCLUDED.last_name;
+
+    RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
