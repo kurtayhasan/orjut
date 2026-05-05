@@ -208,8 +208,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initialDarkMode = savedTheme === 'dark' || (!savedTheme && systemPrefersDark);
+    const initialDarkMode = savedTheme === 'dark';
     setIsDarkMode(initialDarkMode);
     if (initialDarkMode) document.documentElement.classList.add('dark');
     

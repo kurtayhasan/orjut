@@ -61,7 +61,11 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: { isO
     if (cat === 'Mazot') return '⛽';
     if (cat === 'Gübre/İlaç') return '🌱';
     if (cat === 'İşçilik') return '🧑‍🌾';
-    return     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[2000] flex items-end sm:items-center justify-center p-4">
+    return '📦';
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[2000] flex items-end sm:items-center justify-center p-4">
       <div className="bg-white dark:bg-zinc-900 p-6 rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-md animate-in slide-in-from-bottom-10 border border-transparent dark:border-zinc-800">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center text-2xl">
