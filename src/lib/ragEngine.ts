@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { getWeather } from './services';
+import { fetchWeather } from './weatherService';
 
 export async function buildLandContext(landId: string) {
   try {
@@ -34,7 +34,7 @@ export async function buildLandContext(landId: string) {
       .single();
 
     // 5. Fetch current weather
-    const weather = await getWeather(land.lat, land.lng);
+    const weather = await fetchWeather(land.lat, land.lng);
 
     // Aggregate Context
     return {
