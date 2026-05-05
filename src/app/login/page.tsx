@@ -1,44 +1,73 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { Mail, Lock, User, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Lock, User, ArrowRight, ArrowLeft, Phone, RefreshCcw } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Input from '@/components/ui/Input';
 import Link from 'next/link';
+import PhoneInput from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
 
 export default function LoginPage() {
   const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   
+  // Captcha State
+  const [generatedCaptcha, setGeneratedCaptcha] = useState('');
+  const [captchaValue, setCaptchaValue] = useState('');
+
   const [formData, setFormData] = useState({
-    email: '',
+    phone: '',
     password: '',
     firstName: '',
     lastName: ''
   });
 
+  const generateCaptcha = () => {
+    const code = Math.floor(1000 + Math.random() * 9000).toString();
+    setGeneratedCaptcha(code);
+  };
+
+  useEffect(() => {
+    generateCaptcha();
+  }, []);
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Captcha Check for Signup
+    if (!isLogin && captchaValue !== generatedCaptcha) {
+      toast.error("Güvenlik kodunu yanlış girdiniz.");
+      generateCaptcha();
+      setCaptchaValue('');
+      return;
+    }
+
+    if (!formData.phone) {
+      toast.error("Lütfen geçerli bir telefon numarası giriniz.");
+      return;
+    }
+
     setIsLoading(true);
     
     try {
       if (isLogin) {
-        // LOGIN
+        // LOGIN (Phone-Password)
         const { error } = await supabase.auth.signInWithPassword({
-          email: formData.email,
+          phone: formData.phone,
           password: formData.password
         });
         if (error) throw error;
         toast.success("Giriş başarılı! Yönlendiriliyorsunuz...");
       } else {
-        // SIGNUP
+        // SIGNUP (Phone-Password)
         const { error } = await supabase.auth.signUp({
-          email: formData.email,
+          phone: formData.phone,
           password: formData.password,
           options: {
             data: {
@@ -49,14 +78,15 @@ export default function LoginPage() {
           }
         });
         if (error) throw error;
-        toast.success("Kayıt başarılı! Lütfen e-postanızı doğrulayın veya giriş yapın.");
-        if (!error) setIsLogin(true); // Switch to login after signup
+        toast.success("Kayıt başarılı! Şimdi giriş yapabilirsiniz.");
+        setIsLogin(true);
       }
       
       router.push('/dashboard');
     } catch (err: any) {
       console.error("Auth Error:", err);
-      toast.error(err.message || "Bir hata oluştu.");
+      const message = err.message === 'Invalid login credentials' ? 'Telefon numarası veya şifre hatalı' : err.message;
+      toast.error(message || "Bir hata oluştu.");
     } finally {
       setIsLoading(false);
     }
@@ -113,7 +143,7 @@ export default function LoginPage() {
           {/* Divider */}
           <div className="relative flex items-center gap-4 mb-6">
             <div className="flex-1 h-px bg-white/5"></div>
-            <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest whitespace-nowrap">veya e-posta ile</span>
+            <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest whitespace-nowrap">veya telefon ile</span>
             <div className="flex-1 h-px bg-white/5"></div>
           </div>
 
@@ -137,15 +167,16 @@ export default function LoginPage() {
               </div>
             )}
 
-            <Input
-              label="E-posta Adresi"
-              type="email"
-              placeholder="ahmet@tarlaniz.com"
-              required
-              leftIcon={<Mail size={16} />}
-              value={formData.email}
-              onChange={e => setFormData({...formData, email: e.target.value})}
-            />
+            <div className="space-y-1.5">
+              <label className="block text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest ml-1">Telefon Numarası</label>
+              <PhoneInput
+                international
+                defaultCountry="TR"
+                value={formData.phone}
+                onChange={(value) => setFormData({...formData, phone: value || ''})}
+                className="phone-input-dark w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-2xl py-2 px-4 text-zinc-900 dark:text-zinc-100 text-sm font-bold outline-none focus-within:ring-2 focus-within:ring-emerald-500/20 focus-within:border-emerald-500/50 transition-all"
+              />
+            </div>
 
             <Input
               label="Şifre"
@@ -157,10 +188,42 @@ export default function LoginPage() {
               onChange={e => setFormData({...formData, password: e.target.value})}
             />
 
+            {!isLogin && (
+              <div className="space-y-2 pt-2 animate-in fade-in slide-in-from-top-2">
+                <label className="block text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest ml-1">Güvenlik Doğrulaması</label>
+                <div className="flex gap-3">
+                  <div className="flex-1 bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/10 rounded-2xl flex items-center justify-center relative overflow-hidden min-h-[50px]">
+                    <span className="font-black text-2xl italic tracking-[0.4em] text-emerald-400 select-none z-10">
+                      {generatedCaptcha.split('').join(' ')}
+                    </span>
+                    <button 
+                      type="button"
+                      onClick={generateCaptcha}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-zinc-600 hover:text-white transition-colors z-20"
+                    >
+                      <RefreshCcw size={14} />
+                    </button>
+                  </div>
+                  <div className="relative w-28">
+                    <input 
+                      type="text" 
+                      required
+                      maxLength={4}
+                      placeholder="Kod"
+                      className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-2xl py-3.5 px-4 text-zinc-900 dark:text-zinc-100 text-center text-sm font-bold outline-none focus:border-emerald-500/50 transition-all"
+                      value={captchaValue}
+                      onChange={e => setCaptchaValue(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
             <Button
               type="submit"
               className="w-full mt-2"
               isLoading={isLoading}
+              disabled={!isLogin && captchaValue.length !== 4}
               rightIcon={<ArrowRight size={18} />}
             >
               {isLogin ? 'Giriş Yap' : 'Kayıt Ol'}
