@@ -14,6 +14,9 @@ export default function Header() {
   const [isEndModalOpen, setEndModalOpen] = useState(false);
   const [isProfileOpen, setProfileOpen] = useState(false);
   const [userName, setUserName] = useState('');
+  const profileRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (userProfile) {
