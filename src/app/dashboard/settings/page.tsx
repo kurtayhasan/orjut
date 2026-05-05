@@ -13,12 +13,22 @@ export default function SettingsPage() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const router = useRouter();
   const [userProfile, setUserProfile] = useState<{name: string, phone: string} | null>(null);
+  const [pendingRequests, setPendingRequests] = useState<any[]>([]);
+
+  const fetchRequests = async () => {
+    const userId = localStorage.getItem('user_id');
+    if (userId) {
+      const { data } = await db.getPendingRequests(userId);
+      if (data) setPendingRequests(data);
+    }
+  };
 
   useEffect(() => {
     const userId = localStorage.getItem('user_id');
     const name = localStorage.getItem('user_name') || 'Kullanıcı';
     const phone = localStorage.getItem('user_phone') || '05XX XXX XX XX';
     setUserProfile({ name, phone });
+    fetchRequests();
   }, []);
 
   const handleNotificationToggle = async () => {
@@ -33,12 +43,22 @@ export default function SettingsPage() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('user_id');
-    localStorage.removeItem('user_name');
-    localStorage.removeItem('user_phone');
+  const handleLogout = async () => {
+    const { supabase } = await import('@/lib/supabase');
+    await supabase.auth.signOut();
+    localStorage.clear();
     toast.success("Başarıyla çıkış yapıldı.");
     router.push('/');
+  };
+
+  const handleRequest = async (id: string, status: 'approved' | 'rejected') => {
+    try {
+      await db.updateClientRequestStatus(id, status);
+      toast.success(status === 'approved' ? "Erişim onaylandı." : "Talep reddedildi.");
+      fetchRequests();
+    } catch (err) {
+      toast.error("İşlem başarısız.");
+    }
   };
 
   return (
@@ -139,6 +159,43 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
+
+          {/* Engineer Access */}
+          {pendingRequests.length > 0 && (
+            <div className="bg-white border-2 border-indigo-100 rounded-3xl p-6 shadow-sm animate-pulse-subtle">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
+                  <User size={20} />
+                </div>
+                <h4 className="font-bold text-zinc-900">Mühendis Erişim Talepleri</h4>
+              </div>
+              
+              <div className="space-y-3">
+                {pendingRequests.map(req => (
+                  <div key={req.id} className="flex items-center justify-between p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100">
+                    <div>
+                      <p className="font-black text-sm text-zinc-900">{req.engineer.first_name} {req.engineer.last_name}</p>
+                      <p className="text-xs text-indigo-600 font-bold uppercase tracking-widest">Ziraat Mühendisi / Danışman</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => handleRequest(req.id, 'rejected')}
+                        className="px-4 py-2 bg-white text-rose-600 rounded-xl text-[10px] font-black uppercase border border-rose-100 hover:bg-rose-50 transition-all"
+                      >
+                        Reddet
+                      </button>
+                      <button 
+                        onClick={() => handleRequest(req.id, 'approved')}
+                        className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase hover:bg-emerald-700 transition-all"
+                      >
+                        Onayla
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Security */}
           <div className="bg-white border-2 border-zinc-100 rounded-3xl p-6 shadow-sm">

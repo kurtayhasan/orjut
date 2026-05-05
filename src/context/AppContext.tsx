@@ -59,6 +59,9 @@ type AppContextType = {
   isDarkMode: boolean;
   toggleDarkMode: () => void;
   calculateUnitCost: (amount: number, quantity: number) => number;
+  userRole: 'farmer' | 'engineer' | 'admin';
+  selectedClientId: string | null;
+  setSelectedClientId: (id: string | null) => void;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -87,15 +90,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [scoutingLogs, setScoutingLogs] = useState<ScoutingLog[]>([]);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [userRole, setUserRole] = useState<'farmer' | 'engineer' | 'admin'>('farmer');
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
 
   const t = (key: keyof typeof translations['en']) => translations[lang][key] || key;
 
   const getUserId = useCallback(() => localStorage.getItem('user_id'), []);
+  const getEffectiveUserId = useCallback(() => selectedClientId || localStorage.getItem('user_id'), [selectedClientId]);
 
   // Centralized Data Fetching
   const refreshAllData = useCallback(async () => {
     const userId = getUserId();
-    if (!userId) return;
+    const effectiveId = getEffectiveUserId();
+    if (!userId || !effectiveId) return;
 
     setIsLoadingLands(true);
     setIsLoadingTransactions(true);
@@ -103,16 +110,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     try {
       const [p, l, t, s, i, fo, sl, inv] = await Promise.all([
         db.getProfile(userId),
-        db.getLands(userId),
-        db.getTransactions(userId, 5),
-        db.getSeasons(userId),
-        db.getIrrigationLogs(userId),
-        db.getFieldOperations(userId),
-        db.getScoutingLogs(userId),
-        db.getInventory(userId)
+        db.getLands(effectiveId),
+        db.getTransactions(effectiveId, 20),
+        db.getSeasons(effectiveId),
+        db.getIrrigationLogs(effectiveId),
+        db.getFieldOperations(effectiveId),
+        db.getScoutingLogs(effectiveId),
+        db.getInventory(effectiveId)
       ]);
 
-      if (p.data) setUserProfile(p.data);
+      if (p.data) {
+        setUserProfile(p.data);
+        setUserRole((p.data.role as any) || 'farmer');
+      }
       if (l.data) {
         setLands(l.data);
         setTotalArea(l.data.reduce((sum, land) => sum + Number(land.size_decare || 0), 0));
@@ -128,7 +138,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (inv.data) setInventory(inv.data);
 
       // Fetch all expense amounts for totals
-      const { data: allTx } = await db.getAllTransactionAmounts(userId);
+      const { data: allTx } = await db.getAllTransactionAmounts(effectiveId);
       if (allTx) setTotalExpenses(allTx.reduce((sum, tx) => sum + Number(tx.amount || 0), 0));
 
     } catch (e) {
@@ -143,7 +153,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const savedTheme = localStorage.getItem('theme');
     setIsDarkMode(savedTheme === 'dark');
     refreshAllData();
-  }, [refreshAllData]);
+  }, [refreshAllData, selectedClientId]);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -163,11 +173,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // --- ACTIONS ---
 
   const addLand = async (land: any) => {
-    const userId = getUserId();
-    if (!userId) return;
+    const effectiveId = getEffectiveUserId();
+    if (!effectiveId) return;
 
     const tempId = 'temp_' + Date.now();
-    const dbPayload = { ...land, org_id: userId };
+    const dbPayload = { ...land, org_id: effectiveId };
     
     setLands(prev => [...prev, { ...dbPayload, id: tempId } as any]);
     setTotalArea(prev => prev + Number(land.size_decare));
@@ -201,12 +211,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addExpense = async (amount: number, category: string, date: string, land_id: string, receipt_url?: string, receipt_thumbnail_url?: string, inventoryData?: { name: string, type: string, quantity: number, unit: string }) => {
-    const userId = getUserId();
-    if (!userId) return;
+    const effectiveId = getEffectiveUserId();
+    if (!effectiveId) return;
 
     const tempId = 'temp_' + Date.now();
     const newTx: any = { 
-      id: tempId, amount, description: category, date, type: 'expense', category, land_id, org_id: userId,
+      id: tempId, amount, description: category, date, type: 'expense', category, land_id, org_id: effectiveId,
       quantity: inventoryData?.quantity, unit: inventoryData?.unit, receipt_url, receipt_thumbnail_url
     };
 
@@ -246,9 +256,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addInventoryItem = async (item: any) => {
-    const userId = getUserId();
-    if (!userId) return;
-    const { data } = await db.insertInventoryItem({ ...item, org_id: userId });
+    const effectiveId = getEffectiveUserId();
+    if (!effectiveId) return;
+    const { data } = await db.insertInventoryItem({ ...item, org_id: effectiveId });
     if (data) setInventory(prev => [...prev, data]);
   };
 
@@ -258,10 +268,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addFieldOperation = async (op: any) => {
-    const userId = getUserId();
-    if (!userId) return;
+    const effectiveId = getEffectiveUserId();
+    if (!effectiveId) return;
     
-    const { data } = await db.insertFieldOperation({ ...op, org_id: userId });
+    const { data } = await db.insertFieldOperation({ ...op, org_id: effectiveId });
     if (data) {
       setFieldOperations(prev => [data, ...prev]);
       if (op.inventory_id) {
@@ -315,10 +325,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     isDemo: false, isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s: Season) => setActiveSeason(s),
     weatherData, currentUserRole, userProfile, fieldOperations, scoutingLogs,
     addFieldOperation, deleteFieldOperation: async (id: string) => { setFieldOperations(prev => prev.filter(o => o.id !== id)); db.deleteFieldOperation(id); },
-    addScoutingLog: async (log: Omit<ScoutingLog, 'id'>) => { const { data } = await db.insertScoutingLog({ ...log, org_id: getUserId() || '' }); if (data) setScoutingLogs(prev => [data, ...prev]); },
+    addScoutingLog: async (log: Omit<ScoutingLog, 'id'>) => { const { data } = await db.insertScoutingLog({ ...log, org_id: getEffectiveUserId() || '' }); if (data) setScoutingLogs(prev => [data, ...prev]); },
     deleteScoutingLog: async (id: string) => { setScoutingLogs(prev => prev.filter(s => s.id !== id)); db.deleteScoutingLog(id); },
     inventory, addInventoryItem, updateInventoryItem, deleteInventoryItem,
-    isDarkMode, toggleDarkMode: () => setIsDarkMode(!isDarkMode), calculateUnitCost
+    isDarkMode, toggleDarkMode: () => setIsDarkMode(!isDarkMode), calculateUnitCost,
+    userRole, selectedClientId, setSelectedClientId
   };
 
   return (

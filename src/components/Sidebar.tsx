@@ -5,19 +5,19 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAppContext } from '@/context/AppContext';
 import { 
-  Leaf, LayoutDashboard, Map as MapIcon, Box, Wallet, Settings, CalendarDays, LogOut, Droplet, ClipboardCheck, Sun, Moon 
+  Leaf, LayoutDashboard, Map as MapIcon, Box, Wallet, Settings, CalendarDays, LogOut, Droplet, ClipboardCheck, Sun, Moon, Users, Shield 
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { t, isSidebarOpen, setIsSidebarOpen, isDarkMode, toggleDarkMode } = useAppContext();
+  const { t, isSidebarOpen, setIsSidebarOpen, isDarkMode, toggleDarkMode, userRole } = useAppContext();
 
-  const handleLogout = () => {
-    localStorage.removeItem('user_id');
-    localStorage.removeItem('user_name');
-    localStorage.removeItem('user_phone');
+  const handleLogout = async () => {
+    const { supabase } = await import('@/lib/supabase');
+    await supabase.auth.signOut();
+    localStorage.clear();
     toast.success("Başarıyla çıkış yapıldı.");
     router.push('/');
   };
@@ -53,6 +53,12 @@ export default function Sidebar() {
           <SidebarItem href="/dashboard/scouting" icon={<ClipboardCheck size={18} />} label="Arazi Kontrolü" active={pathname.includes('/scouting')} />
           <SidebarItem href="/dashboard/inventory" icon={<Box size={18} />} label={t('inventory')} active={pathname.includes('/inventory')} />
           <SidebarItem href="/dashboard/finance" icon={<Wallet size={18} />} label={t('finance')} active={pathname.includes('/finance')} />
+          {userRole === 'engineer' && (
+            <SidebarItem href="/dashboard/clients" icon={<Users size={18} />} label="Müşterilerim" active={pathname.includes('/clients')} />
+          )}
+          {userRole === 'admin' && (
+            <SidebarItem href="/admin" icon={<Shield size={18} />} label="Sistem Yönetimi" active={pathname === '/admin'} />
+          )}
         </nav>
       </div>
 

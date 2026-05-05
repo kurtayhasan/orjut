@@ -101,5 +101,36 @@ export const db = {
   // Savings
   async insertSavingLog(log: any) {
     return supabase.from('savings_logs').insert([log]);
+  },
+
+  // Admin & Engineer Specialized Functions
+  async getAllProfiles() {
+    return supabase.from('profiles').select('*').order('created_at', { ascending: false });
+  },
+  async getSystemMetrics() {
+    const [users, lands, premium] = await Promise.all([
+      supabase.from('profiles').select('*', { count: 'exact', head: true }),
+      supabase.from('lands').select('*', { count: 'exact', head: true }),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('is_premium', true)
+    ]);
+    return {
+      totalUsers: users.count || 0,
+      totalLands: lands.count || 0,
+      totalPremium: premium.count || 0
+    };
+  },
+  async getClients(engineerId: string) {
+    return supabase.from('engineer_clients').select('*, farmer:profiles!farmer_id(*)').eq('engineer_id', engineerId);
+  },
+  async addClientRequest(engineerId: string, phone: string) {
+    const { data: user } = await supabase.from('profiles').select('id').eq('phone', phone).single();
+    if (!user) throw new Error("Bu telefon numarasına ait bir kullanıcı bulunamadı.");
+    return supabase.from('engineer_clients').insert([{ engineer_id: engineerId, farmer_id: user.id, status: 'pending' }]);
+  },
+  async updateClientRequestStatus(requestId: string, status: 'approved' | 'rejected') {
+    return supabase.from('engineer_clients').update({ status }).eq('id', requestId);
+  },
+  async getPendingRequests(farmerId: string) {
+    return supabase.from('engineer_clients').select('*, engineer:profiles!engineer_id(*)').eq('farmer_id', farmerId).eq('status', 'pending');
   }
 };
