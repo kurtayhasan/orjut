@@ -32,14 +32,14 @@ export default function Sidebar() {
         />
       )}
       
-      <aside className={`fixed inset-y-0 left-0 z-[2000] w-64 bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 flex flex-col shrink-0 h-full transform transition-all duration-300 md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}`}>
-      <div className="p-6 flex items-center gap-3 border-b border-zinc-100 dark:border-zinc-900">
-        <div className="w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+      <aside className={`fixed inset-y-0 left-0 z-[2000] w-64 bg-white dark:bg-[#080808] border-r border-zinc-200 dark:border-white/5 flex flex-col shrink-0 h-full transform transition-all duration-300 md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}`}>
+      <div className="p-6 flex items-center gap-3 border-b border-zinc-100 dark:border-white/5">
+        <div className="w-9 h-9 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
           <Leaf size={20} className="text-white" />
         </div>
         <div>
           <span className="font-black text-zinc-900 dark:text-zinc-100 tracking-tighter text-lg leading-none block">ORJUT</span>
-          <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest leading-none">ZiraiAsistan</span>
+          <span className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest leading-none">AgTech OS</span>
         </div>
       </div>
       
@@ -62,8 +62,8 @@ export default function Sidebar() {
         </nav>
       </div>
 
-      <div className="p-4 border-t border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/50 space-y-2">
-        <div className="p-1 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex">
+      <div className="p-4 border-t border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-black/20 space-y-2">
+        <div className="p-1 bg-zinc-100 dark:bg-white/5 rounded-xl flex border border-transparent dark:border-white/5">
           <button
             onClick={() => !isDarkMode && toggleDarkMode()}
             className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all ${isDarkMode ? 'bg-zinc-700 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
@@ -96,10 +96,10 @@ export default function Sidebar() {
 
 function SidebarItem({ icon, label, href, active }: { icon: React.ReactNode, label: string, href: string, active?: boolean }) {
   return (
-    <Link href={href} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-medium ${
+    <Link href={href} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm font-bold ${
       active 
-        ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100' 
-        : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100'
+        ? 'bg-zinc-100 dark:bg-emerald-500/10 text-zinc-900 dark:text-emerald-400 border border-transparent dark:border-emerald-500/20 shadow-sm' 
+        : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-zinc-100'
     }`}>
       <span className={active ? 'text-zinc-900 dark:text-indigo-400' : 'text-zinc-500 dark:text-zinc-500'}>{icon}</span>
       {label}

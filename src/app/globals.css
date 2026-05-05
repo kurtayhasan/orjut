@@ -4,25 +4,71 @@
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 142 76% 36%;
+    --primary-foreground: 355 100% 97%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 142 76% 36%;
+    --radius: 0.75rem;
   }
 
   .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 142 70% 50%;
+    --primary-foreground: 144 100% 11%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 142 70% 50%;
+  }
+
+  * {
+    @apply border-border;
   }
 
   body {
-    @apply bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 antialiased transition-colors duration-300;
+    @apply bg-zinc-50 dark:bg-[#050505] text-zinc-900 dark:text-zinc-100 antialiased transition-colors duration-300;
+    font-family: var(--font-inter), sans-serif;
     overscroll-behavior-y: none;
-    min-height: 100dvh;
-    min-height: -webkit-fill-available;
   }
 
-  html {
-    height: -webkit-fill-available;
-    scroll-behavior: smooth;
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-outfit), sans-serif;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/10 backdrop-blur-xl border border-white/10;
+  }
+  .glass-dark {
+    @apply bg-black/40 backdrop-blur-2xl border border-white/5;
   }
 }
 
@@ -42,19 +88,6 @@
   @apply bg-zinc-300 dark:bg-zinc-700;
 }
 
-/* Map fix */
-.leaflet-container {
-  font-family: inherit;
-}
-
-.leaflet-popup-content-wrapper {
-  @apply !rounded-2xl !shadow-2xl !border !border-zinc-100 dark:!border-zinc-800 dark:!bg-zinc-900 dark:!text-white;
-}
-
-.leaflet-popup-tip {
-  @apply !bg-white dark:!bg-zinc-900;
-}
-
 /* Phone Input Dark Theme */
 .phone-input-dark .PhoneInputInput {
   background: transparent;
@@ -65,15 +98,21 @@
 }
 
 .phone-input-dark .PhoneInputInput::placeholder {
-  color: rgb(71 85 105); /* slate-600 */
+  color: rgb(71 85 105);
 }
 
 .phone-input-dark .PhoneInputCountrySelect {
-  background: #1e1e1e;
+  background: #111;
   color: white;
 }
 
-.phone-input-dark .PhoneInputCountryIcon {
-  border: none;
-  box-shadow: none;
+/* Animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }

@@ -67,7 +67,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 p-4 px-4 md:px-8 flex justify-between items-center z-10 shrink-0 h-16 sticky top-0 transition-colors duration-300">
+      <header className="bg-white/80 dark:bg-[#050505]/80 backdrop-blur-md border-b border-zinc-200 dark:border-white/5 p-4 px-4 md:px-8 flex justify-between items-center z-10 shrink-0 h-16 sticky top-0 transition-colors duration-300">
         <div className="flex items-center gap-3">
           {isSubPage ? (
             <button 
