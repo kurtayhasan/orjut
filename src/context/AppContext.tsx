@@ -14,7 +14,7 @@ type AppContextType = {
   t: (key: keyof typeof translations['en']) => string;
   totalExpenses: number;
   totalArea: number;
-  addExpense: (amount: number, category: string, date: string, land_id: string, receipt_url?: string, receipt_thumbnail_url?: string, inventoryData?: { name: string, type: string, quantity: number, unit: string }) => Promise<void>;
+  addExpense: (amount: number, category: string, date: string, land_id: string, receipt_url?: string, receipt_thumbnail_url?: string, inventoryData?: { name: string, type: string, quantity: number, unit: string }, season_id?: string) => Promise<void>;
   updateExpense: (id: string, updates: any) => Promise<void>;
   deleteExpense: (id: string) => Promise<void>;
   weather: { temp: number | null, windspeed: number | null, loading: boolean, error: string | null };
@@ -211,11 +211,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const addExpense = async (amount: number, category: string, date: string, land_id: string, receipt_url?: string, receipt_thumbnail_url?: string, inventoryData?: { name: string, type: string, quantity: number, unit: string }) => {
+  const addExpense = async (amount: number, category: string, date: string, land_id: string, receipt_url?: string, receipt_thumbnail_url?: string, inventoryData?: { name: string, type: string, quantity: number, unit: string }, season_id?: string) => {
     if (!activeOrgId) return;
     const newTx: any = { 
       amount, description: category, date, type: 'expense', category, land_id, org_id: activeOrgId,
-      quantity: inventoryData?.quantity, unit: inventoryData?.unit, receipt_url, receipt_thumbnail_url
+      quantity: inventoryData?.quantity, unit: inventoryData?.unit, receipt_url, receipt_thumbnail_url,
+      season_id: season_id || activeSeason?.id
     };
     try {
       const { data, error } = await db.insertTransaction(newTx);
@@ -291,10 +292,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addInventoryItem = async (item: any) => {
     if (!activeOrgId) return;
     try {
-      const { data, error } = await db.insertInventoryItem({ ...item, org_id: activeOrgId });
-      if (error) throw error;
+      // Ensure numeric values to prevent DB errors
+      const sanitizedItem = {
+        ...item,
+        quantity: Number(item.quantity || 0),
+        last_unit_cost: Number(item.last_unit_cost || 0)
+      };
+      
+      const { data, error } = await db.insertInventoryItem({ ...sanitizedItem, org_id: activeOrgId });
+      if (error) {
+        toast.error(`Stok ekleme hatası: ${error.message}`);
+        throw error;
+      }
       if (data) setInventory(prev => [...prev, data]);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Inventory error:", err);
     }
   };

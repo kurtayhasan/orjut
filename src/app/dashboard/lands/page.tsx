@@ -15,6 +15,7 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import BaseModal from '@/components/ui/BaseModal';
+import LandMovementsModal from '@/components/lands/LandMovementsModal';
 
 const CROP_LIFECYCLES: Record<string, number> = {
   'Buğday': 240, 'Mısır': 120, 'Pirinç': 150, 'Soya Fasulyesi': 120, 'Pamuk': 160,
@@ -41,6 +42,7 @@ export default function LandsPage() {
   
   const [editYield, setEditYield] = useState('');
   const [editPrice, setEditPrice] = useState('');
+  const [movementLand, setMovementLand] = useState<any>(null);
 
   const { currentPrice: marketPrice, history: marketHistory } = useMarketPrice(selectedLand?.crop_type);
 
@@ -212,12 +214,17 @@ export default function LandsPage() {
                         <div className="font-black text-xl text-zinc-900 dark:text-zinc-100 tracking-tighter">{land.size_decare}</div>
                         <div className="text-[10px] text-zinc-400 font-black uppercase tracking-widest">Dönüm</div>
                       </div>
-                      {currentUserRole !== 'viewer' && (
-                        <div className="flex gap-1">
-                          <Button variant="ghost" size="sm" className="!p-2" onClick={(e) => { e.stopPropagation(); setSelectedLand(land); setLandToEdit(land); }}><Edit2 size={16} /></Button>
-                          <Button variant="ghost" size="sm" className="!p-2 !text-rose-500" onClick={(e) => { e.stopPropagation(); setDeletingLand(land); }}><Trash2 size={16} /></Button>
-                        </div>
-                      )}
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="sm" className="!p-2 text-indigo-500" onClick={(e) => { e.stopPropagation(); setMovementLand(land); }}>
+                          <Activity size={18} />
+                        </Button>
+                        {currentUserRole !== 'viewer' && (
+                          <>
+                            <Button variant="ghost" size="sm" className="!p-2" onClick={(e) => { e.stopPropagation(); setSelectedLand(land); setLandToEdit(land); }}><Edit2 size={16} /></Button>
+                            <Button variant="ghost" size="sm" className="!p-2 !text-rose-500" onClick={(e) => { e.stopPropagation(); setDeletingLand(land); }}><Trash2 size={16} /></Button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -226,6 +233,13 @@ export default function LandsPage() {
           </div>
         </Card>
       </div>
+
+      <LandMovementsModal 
+        isOpen={!!movementLand} 
+        onClose={() => setMovementLand(null)} 
+        land={movementLand} 
+        transactions={transactions} 
+      />
     </div>
   );
 }

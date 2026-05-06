@@ -9,10 +9,11 @@ import Input from './ui/Input';
 import { ExpenseModalProps } from '@/types';
 
 export default function ExpenseModal({ isOpen, onClose, defaultCategory }: ExpenseModalProps) {
-  const { addExpense, lands } = useAppContext();
+  const { addExpense, lands, seasons, activeSeason } = useAppContext();
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [landId, setLandId] = useState('');
+  const [seasonId, setSeasonId] = useState('');
   const [category, setCategory] = useState(defaultCategory);
   const [receiptUrl, setReceiptUrl] = useState('');
   const [receiptThumbnail, setReceiptThumbnail] = useState('');
@@ -22,8 +23,11 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
   const [unit, setUnit] = useState('kg');
 
   useEffect(() => {
-    if (isOpen) setCategory(defaultCategory);
-  }, [isOpen, defaultCategory]);
+    if (isOpen) {
+      setCategory(defaultCategory);
+      if (activeSeason) setSeasonId(activeSeason.id);
+    }
+  }, [isOpen, defaultCategory, activeSeason]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +39,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
         unit: unit
       } : undefined;
 
-      await addExpense(Number(amount), category, date, landId, receiptUrl, receiptThumbnail, inventoryData);
+      await addExpense(Number(amount), category, date, landId, receiptUrl, receiptThumbnail, inventoryData, seasonId);
       
       // Reset form
       setAmount('');
@@ -140,6 +144,21 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
               {lands.map((land) => (
                 <option key={land.id} value={land.id}>
                   {land.district || land.city} - Ada {land.block_no} / Parsel {land.parcel_no}
+                </option>
+              ))}
+            </Input>
+
+            <Input
+              as="select"
+              label="İlgili Sezon"
+              value={seasonId}
+              onChange={(e: any) => setSeasonId(e.target.value)}
+              required
+              className="text-sm font-bold"
+            >
+              {seasons.map((season) => (
+                <option key={season.id} value={season.id}>
+                  {season.name} ({season.year})
                 </option>
               ))}
             </Input>

@@ -42,6 +42,7 @@ export interface Transaction {
   quantity?: number;
   unit?: string;
   isPending?: boolean;
+  season_id?: string;
   lands?: {
     block_no: string;
     parcel_no: string;

@@ -97,10 +97,27 @@ export default function Header() {
             <NetworkStatus />
           </div>
           
-          <button className="relative p-2 text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
-            <Bell size={20} />
-            <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white dark:border-zinc-950"></span>
-          </button>
+          <div className="relative group">
+            <button className="relative p-2 text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
+              <Bell size={20} />
+              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white dark:border-zinc-950"></span>
+            </button>
+            <div className="absolute right-0 top-12 w-80 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-100 dark:border-zinc-800 py-4 px-2 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+              <h4 className="px-4 text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-4">🔔 Bildirimler & Yapılacaklar</h4>
+              <div className="space-y-1">
+                <div className="p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 rounded-xl transition-all cursor-pointer group/item border border-transparent hover:border-zinc-100 dark:hover:border-zinc-800">
+                  <p className="text-xs font-black text-zinc-900 dark:text-zinc-100 mb-1 flex items-center justify-between">
+                    Mühendis Notu <span className="text-[9px] bg-emerald-500/10 text-emerald-600 px-1.5 py-0.5 rounded">Yeni</span>
+                  </p>
+                  <p className="text-xs text-zinc-500 font-bold leading-relaxed">Kızıltepe 1 nolu tarlaya Üre gübresi atılacak. Yağış öncesi uygun zaman.</p>
+                </div>
+                <div className="p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 rounded-xl transition-all cursor-pointer opacity-60">
+                  <p className="text-xs font-black text-zinc-900 dark:text-zinc-100 mb-1">Hasat Planlaması</p>
+                  <p className="text-xs text-zinc-500 font-bold leading-relaxed">Mısır sezonu kapanış işlemleri için verileri tamamlayın.</p>
+                </div>
+              </div>
+            </div>
+          </div>
           
           <button 
             onClick={() => setEndModalOpen(true)}
