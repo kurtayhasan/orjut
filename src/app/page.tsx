@@ -67,7 +67,10 @@ export default function LandingPage() {
           <div className="hidden md:flex items-center gap-10">
             <button onClick={() => scrollToSection('features')} className="text-sm font-bold text-zinc-400 hover:text-emerald-400 transition-colors uppercase tracking-widest">Özellikler</button>
             <button onClick={() => scrollToSection('pricing')} className="text-sm font-bold text-zinc-400 hover:text-emerald-400 transition-colors uppercase tracking-widest">Fiyatlandırma</button>
-            <div className="h-4 w-px bg-white/10 mx-2"></div>
+            <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/5 mx-2">
+              <Link href="/" className="px-3 py-1 bg-emerald-600 text-white text-[10px] font-black rounded-lg shadow-lg shadow-emerald-500/20">TR</Link>
+              <Link href="/en" className="px-3 py-1 text-zinc-500 hover:text-white text-[10px] font-black transition-colors">EN</Link>
+            </div>
             <Link href="/login" className="text-sm font-bold text-zinc-300 hover:text-white transition-colors">Giriş Yap</Link>
             <Button size="sm" onClick={handleStart} className="!bg-emerald-500 !text-black font-black shadow-lg shadow-emerald-500/20">Ücretsiz Başla</Button>
           </div>
@@ -334,10 +337,10 @@ export default function LandingPage() {
             <div className="space-y-8">
               <h4 className="font-black text-white uppercase tracking-[0.3em] text-[10px]">Yasal</h4>
               <ul className="space-y-4 text-sm font-bold text-zinc-500">
-                <li><Link href="/legal" className="hover:text-emerald-500 transition-colors">Gizlilik Politikası</Link></li>
-                <li><Link href="/legal" className="hover:text-emerald-500 transition-colors">Kullanım Şartları</Link></li>
+                <li><Link href="/legal/privacy" className="hover:text-emerald-500 transition-colors">Gizlilik Politikası</Link></li>
+                <li><Link href="/legal/terms" className="hover:text-emerald-500 transition-colors">Kullanım Şartları</Link></li>
                 <li><a href="mailto:destek@orjut.com" className="hover:text-emerald-500 transition-colors">İletişim</a></li>
-                <li><Link href="/delete-account" className="hover:text-rose-500 transition-colors text-zinc-600">Hesabımı Sil</Link></li>
+                <li><Link href="/login" className="hover:text-rose-500 transition-colors text-zinc-600">Hesabımı Sil</Link></li>
               </ul>
             </div>
           </div>

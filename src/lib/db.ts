@@ -89,15 +89,25 @@ export const db = {
     return supabase.from('inventory').select('*').eq('org_id', userId);
   },
   async insertInventoryItem(item: any) {
-    // Map frontend 'name' to DB 'item_name' if needed
+    // Map types to DB ENUM
+    const typeMap: Record<string, string> = {
+      'gubre': 'fertilizer',
+      'tohum': 'seed',
+      'yakit': 'fuel',
+      'diger': 'other'
+    };
+    
     const payload = {
       ...item,
       item_name: item.name || item.item_name,
-      unit_cost: item.last_unit_cost || item.unit_cost || 0
+      unit_cost: item.last_unit_cost || item.unit_cost || 0,
+      type: typeMap[item.type] || item.type || 'other'
     };
-    // Remove frontend-only aliases to avoid DB error
+    
+    // Remove frontend-only aliases
     delete (payload as any).name;
     delete (payload as any).last_unit_cost;
+    delete (payload as any).last_purchase_date;
     
     return supabase.from('inventory').insert([payload]).select().single();
   },

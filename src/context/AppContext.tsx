@@ -226,8 +226,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (inventoryData) {
           const unitCost = calculateUnitCost(amount, inventoryData.quantity);
           await addInventoryItem({ ...inventoryData, last_unit_cost: unitCost, last_purchase_date: date });
+          toast.success("Masraf ve Stok başarıyla eklendi");
+        } else {
+          toast.success("Masraf başarıyla kaydedildi");
         }
-        toast.success("Masraf kaydedildi");
       }
     } catch (err: any) {
       toast.error("Hata: " + err.message);
