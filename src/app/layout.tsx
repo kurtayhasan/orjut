@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 
@@ -10,6 +10,15 @@ import { Toaster } from 'sonner';
 import CookieConsent from '@/components/CookieConsent';
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+  themeColor: '#050505',
+};
+
 export const metadata: Metadata = {
   title: "Orjut AgTech OS | Akıllı Tarım İşletim Sistemi",
   description: "Çiftçiler ve ziraat mühendisleri için sıfır veri kaybı, maksimum hasat. Yapay zeka destekli uydu takibi, masraf ve arazi yönetim platformu.",
@@ -18,13 +27,6 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   icons: {
     icon: "/icon.svg",
-  },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: 'cover',
   },
   appleWebApp: {
     capable: true,
@@ -75,7 +77,6 @@ export default function RootLayout({
   return (
     <html lang="tr" className={`${inter.variable} ${outfit.variable}`}>
       <head>
-        <meta name="theme-color" content="#050505" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
       <body className="antialiased selection:bg-emerald-500/30">
