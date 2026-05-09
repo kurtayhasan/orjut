@@ -1,156 +1,171 @@
 import { supabase } from './supabase';
-import { Transaction, Land, Season, Profile, IrrigationLog, FieldOperation, ScoutingLog, InventoryItem } from '@/types';
+import type { Land, Transaction, Season, InventoryItem } from '@/types';
 
+// ─────────────────────────────────────────────
+// Generic query helper — eliminates boilerplate
+// ─────────────────────────────────────────────
+type Table = 'profiles' | 'lands' | 'transactions' | 'seasons' | 'irrigation_logs'
+  | 'field_operations' | 'scouting_logs' | 'inventory' | 'savings_logs'
+  | 'engineer_clients' | 'push_subscriptions';
+
+function from(table: Table) {
+  return supabase.from(table);
+}
+
+// ─────────────────────────────────────────────
+// Inventory type mapping (DB ENUM → TR label)
+// ─────────────────────────────────────────────
+const INVENTORY_TYPE_MAP: Record<string, string> = {
+  gubre: 'fertilizer',
+  tohum: 'seed',
+  yakit: 'fuel',
+  ilac:  'pesticide',
+  diger: 'other',
+};
+
+function normalizeInventoryPayload(item: Record<string, any>) {
+  const { name, last_unit_cost, last_purchase_date, ...rest } = item;
+  return {
+    ...rest,
+    item_name:  name ?? item.item_name,
+    unit_cost:  last_unit_cost ?? item.unit_cost ?? 0,
+    type:       INVENTORY_TYPE_MAP[item.type] ?? item.type ?? 'other',
+  };
+}
+
+// ─────────────────────────────────────────────
+// DB — single unified data access object
+// ─────────────────────────────────────────────
 export const db = {
-  // Profiles
-  async getProfile(userId: string) {
-    return supabase.from('profiles').select('*').eq('id', userId).single();
+
+  /* ── Profiles ─────────────────────────── */
+  getProfile: (userId: string) =>
+    from('profiles').select('*').eq('id', userId).single(),
+
+  getAllProfiles: () =>
+    from('profiles').select('*').order('created_at', { ascending: false }),
+
+  /* ── Lands ────────────────────────────── */
+  getLands: (userId: string) =>
+    from('lands').select('*').eq('org_id', userId),
+
+  insertLand: (land: Omit<Land, 'id'>) =>
+    from('lands').insert([land]).select().single(),
+
+  updateLand: (id: string, updates: Partial<Land>) =>
+    from('lands').update(updates).eq('id', id),
+
+  deleteLand: (id: string) =>
+    from('lands').delete().eq('id', id),
+
+  /* ── Transactions ─────────────────────── */
+  getTransactions: (userId: string, limit?: number) => {
+    let q = from('transactions')
+      .select('*, lands(block_no, parcel_no)')
+      .eq('org_id', userId)
+      .order('date', { ascending: false });
+    if (limit) q = q.limit(limit);
+    return q;
   },
 
-  // Lands
-  async getLands(userId: string) {
-    return supabase.from('lands').select('*').eq('org_id', userId);
-  },
-  async insertLand(land: Omit<Land, 'id'>) {
-    return supabase.from('lands').insert([land]).select().single();
-  },
-  async updateLand(id: string, updates: Partial<Land>) {
-    return supabase.from('lands').update(updates).eq('id', id);
-  },
-  async deleteLand(id: string) {
-    return supabase.from('lands').delete().eq('id', id);
-  },
+  insertTransaction: (tx: Omit<Transaction, 'id' | 'lands'>) =>
+    from('transactions').insert([tx]).select().single(),
 
-  // Transactions
-  async getTransactions(userId: string, limit?: number) {
-    let query = supabase.from('transactions').select('*, lands(block_no, parcel_no)').eq('org_id', userId).order('date', { ascending: false });
-    if (limit) query = query.limit(limit);
-    return query;
-  },
-  async getAllTransactionAmounts(userId: string) {
-    return supabase.from('transactions').select('amount').eq('org_id', userId);
-  },
-  async insertTransaction(tx: any) {
-    return supabase.from('transactions').insert([tx]).select().single();
-  },
-  async updateTransaction(id: string, updates: any) {
-    return supabase.from('transactions').update(updates).eq('id', id);
-  },
-  async deleteTransaction(id: string) {
-    return supabase.from('transactions').delete().eq('id', id);
-  },
+  updateTransaction: (id: string, updates: Partial<Transaction>) =>
+    from('transactions').update(updates).eq('id', id),
 
-  // Seasons
-  async getSeasons(userId: string) {
-    return supabase.from('seasons').select('*').eq('org_id', userId).order('created_at', { ascending: false });
-  },
-  async insertSeason(season: any) {
-    return supabase.from('seasons').insert([season]).select();
-  },
-  async updateSeason(id: string, updates: any) {
-    return supabase.from('seasons').update(updates).eq('id', id);
-  },
+  deleteTransaction: (id: string) =>
+    from('transactions').delete().eq('id', id),
 
-  // Irrigation
-  async getIrrigationLogs(userId: string) {
-    return supabase.from('irrigation_logs').select('*').eq('org_id', userId).order('date', { ascending: false });
-  },
-  async insertIrrigationLog(log: any) {
-    return supabase.from('irrigation_logs').insert([log]).select().single();
-  },
-  async deleteIrrigationLog(id: string) {
-    return supabase.from('irrigation_logs').delete().eq('id', id);
-  },
+  /* ── Seasons ──────────────────────────── */
+  getSeasons: (userId: string) =>
+    from('seasons').select('*').eq('org_id', userId).order('created_at', { ascending: false }),
 
-  // Field Operations
-  async getFieldOperations(userId: string) {
-    return supabase.from('field_operations').select('*').eq('org_id', userId).order('date', { ascending: false });
-  },
-  async insertFieldOperation(op: any) {
-    return supabase.from('field_operations').insert([op]).select().single();
-  },
-  async deleteFieldOperation(id: string) {
-    return supabase.from('field_operations').delete().eq('id', id);
-  },
+  insertSeason: (season: Omit<Season, 'id'>) =>
+    from('seasons').insert([season]).select(),
 
-  // Scouting
-  async getScoutingLogs(userId: string) {
-    return supabase.from('scouting_logs').select('*').eq('org_id', userId).order('date', { ascending: false });
-  },
-  async insertScoutingLog(log: any) {
-    return supabase.from('scouting_logs').insert([log]).select().single();
-  },
-  async deleteScoutingLog(id: string) {
-    return supabase.from('scouting_logs').delete().eq('id', id);
-  },
+  updateSeason: (id: string, updates: Partial<Season>) =>
+    from('seasons').update(updates).eq('id', id),
 
-  // Inventory
-  async getInventory(userId: string) {
-    return supabase.from('inventory').select('*').eq('org_id', userId);
-  },
-  async insertInventoryItem(item: any) {
-    // Map types to DB ENUM
-    const typeMap: Record<string, string> = {
-      'gubre': 'fertilizer',
-      'tohum': 'seed',
-      'yakit': 'fuel',
-      'diger': 'other'
-    };
-    
-    const payload = {
-      ...item,
-      item_name: item.name || item.item_name,
-      unit_cost: item.last_unit_cost || item.unit_cost || 0,
-      type: typeMap[item.type] || item.type || 'other'
-    };
-    
-    // Remove frontend-only aliases
-    delete (payload as any).name;
-    delete (payload as any).last_unit_cost;
-    delete (payload as any).last_purchase_date;
-    
-    return supabase.from('inventory').insert([payload]).select().single();
-  },
-  async updateInventoryItem(id: string, updates: Partial<InventoryItem>) {
-    return supabase.from('inventory').update(updates).eq('id', id);
-  },
-  async deleteInventoryItem(id: string) {
-    return supabase.from('inventory').delete().eq('id', id);
-  },
+  /* ── Irrigation ───────────────────────── */
+  getIrrigationLogs: (userId: string) =>
+    from('irrigation_logs').select('*').eq('org_id', userId).order('date', { ascending: false }),
 
-  // Savings
-  async insertSavingLog(log: any) {
-    return supabase.from('savings_logs').insert([log]);
-  },
+  insertIrrigationLog: (log: Record<string, unknown>) =>
+    from('irrigation_logs').insert([log]).select().single(),
 
-  // Admin & Engineer Specialized Functions
-  async getAllProfiles() {
-    return supabase.from('profiles').select('*').order('created_at', { ascending: false });
-  },
-  async getSystemMetrics() {
+  deleteIrrigationLog: (id: string) =>
+    from('irrigation_logs').delete().eq('id', id),
+
+  /* ── Field Operations ─────────────────── */
+  getFieldOperations: (userId: string) =>
+    from('field_operations').select('*').eq('org_id', userId).order('date', { ascending: false }),
+
+  insertFieldOperation: (op: Record<string, unknown>) =>
+    from('field_operations').insert([op]).select().single(),
+
+  deleteFieldOperation: (id: string) =>
+    from('field_operations').delete().eq('id', id),
+
+  /* ── Scouting ─────────────────────────── */
+  getScoutingLogs: (userId: string) =>
+    from('scouting_logs').select('*').eq('org_id', userId).order('date', { ascending: false }),
+
+  insertScoutingLog: (log: Record<string, unknown>) =>
+    from('scouting_logs').insert([log]).select().single(),
+
+  deleteScoutingLog: (id: string) =>
+    from('scouting_logs').delete().eq('id', id),
+
+  /* ── Inventory ────────────────────────── */
+  getInventory: (userId: string) =>
+    from('inventory').select('*').eq('org_id', userId),
+
+  insertInventoryItem: (item: Record<string, unknown>) =>
+    from('inventory').insert([normalizeInventoryPayload(item)]).select().single(),
+
+  updateInventoryItem: (id: string, updates: Partial<InventoryItem>) =>
+    from('inventory').update(updates).eq('id', id),
+
+  deleteInventoryItem: (id: string) =>
+    from('inventory').delete().eq('id', id),
+
+  /* ── Savings ──────────────────────────── */
+  insertSavingLog: (log: Record<string, unknown>) =>
+    from('savings_logs').insert([log]),
+
+  /* ── System Metrics (Admin) ───────────── */
+  getSystemMetrics: async () => {
     const [users, lands, premium] = await Promise.all([
-      supabase.from('profiles').select('*', { count: 'exact', head: true }),
-      supabase.from('lands').select('*', { count: 'exact', head: true }),
-      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('is_premium', true)
+      from('profiles').select('*', { count: 'exact', head: true }),
+      from('lands').select('*', { count: 'exact', head: true }),
+      from('profiles').select('*', { count: 'exact', head: true }).eq('is_premium', true),
     ]);
     return {
-      totalUsers: users.count || 0,
-      totalLands: lands.count || 0,
-      totalPremium: premium.count || 0
+      totalUsers:   users.count   ?? 0,
+      totalLands:   lands.count   ?? 0,
+      totalPremium: premium.count ?? 0,
     };
   },
-  async getClients(engineerId: string) {
-    return supabase.from('engineer_clients').select('*, farmer:profiles!farmer_id(*)').eq('engineer_id', engineerId);
+
+  /* ── Engineer / Clients ───────────────── */
+  getClients: (engineerId: string) =>
+    from('engineer_clients')
+      .select('*, farmer:profiles!farmer_id(*)')
+      .eq('engineer_id', engineerId),
+
+  addClientRequest: async (engineerId: string, phone: string) => {
+    const { data: user, error } = await from('profiles').select('id').eq('phone', phone).single();
+    if (error || !user) throw new Error('Bu telefon numarasına ait bir kullanıcı bulunamadı.');
+    return from('engineer_clients').insert([{ engineer_id: engineerId, farmer_id: user.id, status: 'pending' }]);
   },
-  async addClientRequest(engineerId: string, phone: string) {
-    const { data: user } = await supabase.from('profiles').select('id').eq('phone', phone).single();
-    if (!user) throw new Error("Bu telefon numarasına ait bir kullanıcı bulunamadı.");
-    return supabase.from('engineer_clients').insert([{ engineer_id: engineerId, farmer_id: user.id, status: 'pending' }]);
-  },
-  async updateClientRequestStatus(requestId: string, status: 'approved' | 'rejected') {
-    return supabase.from('engineer_clients').update({ status }).eq('id', requestId);
-  },
-  async getPendingRequests(farmerId: string) {
-    return supabase.from('engineer_clients').select('*, engineer:profiles!engineer_id(*)').eq('farmer_id', farmerId).eq('status', 'pending');
-  }
+
+  updateClientRequestStatus: (requestId: string, status: 'approved' | 'rejected') =>
+    from('engineer_clients').update({ status }).eq('id', requestId),
+
+  getPendingRequests: (farmerId: string) =>
+    from('engineer_clients')
+      .select('*, engineer:profiles!engineer_id(*)')
+      .eq('farmer_id', farmerId)
+      .eq('status', 'pending'),
 };
