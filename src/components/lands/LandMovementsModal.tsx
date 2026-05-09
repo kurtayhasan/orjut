@@ -4,7 +4,7 @@ import React from 'react';
 import BaseModal from '../ui/BaseModal';
 import { Transaction } from '@/types';
 import { format } from 'date-fns';
-import { tr } from 'date-fns/locale';
+import { tr } from 'date-fns/locale/tr';
 import { Receipt, Calendar, Tag, LandPlot } from 'lucide-react';
 
 interface LandMovementsModalProps {

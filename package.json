@@ -17,7 +17,7 @@
     "@types/leaflet-draw": "^1.0.13",
     "bcryptjs": "^3.0.3",
     "country-state-city": "^3.2.1",
-    "date-fns": "^4.1.0",
+    "date-fns": "^3.6.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.7",
     "leaflet": "^1.9.4",
