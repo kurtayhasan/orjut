@@ -17,5 +17,13 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: 'maskable',
       },
     ],
+    related_applications: [
+      {
+        platform: 'play',
+        url: 'https://play.google.com/store/apps/details?id=com.orjut.ziraiasistan',
+        id: 'com.orjut.ziraiasistan',
+      },
+    ],
+    prefer_related_applications: true,
   }
 }
