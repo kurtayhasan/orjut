@@ -41,9 +41,8 @@ function MapController({ selectedLand }: { selectedLand: any }) {
 }
 
 export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, editLand?: any }) {
-  const { addLand, updateLand, lands, userProfile, isDarkMode } = useAppContext();
+  const { addLand, updateLand, lands, userProfile, isDarkMode, triggerUpsell, isPremium } = useAppContext();
   const [isNDVIActive, setIsNDVIActive] = useState(false);
-  const isPremium = userProfile?.is_premium;
   const [markerPosition, setMarkerPosition] = useState<L.LatLng | null>(null);
   const [showCropSelector, setShowCropSelector] = useState(false);
   const [editingLandId, setEditingLandId] = useState<string | null>(null);
@@ -255,13 +254,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
 
   const handleNDVIToggle = () => {
     if (!isPremium) {
-      toast.error("NDVI Uydu Analizi sadece Premium üyeler içindir.", {
-        description: "Hemen yükseltin ve tarlanızı uzaydan izleyin!",
-        action: {
-          label: "Yükselt",
-          onClick: () => window.location.href = '/settings/billing'
-        }
-      });
+      triggerUpsell();
       return;
     }
     setIsNDVIActive(!isNDVIActive);

@@ -1,6 +1,6 @@
 export const landingTranslations = {
   tr: {
-    heroBadge: "YENİ NESİS ZİRAİ İŞLETME YÖNETİMİ",
+    heroBadge: "YENİ NESİL ZİRAİ İŞLETME YÖNETİMİ",
     heroTitle: "Tarlanızın Dijital <span class='text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-indigo-500'>Ziraat Mühendisi</span>",
     heroSub: "Maliyetlerinizi kuruşu kuruşuna takip edin, uydudan tarlanızı izleyin ve doğru zamanda doğru müdahaleyi yapın.",
     heroCTA: "Ücretsiz Başla",

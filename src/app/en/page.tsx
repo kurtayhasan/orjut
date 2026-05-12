@@ -5,18 +5,10 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { 
   ArrowRight, 
-  Map, 
-  TrendingUp, 
-  Leaf, 
-  ShieldCheck, 
-  Zap, 
   Satellite, 
   Bot, 
   BarChart3, 
-  CheckCircle2,
-  Globe,
-  Star,
-  Layers
+  CheckCircle2
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
@@ -138,78 +130,63 @@ export default function EnglishLandingPage() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-20">
             <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-6">{t.pricingTitle}</h2>
+            <p className="text-zinc-500 font-medium text-lg max-w-2xl mx-auto">Core features are free forever. Upgrade to Premium for AI analysis and satellite imagery.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
-            {/* STARTER */}
-            <Card className="p-12 !bg-zinc-950 !border-white/5 flex flex-col h-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-stretch">
+            {/* FREE */}
+            <Card className="p-12 !bg-zinc-950 !border-white/5 flex flex-col h-full hover:!border-white/20 transition-all">
               <div className="mb-10">
-                <span className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-black uppercase tracking-widest text-zinc-500">{t.starter}</span>
-                <h3 className="text-3xl font-black mt-4 mb-2">Starter</h3>
+                <span className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-black uppercase tracking-widest text-zinc-500">Free</span>
+                <h3 className="text-3xl font-black mt-4 mb-2">Data Collector</h3>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-5xl font-black text-white">Free</span>
+                  <span className="text-5xl font-black text-white">$0</span>
+                  <span className="text-zinc-500 font-bold">/ forever</span>
                 </div>
               </div>
               <ul className="space-y-5 mb-12 flex-1">
-                {['5 Lands', 'Standard Dashboard', 'Manual Cost Entry', 'Email Support'].map(item => (
+                {['Field Management', 'Expense Tracking', 'Season Records', 'Inventory Management', 'Irrigation Tracking'].map(item => (
                   <li key={item} className="flex items-center gap-3 text-sm font-bold text-zinc-500">
                     <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />
                     {item}
                   </li>
                 ))}
               </ul>
-              <Button variant="outline" className="w-full !rounded-2xl !py-4 font-black" onClick={handleStart}>{t.getStarted}</Button>
+              <Button variant="outline" className="w-full !rounded-2xl !py-4 font-black" onClick={handleStart}>Start Free</Button>
             </Card>
 
-            {/* PRO */}
-            <Card className="!bg-emerald-600 !border-transparent p-12 flex flex-col h-full relative overflow-hidden shadow-2xl shadow-emerald-500/20 transform md:scale-110 z-10 !rounded-[3rem]">
-              <div className="absolute top-0 right-0 bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] px-6 py-3 rounded-bl-3xl">
-                Most Popular
-              </div>
-              <div className="mb-10">
-                <span className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-black uppercase tracking-widest text-white">{t.professional}</span>
-                <h3 className="text-3xl font-black mt-4 mb-2 text-white">KOBI Pro</h3>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-5xl font-black text-white">$99</span>
-                  <span className="text-emerald-100/60 font-bold">{t.perYear}</span>
+            {/* PREMIUM — KOBI PRO */}
+            <div className="relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 via-emerald-400 to-indigo-500 rounded-[3.5rem] blur-lg opacity-30 animate-pulse" />
+              <Card className="relative !bg-emerald-600 !border-transparent p-12 flex flex-col h-full overflow-hidden shadow-2xl shadow-emerald-500/20 !rounded-[3rem]">
+                <div className="absolute top-0 right-0 bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] px-6 py-3 rounded-bl-3xl">
+                  Recommended
                 </div>
-              </div>
-              <ul className="space-y-5 mb-12 flex-1">
-                {[
-                  'Satellite Heatmaps',
-                  'AI Agronomist (50 Analysis)',
-                  'Unlimited Transactions',
-                  'PDF and Excel Reporting',
-                  'Inventory Management'
-                ].map(item => (
-                  <li key={item} className="flex items-center gap-3 text-sm font-black text-white">
-                    <CheckCircle2 size={18} className="text-white shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Button className="w-full !bg-white !text-black hover:!bg-emerald-50 !rounded-2xl !py-4 font-black shadow-xl" onClick={handleStart}>{t.upgrade}</Button>
-            </Card>
-
-            {/* ENTERPRISE */}
-            <Card className="!bg-zinc-950 !border-white/5 p-12 flex flex-col h-full hover:!border-white/20 transition-all">
-              <div className="mb-10">
-                <span className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-black uppercase tracking-widest text-zinc-400">{t.enterprise}</span>
-                <h3 className="text-3xl font-black mt-4 mb-2">Enterprise</h3>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-5xl font-black text-white">$249</span>
-                  <span className="text-zinc-500 font-bold">{t.perYear}</span>
+                <div className="mb-10">
+                  <span className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-black uppercase tracking-widest text-white">KOBI Pro</span>
+                  <h3 className="text-3xl font-black mt-4 mb-2 text-white">Smart Season</h3>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-5xl font-black text-white">$29</span>
+                    <span className="text-emerald-100/60 font-bold">/year</span>
+                  </div>
+                  <p className="text-emerald-100/80 text-sm font-bold mt-2">or $3/month</p>
                 </div>
-              </div>
-              <ul className="space-y-5 mb-12 flex-1">
-                {['Unlimited NDVI & AI', 'Priority Support', 'Multi-user', 'API & ERP Integration', 'Agronomic Support'].map(item => (
-                  <li key={item} className="flex items-center gap-3 text-sm font-bold text-zinc-400">
-                    <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Button variant="outline" className="w-full !rounded-2xl !py-4 font-black" onClick={handleStart}>{t.contact}</Button>
-            </Card>
+                <ul className="space-y-5 mb-12 flex-1">
+                  {[
+                    'Everything in Free Plan',
+                    'AI Agronomist Assistant',
+                    'NDVI Satellite Analysis',
+                    'Unlimited Consultations',
+                    'Priority Support'
+                  ].map(item => (
+                    <li key={item} className="flex items-center gap-3 text-sm font-black text-white">
+                      <CheckCircle2 size={18} className="text-white shrink-0" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Button className="w-full !bg-white !text-black hover:!bg-emerald-50 !rounded-2xl !py-4 font-black shadow-xl" onClick={handleStart}>Upgrade to Premium</Button>
+              </Card>
+            </div>
           </div>
         </div>
       </section>

@@ -5,14 +5,14 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAppContext } from '@/context/AppContext';
 import { 
-  Leaf, LayoutDashboard, Map as MapIcon, Box, Wallet, Settings, CalendarDays, LogOut, Droplet, ClipboardCheck, Sun, Moon, Users, Shield 
+  Leaf, LayoutDashboard, Map as MapIcon, Box, Wallet, Settings, CalendarDays, LogOut, Droplet, ClipboardCheck, Sun, Moon, Users, Shield, Bot, Crown 
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { t, isSidebarOpen, setIsSidebarOpen, isDarkMode, toggleDarkMode, userRole } = useAppContext();
+  const { t, isSidebarOpen, setIsSidebarOpen, isDarkMode, toggleDarkMode, userRole, isPremium } = useAppContext();
 
   const handleLogout = async () => {
     const { supabase } = await import('@/lib/supabase');
@@ -53,6 +53,7 @@ export default function Sidebar() {
           <SidebarItem href="/dashboard/scouting" icon={<ClipboardCheck size={18} />} label="Arazi Kontrolü" active={pathname.includes('/scouting')} />
           <SidebarItem href="/dashboard/inventory" icon={<Box size={18} />} label={t('inventory')} active={pathname.includes('/inventory')} />
           <SidebarItem href="/dashboard/finance" icon={<Wallet size={18} />} label={t('finance')} active={pathname.includes('/finance')} />
+          <SidebarItem href="/dashboard/ai" icon={<Bot size={18} />} label="Yapay Zekâ" active={pathname.includes('/ai')} badge={!isPremium ? 'PRO' : undefined} />
           {userRole === 'engineer' && (
             <SidebarItem href="/dashboard/clients" icon={<Users size={18} />} label="Müşterilerim" active={pathname.includes('/clients')} />
           )}
@@ -94,7 +95,7 @@ export default function Sidebar() {
   );
 }
 
-function SidebarItem({ icon, label, href, active }: { icon: React.ReactNode, label: string, href: string, active?: boolean }) {
+function SidebarItem({ icon, label, href, active, badge }: { icon: React.ReactNode, label: string, href: string, active?: boolean, badge?: string }) {
   return (
     <Link href={href} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm font-bold ${
       active 
@@ -103,6 +104,12 @@ function SidebarItem({ icon, label, href, active }: { icon: React.ReactNode, lab
     }`}>
       <span className={active ? 'text-zinc-900 dark:text-indigo-400' : 'text-zinc-500 dark:text-zinc-500'}>{icon}</span>
       {label}
+      {badge && (
+        <span className="ml-auto px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-[8px] font-black rounded-md uppercase tracking-wider flex items-center gap-0.5">
+          <Crown size={8} />
+          {badge}
+        </span>
+      )}
     </Link>
   );
 }

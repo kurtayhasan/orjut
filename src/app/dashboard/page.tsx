@@ -19,7 +19,7 @@ export default function DashboardPage() {
   const { 
     totalExpenses, totalArea, dailyInsight, totalSavings, 
     weatherData, transactions, isLoadingTransactions, isLoadingLands, 
-    lands, inventory, fieldOperations, scoutingLogs, userProfile 
+    lands, inventory, fieldOperations, scoutingLogs, userProfile, isPremium, triggerUpsell 
   } = useAppContext();
   
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
@@ -65,10 +65,8 @@ export default function DashboardPage() {
   }, [transactions]);
 
   const handleStartAnalysis = async () => {
-    if (!userProfile?.is_premium) {
-      toast.error("Yapay Zeka Analizi sadece Premium üyeler içindir.", {
-        description: "Verilerinizi profesyonel bir ziraat mühendisi gibi analiz ettirmek için yükseltin."
-      });
+    if (!isPremium) {
+      triggerUpsell();
       return;
     }
     

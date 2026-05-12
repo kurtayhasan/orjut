@@ -5,19 +5,10 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { 
   ArrowRight, 
-  Map, 
-  TrendingUp, 
-  Leaf, 
-  ShieldCheck, 
-  Zap, 
   Satellite, 
   Bot, 
   BarChart3, 
-  CheckCircle2,
-  Globe,
-  Star,
-  Layers,
-  MousePointer2
+  CheckCircle2
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
@@ -144,78 +135,63 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-20">
             <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-6">{t.pricingTitle}</h2>
+            <p className="text-zinc-500 font-medium text-lg max-w-2xl mx-auto">Temel özellikler sonsuza kadar ücretsiz. Yapay zekâ ve uydu verileri için Premium&apos;a geçin.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
-            {/* STARTER */}
-            <Card className="p-12 !bg-zinc-950 !border-white/5 flex flex-col h-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-stretch">
+            {/* FREE */}
+            <Card className="p-12 !bg-zinc-950 !border-white/5 flex flex-col h-full hover:!border-white/20 transition-all">
               <div className="mb-10">
-                <span className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-black uppercase tracking-widest text-zinc-500">{t.starter}</span>
-                <h3 className="text-3xl font-black mt-4 mb-2">Başlangıç</h3>
+                <span className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-black uppercase tracking-widest text-zinc-500">Ücretsiz</span>
+                <h3 className="text-3xl font-black mt-4 mb-2">Veri Toplayıcı</h3>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-5xl font-black text-white">Ücretsiz</span>
+                  <span className="text-5xl font-black text-white">0 TL</span>
+                  <span className="text-zinc-500 font-bold">/ sonsuza dek</span>
                 </div>
               </div>
               <ul className="space-y-5 mb-12 flex-1">
-                {['5 Arazi Kaydı', 'Temel Dashboard', 'Manuel Masraf Girişi', 'E-posta Desteği'].map(item => (
+                {['Tarla Yönetimi', 'Masraf Takibi', 'Sezon Kayıtları', 'Envanter Yönetimi', 'Sulama Takibi'].map(item => (
                   <li key={item} className="flex items-center gap-3 text-sm font-bold text-zinc-500">
                     <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />
                     {item}
                   </li>
                 ))}
               </ul>
-              <Button variant="outline" className="w-full !rounded-2xl !py-4 font-black" onClick={handleStart}>{t.getStarted}</Button>
+              <Button variant="outline" className="w-full !rounded-2xl !py-4 font-black" onClick={handleStart}>Ücretsiz Başla</Button>
             </Card>
 
-            {/* PRO */}
-            <Card className="!bg-emerald-600 !border-transparent p-12 flex flex-col h-full relative overflow-hidden shadow-2xl shadow-emerald-500/20 transform md:scale-110 z-10 !rounded-[3rem]">
-              <div className="absolute top-0 right-0 bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] px-6 py-3 rounded-bl-3xl">
-                En Çok Tercih Edilen
-              </div>
-              <div className="mb-10">
-                <span className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-black uppercase tracking-widest text-white">{t.professional}</span>
-                <h3 className="text-3xl font-black mt-4 mb-2 text-white">KOBİ Pro</h3>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-5xl font-black text-white">3.490 TL</span>
-                  <span className="text-emerald-100/60 font-bold">{t.perYear}</span>
+            {/* PREMIUM — KOBİ PRO */}
+            <div className="relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 via-emerald-400 to-indigo-500 rounded-[3.5rem] blur-lg opacity-30 animate-pulse" />
+              <Card className="relative !bg-emerald-600 !border-transparent p-12 flex flex-col h-full overflow-hidden shadow-2xl shadow-emerald-500/20 !rounded-[3rem]">
+                <div className="absolute top-0 right-0 bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] px-6 py-3 rounded-bl-3xl">
+                  Önerilen
                 </div>
-              </div>
-              <ul className="space-y-5 mb-12 flex-1">
-                {[
-                  'NDVI Uydu Isı Haritaları',
-                  'AI Ziraat Mühendisi (50 Analiz)',
-                  'Sınırsız İşlem Kaydı',
-                  'PDF ve Excel Raporlama',
-                  'Stok ve Envanter Yönetimi'
-                ].map(item => (
-                  <li key={item} className="flex items-center gap-3 text-sm font-black text-white">
-                    <CheckCircle2 size={18} className="text-white shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Button className="w-full !bg-white !text-black hover:!bg-emerald-50 !rounded-2xl !py-4 font-black shadow-xl" onClick={handleStart}>{t.upgrade}</Button>
-            </Card>
-
-            {/* ENTERPRISE */}
-            <Card className="!bg-zinc-950 !border-white/5 p-12 flex flex-col h-full hover:!border-white/20 transition-all">
-              <div className="mb-10">
-                <span className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-black uppercase tracking-widest text-zinc-400">{t.enterprise}</span>
-                <h3 className="text-3xl font-black mt-4 mb-2">Kurumsal</h3>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-5xl font-black text-white">8.990 TL</span>
-                  <span className="text-zinc-500 font-bold">{t.perYear}</span>
+                <div className="mb-10">
+                  <span className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-black uppercase tracking-widest text-white">KOBİ Pro</span>
+                  <h3 className="text-3xl font-black mt-4 mb-2 text-white">Akıllı Sezon</h3>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-5xl font-black text-white">1.000 TL</span>
+                    <span className="text-emerald-100/60 font-bold">/yıl</span>
+                  </div>
+                  <p className="text-emerald-100/80 text-sm font-bold mt-2">veya Aylık 100 TL</p>
                 </div>
-              </div>
-              <ul className="space-y-5 mb-12 flex-1">
-                {['Sınırsız NDVI ve AI Analizi', 'Öncelikli Teknik Destek', 'Çoklu Kullanıcı (Acente)', 'API ve ERP Entegrasyonu', 'Zirai Danışmanlık Desteği'].map(item => (
-                  <li key={item} className="flex items-center gap-3 text-sm font-bold text-zinc-400">
-                    <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Button variant="outline" className="w-full !rounded-2xl !py-4 font-black" onClick={handleStart}>{t.contact}</Button>
-            </Card>
+                <ul className="space-y-5 mb-12 flex-1">
+                  {[
+                    'Her Şey (Ücretsiz Plandaki Tüm Özellikler)',
+                    'Yapay Zekâ Asistanı',
+                    'NDVI Uydu Analizi',
+                    'Sınırsız Danışmanlık',
+                    'Öncelikli Teknik Destek'
+                  ].map(item => (
+                    <li key={item} className="flex items-center gap-3 text-sm font-black text-white">
+                      <CheckCircle2 size={18} className="text-white shrink-0" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Button className="w-full !bg-white !text-black hover:!bg-emerald-50 !rounded-2xl !py-4 font-black shadow-xl" onClick={handleStart}>Premium&apos;a Geç</Button>
+              </Card>
+            </div>
           </div>
         </div>
       </section>

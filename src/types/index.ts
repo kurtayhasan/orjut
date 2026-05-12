@@ -106,8 +106,17 @@ export interface Season {
 export interface CategoryTotal {
   total: number;
   count: number;
+  percentage?: number;
 }
-export type CategoryTotals = Record<string, CategoryTotal> & { grandTotal?: number };
+export interface CategoryTotals {
+  mazot: CategoryTotal;
+  gubre: CategoryTotal;
+  ilac: CategoryTotal;
+  isci: CategoryTotal;
+  diger: CategoryTotal;
+  grandTotal: number;
+  [key: string]: CategoryTotal | number;
+}
 
 // ─── UI Component Props ───────────────────────────────────────────────────────
 

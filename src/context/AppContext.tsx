@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
+import PremiumUpsellModal from '@/components/ui/PremiumUpsellModal';
 import { fetchWeather, WeatherData } from '@/lib/weatherService';
 import { buildAIPrompt, LandContext } from '@/lib/aiActionEngine';
 import { Transaction, Land, Season, Profile, IrrigationLog, FieldOperation, ScoutingLog, InventoryItem } from '@/types';
@@ -63,6 +64,10 @@ type AppContextType = {
   selectedClientId: string | null;
   setSelectedClientId: (id: string | null) => void;
   activeOrgId: string | null;
+  isPremium: boolean;
+  showUpsell: boolean;
+  triggerUpsell: () => void;
+  closeUpsell: () => void;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -93,6 +98,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [userRole, setUserRole] = useState<'farmer' | 'engineer' | 'admin'>('farmer');
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+  const [showUpsell, setShowUpsell] = useState(false);
+  const triggerUpsell = useCallback(() => setShowUpsell(true), []);
+  const closeUpsell = useCallback(() => setShowUpsell(false), []);
 
   const t = (key: keyof typeof translations['en']) => translations[lang][key] || key;
 
@@ -139,8 +147,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (sl.data) setScoutingLogs(sl.data);
       if (inv.data) setInventory(inv.data);
 
-      const { data: allTx } = await db.getAllTransactionAmounts(activeOrgId);
-      if (allTx) setTotalExpenses(allTx.reduce((sum, tx) => sum + Number(tx.amount || 0), 0));
+      const { data: allTx } = await db.getTransactions(activeOrgId);
+      if (allTx) setTotalExpenses(allTx.reduce((sum: number, tx: any) => sum + Number(tx.amount || 0), 0));
 
     } catch (e) {
       console.error("Critical Data Fetch Error:", e);
@@ -423,10 +431,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     deleteScoutingLog: async (id: string) => { setScoutingLogs(prev => prev.filter(s => s.id !== id)); db.deleteScoutingLog(id); },
     inventory, addInventoryItem, updateInventoryItem, deleteInventoryItem,
     isDarkMode, toggleDarkMode: () => setIsDarkMode(!isDarkMode), calculateUnitCost,
-    userRole, selectedClientId, setSelectedClientId, activeOrgId
+    userRole, selectedClientId, setSelectedClientId, activeOrgId,
+    isPremium: !!userProfile?.is_premium,
+    showUpsell, triggerUpsell, closeUpsell
   };
 
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  return (
+    <AppContext.Provider value={value}>
+      {children}
+      <PremiumUpsellModal isOpen={showUpsell} onClose={closeUpsell} />
+    </AppContext.Provider>
+  );
 }
 
 export const useAppContext = () => {
