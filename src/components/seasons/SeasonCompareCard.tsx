@@ -1,5 +1,9 @@
+'use client';
+
 import React from 'react';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp, TrendingDown, Target, Wallet, Landmark } from 'lucide-react';
+import Card from '@/components/ui/Card';
+import { cn, formatCurrency } from '@/lib/utils';
 
 export default function SeasonCompareCard({ season1, season2 }: { season1: any, season2: any }) {
   // Mock comparison logic, in a real scenario these metrics would come from aggregated backend data
@@ -14,53 +18,81 @@ export default function SeasonCompareCard({ season1, season2 }: { season1: any, 
   const isS1MoreProfitable = diffProfit > 0;
 
   return (
-    <div className="bg-white dark:bg-zinc-900 border-2 border-zinc-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 divide-y md:divide-y-0 md:divide-x divide-zinc-100 dark:divide-zinc-800">
+    <Card padding="none" className="bg-white/[0.02] backdrop-blur-xl border-white/5 overflow-hidden">
+      <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/5">
         
         {/* Season 1 */}
-        <div className="space-y-6 pb-6 md:pb-0">
-          <div>
-            <h3 className="font-black text-xl text-zinc-900 dark:text-zinc-100 tracking-tight">{season1.name}</h3>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-widest mt-1">Seçili Sezon</p>
+        <div className="p-6 space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-black text-xl text-zinc-100 tracking-tight">{season1.name}</h3>
+              <p className="text-[10px] text-primary font-black uppercase tracking-widest mt-1">SEÇİLİ SEZON</p>
+            </div>
+            <div className="bg-primary/20 p-2 rounded-xl text-primary border border-primary/20">
+               <Target size={20} />
+            </div>
           </div>
- 
+  
           <div className="space-y-4">
-            <div className="p-4 bg-rose-50/50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/30 rounded-2xl">
-              <p className="text-[10px] font-black text-rose-700 dark:text-rose-400 uppercase tracking-widest mb-1">Toplam Harcama</p>
-              <div className="text-2xl font-black text-rose-600 dark:text-rose-500">₺{s1Expenses.toLocaleString()}</div>
+            <div className="p-4 bg-white/[0.03] border border-white/5 rounded-2xl">
+              <div className="flex items-center gap-2 mb-2">
+                 <Wallet size={14} className="text-danger" />
+                 <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">TOPLAM HARCAMA</p>
+              </div>
+              <div className="text-2xl font-black text-zinc-100">{formatCurrency(s1Expenses)}</div>
             </div>
             
-            <div className="p-4 bg-emerald-50/50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 rounded-2xl">
-              <p className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest mb-1">Tahmini Kâr</p>
-              <div className="text-2xl font-black text-emerald-600 dark:text-emerald-500">₺{s1Profit.toLocaleString()}</div>
+            <div className="p-4 bg-white/[0.03] border border-white/5 rounded-2xl">
+              <div className="flex items-center gap-2 mb-2">
+                 <TrendingUp size={14} className="text-success" />
+                 <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">TAHMİNİ KÂR</p>
+              </div>
+              <div className="text-2xl font-black text-zinc-100">{formatCurrency(s1Profit)}</div>
             </div>
           </div>
         </div>
- 
+  
         {/* Season 2 */}
-        <div className="md:pl-8 pt-6 md:pt-0 space-y-6">
-          <div>
-            <h3 className="font-black text-xl text-zinc-900 dark:text-zinc-100 tracking-tight">{season2.name}</h3>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-widest mt-1">Önceki Sezon</p>
+        <div className="p-6 space-y-6 bg-white/[0.01]">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-black text-xl text-zinc-100 tracking-tight">{season2.name}</h3>
+              <p className="text-[10px] text-text-muted font-black uppercase tracking-widest mt-1">ÖNCEKİ SEZON</p>
+            </div>
+            <div className="bg-white/5 p-2 rounded-xl text-text-muted border border-white/10">
+               <Landmark size={20} />
+            </div>
           </div>
- 
+  
           <div className="space-y-4">
-            <div className="p-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 rounded-2xl">
-              <p className="text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest mb-1">Toplam Harcama</p>
+            <div className="p-4 bg-white/[0.03] border border-white/5 rounded-2xl">
+              <div className="flex items-center gap-2 mb-2">
+                 <Wallet size={14} className="text-zinc-500" />
+                 <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">TOPLAM HARCAMA</p>
+              </div>
               <div className="flex items-center justify-between">
-                <div className="text-2xl font-black text-zinc-700 dark:text-zinc-300">₺{s2Expenses.toLocaleString()}</div>
-                <div className={`flex items-center gap-1 text-[10px] font-black px-2 py-1 rounded-lg ${isS1MoreExpensive ? 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400' : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'}`}>
+                <div className="text-2xl font-black text-zinc-300">{formatCurrency(s2Expenses)}</div>
+                <div className={cn(
+                  "flex items-center gap-1 text-[10px] font-black px-2 py-1 rounded-lg border",
+                  isS1MoreExpensive ? 'bg-danger/10 border-danger/20 text-danger' : 'bg-success/10 border-success/20 text-success'
+                )}>
                   {isS1MoreExpensive ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                   {Math.abs((diffExpenses / s2Expenses) * 100).toFixed(0)}%
                 </div>
               </div>
             </div>
             
-            <div className="p-4 bg-zinc-50 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 rounded-2xl">
-              <p className="text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest mb-1">Tahmini Kâr</p>
+            <div className="p-4 bg-white/[0.03] border border-white/5 rounded-2xl">
+              <div className="flex items-center gap-2 mb-2">
+                 <TrendingUp size={14} className="text-zinc-500" />
+                 <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">TAHMİNİ KÂR</p>
+              </div>
               <div className="flex items-center justify-between">
-                <div className="text-2xl font-black text-zinc-700 dark:text-zinc-300">₺{s2Profit.toLocaleString()}</div>
-                <div className={`flex items-center gap-1 text-[10px] font-black px-2 py-1 rounded-lg ${isS1MoreProfitable ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400'}`}>
+                <div className="text-2xl font-black text-zinc-300">{formatCurrency(s2Profit)}</div>
+                <div className={cn(
+                  "flex items-center gap-1 text-[10px] font-black px-2 py-1 rounded-lg border",
+                  isS1MoreProfitable ? 'bg-success/10 border-success/20 text-success' : 'bg-danger/10 border-danger/20 text-danger'
+                )}>
                   {isS1MoreProfitable ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                   {Math.abs((diffProfit / s2Profit) * 100).toFixed(0)}%
                 </div>
@@ -68,8 +100,8 @@ export default function SeasonCompareCard({ season1, season2 }: { season1: any, 
             </div>
           </div>
         </div>
- 
+  
       </div>
-    </div>
+    </Card>
   );
 }

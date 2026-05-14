@@ -9,6 +9,7 @@ export interface Profile {
   last_name:   string;
   is_premium:  boolean;
   avatar_url?: string;
+  role?:       'farmer' | 'engineer' | 'admin';
 }
 
 export interface Land {
@@ -67,7 +68,9 @@ export interface ScoutingLog {
   land_id:      string;
   date:         string;
   notes:        string;
-  health_score: number;
+  health_score?:number; // Legacy or calculated
+  health_status?: 'saglikli' | 'hastalik' | 'zararli'; // New UI field
+  growth_stage?: 'cimlenme' | 'ciceklenme' | 'meyve_tutumu' | 'hasat'; // New UI field
   image_url?:   string;
 }
 
@@ -76,9 +79,11 @@ export interface FieldOperation {
   org_id:         string;
   land_id:        string;
   date:           string;
-  type:           'fertilizer' | 'pesticide' | 'harvest' | 'planting';
+  type:           'fertilizer' | 'pesticide' | 'harvest' | 'planting' | 'su' | 'gubre' | 'ilac'; // Extended types for UI compatibility
   method:         string;
   amount:         number;
+  unit?:          string; // Added for UI compatibility
+  notes?:         string; // Added for UI compatibility
   inventory_id?:  string;
 }
 
@@ -87,8 +92,12 @@ export interface IrrigationLog {
   org_id:           string;
   land_id:          string;
   date:             string;
-  duration_minutes: number;
-  water_amount_m3?: number;
+  duration_minutes?:number; // Legacy
+  water_amount_m3?: number; // Legacy
+  amount:           number; // New UI field (can map to duration or m3)
+  unit:             string; // New UI field (saat, ton, litre)
+  method:           string; // New UI field
+  notes?:           string; // New UI field
 }
 
 export interface Season {

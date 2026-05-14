@@ -1,9 +1,20 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Outfit } from "next/font/google";
+import { Nunito, Nunito_Sans } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
-const outfit = Outfit({ subsets: ["latin"], variable: '--font-outfit' });
+const nunito = Nunito({ 
+  subsets: ["latin"], 
+  variable: '--font-heading',
+  weight: ['400', '600', '700', '800', '900'],
+  display: 'swap',
+});
+
+const nunitoSans = Nunito_Sans({ 
+  subsets: ["latin"], 
+  variable: '--font-body',
+  weight: ['400', '600', '700'],
+  display: 'swap',
+});
 
 import { AppProvider } from "@/context/AppContext";
 import { Toaster } from 'sonner';
@@ -16,13 +27,13 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: 'cover',
-  themeColor: '#050505',
+  themeColor: '#2D7A3A',
 };
 
 export const metadata: Metadata = {
-  title: "Orjut AgTech OS | Akıllı Tarım İşletim Sistemi",
-  description: "Çiftçiler ve ziraat mühendisleri için sıfır veri kaybı, maksimum hasat. Yapay zeka destekli uydu takibi, masraf ve arazi yönetim platformu.",
-  keywords: ["Tarım yazılımı", "Zirai Takip", "Çiftçi Uygulaması", "Tarım ERP", "Akıllı Tarım", "Arazi Yönetimi", "NDVI Takibi"],
+  title: "Orjut ZiraiAsistan | Profesyonel Tarım Yönetim Sistemi",
+  description: "Türk çiftçisi için geliştirilmiş en gelişmiş tarım takip platformu. Arazi yönetimi, masraf takibi ve yapay zeka destekli zirai danışmanlık.",
+  keywords: ["Tarım yazılımı", "Zirai Takip", "Çiftçi Uygulaması", "Tarım ERP", "Akıllı Tarım", "Arazi Yönetimi", "Masraf Takibi"],
   metadataBase: new URL('https://orjut.com'),
   manifest: "/manifest.json",
   icons: {
@@ -30,43 +41,24 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'black-translucent',
-    title: 'Orjut AgTech',
+    statusBarStyle: 'default',
+    title: 'Orjut ZiraiAsistan',
   },
   openGraph: {
-    title: "Orjut AgTech OS | Akıllı Tarım İşletim Sistemi",
-    description: "Sıfır veri kaybı, maksimum hasat. Tarımsal işletmenizi dijital güçle yönetin.",
+    title: "Orjut ZiraiAsistan | Profesyonel Tarım Yönetim Sistemi",
+    description: "Tarlanızdan kazancınıza kadar her şey kontrolünüzde. Türk çiftçisinin dijital iş ortağı.",
     type: "website",
     locale: "tr_TR",
-    siteName: "Orjut AgTech",
+    siteName: "Orjut ZiraiAsistan",
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Orjut AgTech OS Dashboard'
+        alt: 'Orjut ZiraiAsistan Dashboard'
       }
     ]
   },
-  other: {
-    'mobile-web-app-capable': 'yes',
-    'apple-mobile-web-app-capable': 'yes',
-    'apple-mobile-web-app-status-bar-style': 'black-translucent',
-  },
-};
-
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Orjut AgTech OS",
-  "applicationCategory": "AgTech, BusinessApplication",
-  "operatingSystem": "Web, Android, iOS",
-  "description": "Yapay zeka destekli arazi, gübreleme, ilaçlama ve hasat takip uygulaması.",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "TRY"
-  }
 };
 
 export default function RootLayout({
@@ -75,18 +67,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="tr" className={`${inter.variable} ${outfit.variable}`}>
+    <html lang="tr" className={`${nunito.variable} ${nunitoSans.variable}`}>
       <head>
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
-      <body className="antialiased selection:bg-emerald-500/30">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
+      <body className="antialiased font-body">
         <ServiceWorkerRegister />
         <AppProvider>
-          <Toaster position="top-center" richColors theme="dark" />
+          <Toaster position="top-center" richColors theme="light" closeButton />
           {children}
           <CookieConsent />
         </AppProvider>

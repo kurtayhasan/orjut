@@ -3,29 +3,30 @@
 import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useAppContext } from '@/context/AppContext';
-import { Map, MapPin, Trash2, Sprout, ChevronLeft, Save, Activity, Users, Edit2 } from 'lucide-react';
+import { 
+  Map as MapIcon, MapPin, Trash2, Sprout, 
+  ChevronLeft, Activity, Edit2, Plus, 
+  Droplets, Grid, List, Search, Filter,
+  TrendingUp, TrendingDown
+} from 'lucide-react';
 import { toast } from 'sonner';
 
 import EmptyState from '@/components/EmptyState';
 import { CardSkeleton } from '@/components/Skeleton';
-import InviteCollaborator from '@/components/collaborators/InviteCollaborator';
-import { useMarketPrice } from '@/lib/useMarketPrice';
-import MarketTrendMini from '@/components/market/MarketTrendMini';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import BaseModal from '@/components/ui/BaseModal';
 import LandMovementsModal from '@/components/lands/LandMovementsModal';
-
-const CROP_LIFECYCLES: Record<string, number> = {
-  'Buğday': 240, 'Mısır': 120, 'Pirinç': 150, 'Soya Fasulyesi': 120, 'Pamuk': 160,
-  'Arpa': 210, 'Patates': 100, 'Şeker Pancarı': 180, 'Şeker Kamışı': 365, 'Domates': 90,
-  'Soğan': 120, 'Elma': 180, 'Üzüm': 170, 'Portakal': 270, 'Kahve': 270,
-};
+import { formatArea, cn } from '@/lib/utils';
 
 const DynamicLeafletMap = dynamic(() => import('@/components/LeafletMap'), { 
   ssr: false,
-  loading: () => <div className="flex h-full w-full items-center justify-center text-sm text-zinc-500 font-bold">Harita Yükleniyor...</div>
+  loading: () => (
+    <div className="flex h-full w-full items-center justify-center bg-surface-2 animate-skeleton-pulse">
+      <span className="text-sm text-text-muted font-bold">Harita Yükleniyor...</span>
+    </div>
+  )
 });
 
 export default function LandsPage() {
@@ -34,17 +35,14 @@ export default function LandsPage() {
   const [mapFocusLand, setMapFocusLand] = useState<any>(null);
   const [landToEdit, setLandToEdit] = useState<any>(null);
   const [deletingLand, setDeletingLand] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'details' | 'collaborators'>('details');
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   
   const [cropFilter, setCropFilter] = useState('all');
-  const [envFilter, setEnvFilter] = useState('all');
-  const [irrigationFilter, setIrrigationFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   
   const [editYield, setEditYield] = useState('');
   const [editPrice, setEditPrice] = useState('');
   const [movementLand, setMovementLand] = useState<any>(null);
-
-  const { currentPrice: marketPrice, history: marketHistory } = useMarketPrice(selectedLand?.crop_type);
 
   useEffect(() => {
     if (selectedLand) {
@@ -62,177 +60,204 @@ export default function LandsPage() {
     };
     updateLand(updated);
     setSelectedLand(updated);
-  };
-
-  const calculateDays = (plantingDate?: string): number | null => {
-    if (!plantingDate) return null;
-    try {
-      const parts = plantingDate.split('-');
-      const planted = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      planted.setHours(0, 0, 0, 0);
-      return Math.floor((today.getTime() - planted.getTime()) / 86400000);
-    } catch { return null; }
+    toast.success("Verim hedefleri güncellendi.");
   };
 
   const filteredLands = lands.filter(land => {
     const matchesCrop = cropFilter === 'all' || land.crop_type === cropFilter;
-    const matchesEnv = envFilter === 'all' || land.environment_type === envFilter;
-    const matchesIrrigation = irrigationFilter === 'all' || (irrigationFilter === 'irrigated' ? land.is_irrigated : !land.is_irrigated);
-    return matchesCrop && matchesEnv && matchesIrrigation;
+    const matchesSearch = 
+      land.block_no?.includes(searchQuery) || 
+      land.parcel_no?.includes(searchQuery) || 
+      land.district?.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCrop && matchesSearch;
   });
 
   const uniqueCrops = Array.from(new Set(lands.map(l => l.crop_type)));
 
   return (
-    <div className="space-y-6 pb-48">
-      
-      <Card padding="md" className="flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <div className="bg-emerald-100 p-3 rounded-2xl text-emerald-600">
-            <Map size={28} />
-          </div>
-          <div>
-            <h1 className="text-2xl font-black text-zinc-900 dark:text-zinc-100 tracking-tight">Arazi Yönetimi</h1>
-            <p className="text-zinc-500 font-bold text-sm">Toplam {totalArea.toFixed(0)} Dönüm Aktif Alan</p>
+    <div className="space-y-6 animate-fade-in">
+      {/* HEADER SECTION */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black font-heading text-text-primary tracking-tight">Arazilerim</h1>
+          <p className="text-text-muted font-bold text-sm">Toplam {formatArea(totalArea)} aktif tarım alanı yönetiyorsunuz.</p>
+        </div>
+        <div className="flex items-center gap-2">
+           <div className="bg-surface-2 p-1 rounded-lg border border-border flex">
+              <button 
+                onClick={() => setViewMode('list')}
+                className={cn(
+                  "p-2 rounded-md transition-all",
+                  viewMode === 'list' ? "bg-white shadow-sm text-primary" : "text-text-muted hover:text-text-primary"
+                )}
+              >
+                <List size={20} />
+              </button>
+              <button 
+                onClick={() => setViewMode('map')}
+                className={cn(
+                  "p-2 rounded-md transition-all",
+                  viewMode === 'map' ? "bg-white shadow-sm text-primary" : "text-text-muted hover:text-text-primary"
+                )}
+              >
+                <Grid size={20} />
+              </button>
+           </div>
+           <Button size="md" leftIcon={<Plus size={20} />}>Yeni Ekle</Button>
+        </div>
+      </div>
+
+      {/* FILTER BAR */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="md:col-span-2">
+           <Input 
+             placeholder="Ada, parsel veya ilçe ara..." 
+             leftIcon={<Search size={18} />}
+             value={searchQuery}
+             onChange={(e: any) => setSearchQuery(e.target.value)}
+           />
+        </div>
+        <div className="flex gap-2">
+           <Input as="select" value={cropFilter} onChange={(e: any) => setCropFilter(e.target.value)} className="flex-1">
+              <option value="all">Tüm Ürünler</option>
+              {uniqueCrops.map(crop => <option key={crop} value={crop}>{crop}</option>)}
+           </Input>
+           <Button variant="neutral" size="md" className="shrink-0"><Filter size={18} /></Button>
+        </div>
+      </div>
+
+      {/* MAIN CONTENT AREA */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[600px]">
+        
+        {/* MAP SECTION — Responsive height */}
+        <div className={cn(
+          "lg:col-span-7 xl:col-span-8 overflow-hidden rounded-2xl border border-border shadow-sm bg-surface-2",
+          viewMode === 'map' ? 'block' : 'hidden lg:block'
+        )}>
+          <div className="h-[400px] lg:h-full w-full relative z-0">
+             <DynamicLeafletMap focusLand={mapFocusLand} editLand={landToEdit} />
           </div>
         </div>
-      </Card>
 
+        {/* LIST SECTION */}
+        <div className={cn(
+          "lg:col-span-5 xl:col-span-4 flex flex-col gap-4",
+          viewMode === 'list' ? 'block' : 'hidden lg:block'
+        )}>
+          {selectedLand ? (
+            <Card padding="lg" className="h-full flex flex-col animate-scale-in">
+              <div className="flex items-center justify-between mb-6">
+                <Button variant="ghost" onClick={() => setSelectedLand(null)} size="sm" leftIcon={<ChevronLeft size={16} />}>Listeye Dön</Button>
+                <div className="flex gap-1">
+                   <Button variant="neutral" size="sm" onClick={() => setMovementLand(selectedLand)}><Activity size={16} /></Button>
+                   <Button variant="danger" size="sm" onClick={() => setDeletingLand(selectedLand)}><Trash2 size={16} /></Button>
+                </div>
+              </div>
+
+              <div className="space-y-6 flex-1">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-2xl font-black font-heading text-text-primary">{selectedLand.district || selectedLand.city}</h3>
+                    <p className="text-text-muted font-bold">Ada {selectedLand.block_no} / Parsel {selectedLand.parcel_no}</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-black text-3xl text-primary font-heading tracking-tight">{selectedLand.size_decare}</div>
+                    <div className="text-[10px] text-text-muted font-black uppercase tracking-widest">Dönüm Alan</div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-surface-2 rounded-xl border border-border">
+                    <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-1">Ürün</p>
+                    <p className="font-bold text-text-primary flex items-center gap-2"><Sprout size={14} className="text-primary" /> {selectedLand.crop_type}</p>
+                  </div>
+                  <div className="p-4 bg-surface-2 rounded-xl border border-border">
+                    <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-1">Sulama</p>
+                    <p className="font-bold text-text-primary flex items-center gap-2">
+                       {selectedLand.is_irrigated ? <><Droplets size={14} className="text-blue-500" /> Sulanıyor</> : 'Kuru Tarım'}
+                    </p>
+                  </div>
+                </div>
+
+                <Card className="bg-primary-50 border-primary-100" padding="md">
+                  <h4 className="font-bold text-primary flex items-center gap-2 mb-4 text-sm">
+                    <TrendingUp size={16} /> Verim & Fiyat Hedefi
+                  </h4>
+                  <div className="space-y-4">
+                    <Input label="Hedef Verim (KG/Dönüm)" type="number" value={editYield} onChange={(e: any) => setEditYield(e.target.value)} />
+                    <Input label="Hedef Satış Fiyatı (₺/Birim)" type="number" value={editPrice} onChange={(e: any) => setEditPrice(e.target.value)} />
+                    <Button onClick={handleSaveMetrics} fullWidth size="md">Güncelle</Button>
+                  </div>
+                </Card>
+
+                <div>
+                   <h4 className="font-black text-[10px] text-text-muted uppercase tracking-widest mb-3">Arazi Notları</h4>
+                   <p className="text-sm text-text-secondary italic">Bu arazi için henüz bir gözlem kaydı bulunmuyor.</p>
+                </div>
+              </div>
+            </Card>
+          ) : (
+            <div className="space-y-4 overflow-y-auto max-h-[700px] lg:max-h-none pr-2 custom-scrollbar">
+              {isLoadingLands ? (
+                <div className="space-y-4"><CardSkeleton /><CardSkeleton /><CardSkeleton /></div>
+              ) : filteredLands.length === 0 ? (
+                <EmptyState title="Sonuç Bulunamadı" description="Arama kriterlerini değiştirin veya yeni bir arazi ekleyin." emoji="🔍" />
+              ) : (
+                filteredLands.map((land) => (
+                  <Card 
+                    key={land.id} 
+                    hoverable 
+                    padding="md" 
+                    status={land.is_irrigated ? 'info' : 'default'}
+                    onClick={() => { setMapFocusLand(land); setSelectedLand(land); }}
+                    className={cn(
+                      "transition-all",
+                      mapFocusLand?.id === land.id && "ring-2 ring-primary border-primary/20"
+                    )}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                         <div className="w-12 h-12 bg-surface-2 rounded-xl flex items-center justify-center text-primary border border-border">
+                            <Sprout size={24} />
+                         </div>
+                         <div>
+                            <h4 className="font-bold text-text-primary leading-tight">{land.district || land.city}</h4>
+                            <p className="text-xs font-bold text-text-muted">Ada {land.block_no} / P. {land.parcel_no} • {land.crop_type}</p>
+                         </div>
+                      </div>
+                      <div className="text-right">
+                         <div className="font-black text-xl text-text-primary tracking-tight">{land.size_decare}</div>
+                         <div className="text-[10px] text-text-muted font-black uppercase tracking-widest">Dönüm</div>
+                      </div>
+                    </div>
+                  </Card>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* MODALS */}
       <BaseModal 
         isOpen={!!deletingLand} 
         onClose={() => setDeletingLand(null)}
         title="Araziyi Sil"
       >
-        <div className="text-center">
-          <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Trash2 size={28} />
+        <div className="text-center py-4">
+          <div className="w-16 h-16 bg-danger-bg text-danger rounded-full flex items-center justify-center mx-auto mb-6">
+            <Trash2 size={32} />
           </div>
-          <p className="text-zinc-500 font-bold text-sm mb-8">
-            Bu araziyi (Ada {deletingLand?.block_no} / Parsel {deletingLand?.parcel_no}) silmek istediğinize emin misiniz? Bu işlem geri alınamaz.
+          <h3 className="text-lg font-bold text-text-primary mb-2">Emin misiniz?</h3>
+          <p className="text-text-secondary font-medium text-sm mb-8">
+            Bu araziyi (Ada {deletingLand?.block_no} / Parsel {deletingLand?.parcel_no}) sildiğinizde, bu araziye ait tüm geçmiş veriler de silinecektir. Bu işlem geri alınamaz.
           </p>
-          <div className="flex gap-4">
-            <Button variant="ghost" onClick={() => setDeletingLand(null)} className="flex-1">İptal</Button>
-            <Button variant="danger" onClick={() => { deleteLand(deletingLand.id); setDeletingLand(null); }} className="flex-1">Evet, Sil</Button>
+          <div className="flex flex-col gap-3">
+            <Button variant="danger" fullWidth size="lg" onClick={() => { deleteLand(deletingLand.id); setDeletingLand(null); toast.success("Arazi silindi."); }}>Evet, Tamamen Sil</Button>
+            <Button variant="ghost" fullWidth onClick={() => setDeletingLand(null)}>Vazgeç</Button>
           </div>
         </div>
       </BaseModal>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[500px] lg:h-[calc(100vh-250px)]">
-        
-        <Card padding="none" className="flex flex-col h-[400px] lg:h-full overflow-hidden">
-          <div className="p-4 border-b border-zinc-100 dark:border-zinc-800">
-            <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-100">Arazi İşaretleme</h2>
-            <p className="text-sm text-zinc-500 font-medium">Tarlalarınızı eklemek için haritaya bir nokta bırakın.</p>
-          </div>
-          <div className="flex-1 w-full relative bg-zinc-100 z-0">
-            <DynamicLeafletMap focusLand={mapFocusLand} editLand={landToEdit} />
-          </div>
-        </Card>
-
-        <Card padding="none" className="flex flex-col h-[500px] lg:h-full overflow-hidden">
-          <div className="p-4 border-b border-zinc-100 dark:border-zinc-800 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-100">Kayıtlı Parseller</h2>
-              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{filteredLands.length} Sonuç</span>
-            </div>
-            
-            <div className="flex flex-wrap gap-2">
-              <Input as="select" value={cropFilter} onChange={(e: any) => setCropFilter(e.target.value)} className="!py-1.5 !text-[11px] !px-3 w-auto">
-                <option value="all">Tüm Ürünler</option>
-                {uniqueCrops.map(crop => <option key={crop} value={crop}>{crop}</option>)}
-              </Input>
-              <Input as="select" value={envFilter} onChange={(e: any) => setEnvFilter(e.target.value)} className="!py-1.5 !text-[11px] !px-3 w-auto">
-                <option value="all">Tüm Alanlar</option>
-                <option value="acik_tarla">Açık Tarla</option>
-                <option value="sera">Sera</option>
-              </Input>
-            </div>
-          </div>
-          
-          <div className="flex-1 overflow-y-auto custom-scrollbar">
-            {selectedLand ? (
-              <div className="p-6 space-y-6 animate-in slide-in-from-right-4 duration-300">
-                <Button variant="ghost" onClick={() => setSelectedLand(null)} size="sm" leftIcon={<ChevronLeft size={16} />}>Listeye Dön</Button>
-                
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-xl font-black text-zinc-900 dark:text-zinc-100">{selectedLand.district || selectedLand.city}</h3>
-                    <p className="text-zinc-500 font-bold">Ada {selectedLand.block_no} / Parsel {selectedLand.parcel_no}</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-black text-2xl text-emerald-600">{selectedLand.size_decare}</div>
-                    <div className="text-[10px] text-emerald-600/70 font-black uppercase tracking-widest">Dönüm</div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <Card className="!bg-indigo-50 dark:!bg-indigo-900/10 !border-indigo-100 dark:!border-indigo-900/30" padding="md">
-                    <h4 className="font-bold text-indigo-900 dark:text-indigo-200 flex items-center gap-2 mb-4">
-                      <Activity size={18} /> Beklenen Verim & Fiyat
-                    </h4>
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <Input label="Beklenen Verim (KG)" type="number" value={editYield} onChange={(e: any) => setEditYield(e.target.value)} disabled={currentUserRole === 'viewer'} />
-                      <Input label="Birim Fiyat (₺)" type="number" value={editPrice} onChange={(e: any) => setEditPrice(e.target.value)} disabled={currentUserRole === 'viewer'} />
-                    </div>
-                    {currentUserRole !== 'viewer' && <Button onClick={handleSaveMetrics} className="w-full" size="sm">Kaydet</Button>}
-                  </Card>
-
-                  <div>
-                    <h4 className="font-black text-[10px] text-zinc-400 uppercase tracking-widest mb-3">Son İşlemler</h4>
-                    <div className="space-y-2">
-                      {transactions.filter(t => t.land_id === selectedLand.id).map(tx => (
-                        <div key={tx.id} className="p-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-xl flex items-center justify-between text-sm">
-                          <span className="font-bold">{tx.description}</span>
-                          <span className="font-black text-rose-600">-₺{tx.amount.toLocaleString()}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : isLoadingLands ? (
-              <div className="p-4 space-y-4"><CardSkeleton /><CardSkeleton /></div>
-            ) : lands.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center p-12 text-center">
-                <EmptyState message="Henüz arazi eklemediniz." icon={MapPin} />
-              </div>
-            ) : (
-              <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                {filteredLands.map((land) => (
-                  <div key={land.id} onClick={() => setMapFocusLand(land)} className={`p-5 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all flex items-center justify-between cursor-pointer ${mapFocusLand?.id === land.id ? 'bg-indigo-50/30 ring-1 ring-inset ring-indigo-100' : ''}`}>
-                    <div className="flex items-center gap-4">
-                      <div className="bg-emerald-50 text-emerald-600 p-2.5 rounded-xl"><Sprout size={20} /></div>
-                      <div>
-                        <h4 className="font-bold text-zinc-900 dark:text-zinc-100">{land.district || land.city}</h4>
-                        <p className="text-xs text-zinc-500 font-bold">Ada {land.block_no} / Parsel {land.parcel_no} • {land.crop_type}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <div className="font-black text-xl text-zinc-900 dark:text-zinc-100 tracking-tighter">{land.size_decare}</div>
-                        <div className="text-[10px] text-zinc-400 font-black uppercase tracking-widest">Dönüm</div>
-                      </div>
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="sm" className="!p-2 text-indigo-500" onClick={(e) => { e.stopPropagation(); setMovementLand(land); }}>
-                          <Activity size={18} />
-                        </Button>
-                        {currentUserRole !== 'viewer' && (
-                          <>
-                            <Button variant="ghost" size="sm" className="!p-2" onClick={(e) => { e.stopPropagation(); setSelectedLand(land); setLandToEdit(land); }}><Edit2 size={16} /></Button>
-                            <Button variant="ghost" size="sm" className="!p-2 !text-rose-500" onClick={(e) => { e.stopPropagation(); setDeletingLand(land); }}><Trash2 size={16} /></Button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </Card>
-      </div>
 
       <LandMovementsModal 
         isOpen={!!movementLand} 

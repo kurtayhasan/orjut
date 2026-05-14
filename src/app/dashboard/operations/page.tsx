@@ -2,12 +2,24 @@
 
 import React, { useState } from 'react';
 import { useAppContext } from '@/context/AppContext';
-import { Droplet, Plus, Trash2, Calendar, MapPin, Search, FlaskConical, Bug, Filter, Clock, Box } from 'lucide-react';
+import { 
+  Droplet, Plus, Trash2, Calendar, MapPin, 
+  Search, FlaskConical, Bug, Filter, Clock, 
+  Box, Tractor, ChevronRight, CheckCircle2,
+  Info, AlertCircle, MoreVertical
+} from 'lucide-react';
 import { toast } from 'sonner';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import BaseModal from '@/components/ui/BaseModal';
+import EmptyState from '@/components/EmptyState';
+import { cn, formatDateShort } from '@/lib/utils';
 
 export default function OperationsPage() {
   const { lands, fieldOperations, addFieldOperation, deleteFieldOperation, inventory } = useAppContext();
   
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedLandId, setSelectedLandId] = useState('');
   const [selectedInventoryId, setSelectedInventoryId] = useState('');
   const [type, setType] = useState<'su' | 'gubre' | 'ilac'>('su');
@@ -15,12 +27,9 @@ export default function OperationsPage() {
   const [amount, setAmount] = useState('');
   const [unit, setUnit] = useState('');
   const [method, setMethod] = useState('');
-  const [periodDays, setPeriodDays] = useState('');
   const [notes, setNotes] = useState('');
   
   const [filter, setFilter] = useState<'all' | 'su' | 'gubre' | 'ilac'>('all');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,386 +40,223 @@ export default function OperationsPage() {
     }
     
     setIsSubmitting(true);
-    await addFieldOperation({
-      land_id: selectedLandId,
-      type,
-      date,
-      amount: Number(amount),
-      unit,
-      method,
-      period_days: periodDays ? Number(periodDays) : undefined,
-      inventory_id: selectedInventoryId || undefined,
-      notes
-    });
-    setIsSubmitting(false);
-    
-    // Reset form
-    setAmount('');
-    setNotes('');
-    setPeriodDays('');
-  };
-
-  const getLandDisplay = (landId: string) => {
-    const land = lands.find(l => l.id === landId);
-    if (!land) return 'Bilinmeyen Arazi';
-    return `${land.district || land.city} - Ada ${land.block_no} / Parsel ${land.parcel_no}`;
+    try {
+      await addFieldOperation({
+        land_id: selectedLandId,
+        type,
+        date,
+        amount: Number(amount),
+        unit,
+        method,
+        inventory_id: selectedInventoryId || undefined,
+        notes
+      });
+      toast.success("İşlem başarıyla kaydedildi.");
+      setIsAddModalOpen(false);
+      // Reset
+      setAmount(''); setNotes(''); setMethod('');
+    } catch (err) {
+      toast.error("İşlem kaydedilemedi.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const filteredOps = fieldOperations.filter(op => {
-    const matchesType = filter === 'all' || op.type === filter;
-    const matchesStartDate = !startDate || new Date(op.date) >= new Date(startDate);
-    const matchesEndDate = !endDate || new Date(op.date) <= new Date(endDate);
-    return matchesType && matchesStartDate && matchesEndDate;
+    return filter === 'all' || (op.type as string) === filter;
   });
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'su': return <Droplet size={20} />;
-      case 'gubre': return <FlaskConical size={20} />;
-      case 'ilac': return <Bug size={20} />;
-      default: return <Droplet size={20} />;
-    }
-  };
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'su': return 'bg-blue-100 text-blue-600';
-      case 'gubre': return 'bg-emerald-100 text-emerald-600';
-      case 'ilac': return 'bg-amber-100 text-amber-600';
-      default: return 'bg-zinc-100 text-zinc-600';
-    }
-  };
-
-  const getTypeLabel = (type: string) => {
-    switch (type) {
-      case 'su': return 'Sulama';
-      case 'gubre': return 'Gübreleme';
-      case 'ilac': return 'İlaçlama';
-      default: return type;
-    }
+  const getLandDisplay = (landId: string) => {
+    const land = lands.find(l => l.id === landId);
+    return land ? `${land.district || land.city} (A:${land.block_no}/P:${land.parcel_no})` : 'Bilinmeyen Arazi';
   };
 
   return (
-    <div className="space-y-6 pb-24">
-      {/* Header */}
-      <header className="flex justify-between items-center bg-white border border-zinc-200 p-6 rounded-3xl shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className="bg-indigo-100 p-3 rounded-2xl text-indigo-600">
-            <Filter size={28} />
-          </div>
-          <div>
-            <h1 className="text-2xl font-black text-zinc-900 tracking-tight">Zirai İşlemler</h1>
-            <p className="text-zinc-500 font-medium text-sm">Sulama, gübreleme ve ilaçlama yönetimi</p>
-          </div>
+    <div className="space-y-6 animate-fade-in">
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black font-heading text-text-primary tracking-tight">Zirai İşlemler</h1>
+          <p className="text-text-muted font-bold text-sm">Tarlada yapılan her adımı dijital ortamda takip edin.</p>
         </div>
-      </header>
+        <Button size="md" leftIcon={<Plus size={20} />} onClick={() => setIsAddModalOpen(true)}>Yeni İşlem Kaydet</Button>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Form */}
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-3xl p-6 border border-zinc-100 shadow-sm sticky top-24">
-            <h2 className="text-lg font-black text-zinc-900 mb-6 flex items-center gap-2">
-              <Plus size={20} className="text-indigo-500" /> Yeni İşlem Kaydı
-            </h2>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">İşlem Tipi</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(['su', 'gubre', 'ilac'] as const).map(t => (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => {
-                        setType(t);
-                        if (t === 'su') setUnit('saat');
-                        else if (t === 'gubre') setUnit('kg');
-                        else setUnit('lt');
-                      }}
-                      className={`py-3 rounded-xl border-2 flex flex-col items-center gap-1 transition-all ${type === t ? 'bg-indigo-50 border-indigo-500 text-indigo-600 shadow-sm' : 'bg-zinc-50 border-zinc-100 text-zinc-400 hover:bg-white hover:border-zinc-200'}`}
-                    >
-                      {getTypeIcon(t)}
-                      <span className="text-[10px] font-bold uppercase">{getTypeLabel(t)}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Arazi Seçimi</label>
-                <div className="relative">
-                  <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
-                  <select 
-                    className="w-full pl-10 pr-4 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition-all text-sm font-semibold appearance-none cursor-pointer"
-                    value={selectedLandId}
-                    onChange={e => setSelectedLandId(e.target.value)}
-                    required
-                  >
-                    <option value="" disabled>Arazi seçin...</option>
-                    {lands.map(l => (
-                      <option key={l.id} value={l.id}>{getLandDisplay(l.id)} ({l.crop_type})</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Tarih</label>
-                <div className="relative">
-                  <Calendar size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
-                  <input 
-                    type="date"
-                    required
-                    className="w-full pl-10 pr-4 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition-all text-sm font-semibold"
-                    value={date}
-                    onChange={e => setDate(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Miktar</label>
-                  <input 
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    required
-                    placeholder="Örn: 10"
-                    className="w-full px-4 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition-all text-sm font-semibold"
-                    value={amount}
-                    onChange={e => setAmount(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Birim</label>
-                  <select 
-                    required
-                    className="w-full px-4 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition-all text-sm font-semibold appearance-none cursor-pointer"
-                    value={unit}
-                    onChange={e => setUnit(e.target.value)}
-                  >
-                    <option value="" disabled>Seçiniz</option>
-                    {type === 'su' ? (
-                      <>
-                        <option value="saat">Saat</option>
-                        <option value="ton">Ton</option>
-                        <option value="m3">m³</option>
-                        <option value="litre">Litre</option>
-                      </>
-                    ) : type === 'gubre' ? (
-                      <>
-                        <option value="kg">kg</option>
-                        <option value="paket">Paket</option>
-                        <option value="lt">Litre</option>
-                        <option value="cuval">Çuval</option>
-                      </>
-                    ) : (
-                      <>
-                        <option value="lt">Litre</option>
-                        <option value="cc">cc</option>
-                        <option value="gr">Gram</option>
-                        <option value="paket">Paket</option>
-                      </>
-                    )}
-                  </select>
-                </div>
-              </div>
-
-              {/* Inventory Linkage */}
-              {(type === 'gubre' || type === 'ilac') && (
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Stoktan Düş (Opsiyonel)</label>
-                  <div className="relative">
-                    <Box size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
-                    <select 
-                      className="w-full pl-10 pr-4 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition-all text-sm font-semibold appearance-none cursor-pointer"
-                      value={selectedInventoryId}
-                      onChange={e => {
-                        setSelectedInventoryId(e.target.value);
-                        const item = inventory.find(i => i.id === e.target.value);
-                        if (item) {
-                          setUnit(item.unit);
-                          setMethod(item.name);
-                        }
-                      }}
-                    >
-                      <option value="">Stok seçilmedi</option>
-                      {inventory.filter(i => i.type === type).map(i => (
-                        <option key={i.id} value={i.id}>{i.name} (Kalan: {i.quantity} {i.unit})</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Yöntem / Uygulama</label>
-                  <select 
-                    required
-                    className="w-full px-4 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition-all text-sm font-semibold appearance-none cursor-pointer"
-                    value={method}
-                    onChange={e => setMethod(e.target.value)}
-                  >
-                    <option value="" disabled>Yöntem seçin...</option>
-                    {type === 'su' ? (
-                      <>
-                        <option value="Damlama">Damlama</option>
-                        <option value="Salma">Salma</option>
-                        <option value="Yağmurlama">Yağmurlama</option>
-                        <option value="Pivot">Pivot</option>
-                      </>
-                    ) : type === 'gubre' ? (
-                      <>
-                        <option value="Taban Gübresi">Taban Gübresi</option>
-                        <option value="Üst Gübre">Üst Gübre</option>
-                        <option value="Yaprak Gübresi">Yaprak Gübresi</option>
-                        <option value="Fertigasyon">Fertigasyon (Damlama ile)</option>
-                      </>
-                    ) : (
-                      <>
-                        <option value="Pülverizatör">Pülverizatör (Traktör)</option>
-                        <option value="Atomizör">Atomizör</option>
-                        <option value="Sırt Pompası">Sırt Pompası</option>
-                        <option value="Dron">Dron ile Uygulama</option>
-                      </>
-                    )}
-                    <option value="Diger">Diğer</option>
-                  </select>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Periyot (Gün)</label>
-                  <div className="relative">
-                    <Clock size={16} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-300" />
-                    <input 
-                      type="number"
-                      placeholder="Opsiyonel"
-                      className="w-full px-4 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition-all text-sm font-semibold"
-                      value={periodDays}
-                      onChange={e => setPeriodDays(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Not (Opsiyonel)</label>
-                <textarea 
-                  rows={2}
-                  placeholder="Hava rüzgarlıydı, verim iyi bekliyoruz vb."
-                  className="w-full px-4 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-indigo-500 focus:bg-white transition-all text-sm font-semibold resize-none"
-                  value={notes}
-                  onChange={e => setNotes(e.target.value)}
-                />
-              </div>
-
-              <button 
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition-all shadow-md hover:shadow-indigo-200 active:scale-[0.98] mt-2 disabled:opacity-50"
+      {/* STATS / FILTERS */}
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+         <div className="flex bg-surface-2 p-1 rounded-lg border border-border w-full md:w-auto">
+            {(['all', 'su', 'gubre', 'ilac'] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={cn(
+                  "flex-1 md:px-6 py-2 text-[10px] font-black uppercase tracking-widest rounded-md transition-all",
+                  filter === f ? "bg-white shadow-sm text-primary" : "text-text-muted hover:text-text-primary"
+                )}
               >
-                {isSubmitting ? 'Kaydediliyor...' : 'İşlemi Kaydet'}
+                {f === 'all' ? 'Tümü' : f === 'su' ? 'Sulama' : f === 'gubre' ? 'Gübreleme' : 'İlaçlama'}
               </button>
-            </form>
-          </div>
-        </div>
+            ))}
+         </div>
+         <div className="text-xs font-bold text-text-muted">
+            Toplam {filteredOps.length} kayıt listelendi
+         </div>
+      </div>
 
-        {/* List */}
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-3xl p-6 border border-zinc-100 shadow-sm min-h-[500px]">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-              <h2 className="text-lg font-black text-zinc-900 flex items-center gap-2">
-                <Search size={20} className="text-zinc-400" /> İşlem Geçmişi
-              </h2>
-              
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                <div className="flex bg-zinc-100 p-1 rounded-xl">
-                  {(['all', 'su', 'gubre', 'ilac'] as const).map(f => (
-                    <button
-                      key={f}
-                      onClick={() => setFilter(f)}
-                      className={`px-3 py-1.5 text-[10px] font-bold rounded-lg transition-all ${filter === f ? 'bg-white shadow-sm text-indigo-600' : 'text-zinc-500 hover:text-zinc-700'}`}
-                    >
-                      {f === 'all' ? 'Tümü' : getTypeLabel(f)}
-                    </button>
-                  ))}
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <input 
-                    type="date" 
-                    className="bg-zinc-50 border border-zinc-100 rounded-lg px-2 py-1 text-[10px] font-bold text-zinc-600 outline-none"
-                    value={startDate}
-                    onChange={e => setStartDate(e.target.value)}
-                  />
-                  <span className="text-zinc-300">-</span>
-                  <input 
-                    type="date" 
-                    className="bg-zinc-50 border border-zinc-100 rounded-lg px-2 py-1 text-[10px] font-bold text-zinc-600 outline-none"
-                    value={endDate}
-                    onChange={e => setEndDate(e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              {filteredOps.length === 0 ? (
-                <div className="text-center p-12 bg-zinc-50 rounded-2xl border border-zinc-100 border-dashed">
-                  <div className="w-16 h-16 bg-zinc-100 text-zinc-400 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Filter size={28} />
-                  </div>
-                  <h3 className="font-bold text-zinc-900 mb-1">Henüz Kayıt Yok</h3>
-                  <p className="text-zinc-500 text-sm">Arazilerinize ait zirai işlemleri buradan takip edebilirsiniz.</p>
-                </div>
-              ) : (
-                filteredOps.map(op => (
-                  <div key={op.id} className="flex items-center justify-between p-4 bg-zinc-50 border border-zinc-100 rounded-2xl hover:bg-white hover:shadow-md transition-all group">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${getTypeColor(op.type)}`}>
-                        {getTypeIcon(op.type)}
+      {/* OPERATIONS LIST */}
+      <Card padding="none" className="overflow-hidden">
+         <div className="divide-y divide-border">
+            {filteredOps.length > 0 ? (
+              filteredOps.map((op) => (
+                <div key={op.id} className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-surface-2 transition-all group">
+                   <div className="flex items-center gap-4 min-w-[300px]">
+                      <div className={cn(
+                        "w-12 h-12 rounded-xl flex items-center justify-center shadow-sm border border-black/5",
+                        (op.type as string) === 'su' ? "bg-blue-100 text-blue-600" : 
+                        (op.type as string) === 'gubre' ? "bg-emerald-100 text-emerald-600" : 
+                        "bg-amber-100 text-amber-600"
+                      )}>
+                         {(op.type as string) === 'su' ? <Droplet size={24} /> : (op.type as string) === 'gubre' ? <FlaskConical size={24} /> : <Bug size={24} />}
                       </div>
                       <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-zinc-900">{getLandDisplay(op.land_id)}</h4>
-                          <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md ${getTypeColor(op.type)}`}>
-                            {getTypeLabel(op.type)}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-zinc-500 font-medium mt-1">
-                          <span>{new Date(op.date).toLocaleDateString('tr-TR')}</span>
-                          <span className="w-1 h-1 bg-zinc-300 rounded-full" />
-                          <span>{op.method}</span>
-                          {op.period_days && (
-                            <>
-                              <span className="w-1 h-1 bg-zinc-300 rounded-full" />
-                              <span className="text-indigo-600">{op.period_days} Günlük Periyot</span>
-                            </>
-                          )}
-                        </div>
+                         <h4 className="font-bold text-text-primary leading-tight mb-0.5">{getLandDisplay(op.land_id)}</h4>
+                         <div className="flex items-center gap-2 text-xs font-bold text-text-muted">
+                            <span className="uppercase tracking-wider">{(op.type as string) === 'su' ? 'Sulama' : (op.type as string) === 'gubre' ? 'Gübreleme' : 'İlaçlama'}</span>
+                            <span className="opacity-30">•</span>
+                            <span className="flex items-center gap-1"><Calendar size={12} /> {formatDateShort(op.date)}</span>
+                            <span className="opacity-30">•</span>
+                            <span className="flex items-center gap-1"><Tractor size={12} /> {op.method}</span>
+                         </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-4">
+                   </div>
+
+                   <div className="flex items-center justify-between md:justify-end gap-8">
                       <div className="text-right">
-                        <div className="font-black text-lg text-zinc-900">{op.amount}</div>
-                        <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{op.unit}</div>
+                         <div className="text-xl font-black font-heading text-text-primary tracking-tight">
+                            {op.amount} <span className="text-sm font-bold text-text-muted">{op.unit}</span>
+                         </div>
+                         {op.notes && (
+                           <p className="text-[10px] font-bold text-text-muted italic truncate max-w-[150px]">"{op.notes}"</p>
+                         )}
                       </div>
-                      <button 
-                        onClick={() => deleteFieldOperation(op.id)}
-                        className="p-2 text-zinc-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-                        title="Kaydı Sil"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
+                      <div className="flex items-center gap-2">
+                         <button className="p-2 text-text-muted hover:text-primary transition-colors">
+                            <MoreVertical size={20} />
+                         </button>
+                         <button 
+                           onClick={() => { deleteFieldOperation(op.id); toast.success("Kayıt silindi."); }}
+                           className="p-2 text-text-muted hover:text-danger hover:bg-danger-bg rounded-lg transition-colors md:opacity-0 md:group-hover:opacity-100"
+                         >
+                            <Trash2 size={18} />
+                         </button>
+                      </div>
+                   </div>
+                </div>
+              ))
+            ) : (
+              <EmptyState title="İşlem kaydı bulunamadı" description="Tarlada yaptığınız işlemleri ekleyerek takibe başlayın." emoji="🚜" />
+            )}
+         </div>
+      </Card>
+
+      {/* INFO BOX */}
+      <Card className="bg-primary-50 border-primary-100" padding="md">
+         <div className="flex items-start gap-3">
+            <Info className="text-primary mt-0.5 shrink-0" size={18} />
+            <div>
+               <h4 className="text-sm font-black font-heading text-primary uppercase tracking-tight">Neden Önemli?</h4>
+               <p className="text-sm font-medium text-text-primary leading-relaxed mt-1">
+                  Zirai işlemleri kaydetmek, sezon sonunda hangi tarlaya ne kadar gübre/ilaç atıldığını ve bunların verime etkisini analiz etmenizi sağlar.
+               </p>
             </div>
-          </div>
-        </div>
-      </div>
+         </div>
+      </Card>
+
+      {/* ADD MODAL */}
+      <BaseModal 
+        isOpen={isAddModalOpen} 
+        onClose={() => setIsAddModalOpen(false)}
+        title="Yeni Zirai İşlem Kaydı"
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+           <div className="space-y-1.5">
+              <label className="text-sm font-bold text-text-primary">İşlem Tipi</label>
+              <div className="grid grid-cols-3 gap-2">
+                 {(['su', 'gubre', 'ilac'] as const).map(t => (
+                   <button
+                     key={t}
+                     type="button"
+                     onClick={() => {
+                       setType(t);
+                       if (t === 'su') setUnit('saat');
+                       else if (t === 'gubre') setUnit('kg');
+                       else setUnit('lt');
+                     }}
+                     className={cn(
+                       "py-3 rounded-lg border-2 flex flex-col items-center gap-1 transition-all",
+                       type === t ? "bg-primary-50 border-primary text-primary shadow-sm" : "bg-surface-2 border-border text-text-muted"
+                     )}
+                   >
+                     {t === 'su' ? <Droplet size={18} /> : t === 'gubre' ? <FlaskConical size={18} /> : <Bug size={18} />}
+                     <span className="text-[10px] font-black uppercase">{t === 'su' ? 'SULAMA' : t === 'gubre' ? 'GÜBRE' : 'İLAÇ'}</span>
+                   </button>
+                 ))}
+              </div>
+           </div>
+
+           <Input as="select" label="Arazi Seçimi" value={selectedLandId} onChange={e => setSelectedLandId(e.target.value)} required>
+              <option value="" disabled>Seçiniz...</option>
+              {lands.map(l => (
+                <option key={l.id} value={l.id}>{l.district || l.city} - Ada {l.block_no}/P.{l.parcel_no}</option>
+              ))}
+           </Input>
+
+           <Input label="Tarih" type="date" value={date} onChange={e => setDate(e.target.value)} required />
+
+           <div className="grid grid-cols-2 gap-4">
+              <Input label="Miktar" type="number" placeholder="0" value={amount} onChange={e => setAmount(e.target.value)} required />
+              <Input as="select" label="Birim" value={unit} onChange={e => setUnit(e.target.value)} required>
+                {type === 'su' ? (
+                  <>
+                    <option value="saat">Saat</option>
+                    <option value="ton">Ton</option>
+                    <option value="m3">m³</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="kg">kg</option>
+                    <option value="lt">lt</option>
+                    <option value="paket">Paket</option>
+                  </>
+                )}
+              </Input>
+           </div>
+
+           <Input as="select" label="Uygulama Yöntemi" value={method} onChange={e => setMethod(e.target.value)} required>
+              <option value="" disabled>Seçiniz...</option>
+              {type === 'su' ? (
+                <>
+                  <option value="Damlama">Damlama</option>
+                  <option value="Salma">Salma</option>
+                  <option value="Yağmurlama">Yağmurlama</option>
+                </>
+              ) : (
+                <>
+                  <option value="Traktör/Pülverizatör">Traktör/Pülverizatör</option>
+                  <option value="Sırt Pompası">Sırt Pompası</option>
+                  <option value="Dron">Dron ile Uygulama</option>
+                </>
+              )}
+           </Input>
+
+           <Input label="Notlar" placeholder="Opsiyonel..." value={notes} onChange={e => setNotes(e.target.value)} />
+
+           <div className="flex gap-3 pt-4">
+              <Button variant="ghost" fullWidth onClick={() => setIsAddModalOpen(false)}>Vazgeç</Button>
+              <Button fullWidth type="submit" isLoading={isSubmitting}>İşlemi Kaydet</Button>
+           </div>
+        </form>
+      </BaseModal>
     </div>
   );
 }

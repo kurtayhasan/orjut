@@ -2,8 +2,14 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useAppContext } from '@/context/AppContext';
-import { Bot, Send, Sparkles, Lock, Crown, Loader2, User, Leaf } from 'lucide-react';
+import { 
+  Bot, Send, Sparkles, Lock, Crown, 
+  Loader2, User, Leaf, MessageSquare, 
+  ChevronRight, BrainCircuit, Lightbulb
+} from 'lucide-react';
 import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import { cn } from '@/lib/utils';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -83,162 +89,146 @@ export default function AIPage() {
     }
   };
 
-  const handleInteraction = () => {
-    if (!isPremium) {
-      triggerUpsell();
-    }
-  };
+  const suggestions = [
+    'Buğdayda yaprak sarılığı için ne yapmalıyım?',
+    'Mısır tarlama ne zaman gübre atmalıyım?',
+    'Bu haftaki hava durumuna göre ilaçlama uygun mu?',
+    'Hasat zamanını nasıl belirlemeliyim?'
+  ];
 
   return (
-    <div className="space-y-6 pb-48">
-      {/* Header */}
-      <Card padding="md" className="flex justify-between items-center">
+    <div className="flex flex-col h-[calc(100vh-140px)] animate-fade-in">
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-4">
-          <div className="bg-indigo-100 dark:bg-indigo-900/20 p-3 rounded-2xl text-indigo-600">
-            <Bot size={28} />
+          <div className="bg-primary-100 p-3 rounded-xl text-primary">
+            <BrainCircuit size={28} />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-zinc-900 dark:text-zinc-100 tracking-tight flex items-center gap-2">
-              Yapay Zekâ Asistanı
-              {!isPremium && (
-                <span className="px-2 py-0.5 bg-amber-100 dark:bg-amber-900/20 text-amber-600 text-[10px] font-black rounded-full uppercase tracking-widest flex items-center gap-1">
-                  <Crown size={10} /> Premium
-                </span>
-              )}
-            </h1>
-            <p className="text-zinc-500 font-bold text-sm">Kişiselleştirilmiş zirai danışmanlık</p>
+             <div className="flex items-center gap-2">
+                <h1 className="text-3xl font-black font-heading text-text-primary tracking-tight">Akıllı Asistan</h1>
+                {!isPremium && (
+                  <span className="bg-amber-400 text-[#1B2E1C] text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+                    <Crown size={12} /> PRO
+                  </span>
+                )}
+             </div>
+             <p className="text-text-muted font-bold text-sm">Zirai verilerinizle beslenen yapay zekâ danışmanınız.</p>
           </div>
         </div>
-      </Card>
+      </div>
 
-      {/* Chat Container */}
-      <div className="relative">
-        {/* Premium Lock Overlay */}
+      {/* CHAT AREA */}
+      <div className="flex-1 relative min-h-0">
         {!isPremium && (
-          <div className="absolute inset-0 z-20 rounded-[2rem] overflow-hidden">
-            <div className="absolute inset-0 bg-white/60 dark:bg-zinc-900/80 backdrop-blur-md" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/30 mb-4">
-                <Lock size={28} className="text-white" />
-              </div>
-              <h3 className="text-xl font-black text-zinc-900 dark:text-zinc-100 mb-2">
-                Premium Özellik
-              </h3>
-              <p className="text-sm text-zinc-500 font-medium mb-6 max-w-sm">
-                Yapay zekâ asistanınızla sohbet etmek için Premium&apos;a yükseltin. Tarlalarınız hakkında kişiselleştirilmiş tavsiyeler alın.
-              </p>
-              <button
-                onClick={triggerUpsell}
-                className="px-8 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-black rounded-2xl shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
-              >
-                <Crown size={16} />
-                Premium&apos;a Yükselt
-              </button>
-            </div>
+          <div className="absolute inset-0 z-30 flex items-center justify-center p-6 bg-surface/40 backdrop-blur-md rounded-2xl border border-border/50">
+             <Card padding="lg" className="max-w-md w-full text-center space-y-6 shadow-2xl border-primary/20">
+                <div className="w-16 h-16 bg-amber-400 text-[#1B2E1C] rounded-2xl flex items-center justify-center mx-auto shadow-lg rotate-3">
+                   <Lock size={32} />
+                </div>
+                <div>
+                   <h3 className="text-2xl font-black font-heading text-text-primary mb-2 tracking-tight">Yapay Zekâ Kilidini Aç</h3>
+                   <p className="text-sm font-bold text-text-muted leading-relaxed">
+                      Tarlalarınızın verilerini analiz eden ve size özel öneriler sunan akıllı asistana sadece Premium üyeler erişebilir.
+                   </p>
+                </div>
+                <Button fullWidth size="lg" className="bg-amber-400 text-[#1B2E1C] hover:bg-amber-500 border-none" onClick={triggerUpsell}>
+                   <Crown size={20} className="mr-2" /> Premium&apos;a Yükselt
+                </Button>
+             </Card>
           </div>
         )}
 
-        <Card padding="none" className={`flex flex-col h-[calc(100vh-320px)] min-h-[400px] ${!isPremium ? 'pointer-events-none select-none' : ''}`}>
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
-            {messages.length === 0 && (
-              <div className="flex flex-col items-center justify-center h-full text-center space-y-4 opacity-60">
-                <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-900/10 rounded-3xl flex items-center justify-center">
-                  <Sparkles size={32} className="text-indigo-500" />
+        <Card padding="none" className="h-full flex flex-col overflow-hidden border-border relative">
+           {/* Messages Container */}
+           <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-surface/50">
+              {messages.length === 0 && (
+                <div className="flex flex-col items-center justify-center h-full text-center space-y-8 py-10 opacity-80">
+                   <div className="relative">
+                      <div className="absolute -inset-4 bg-primary/10 rounded-full blur-xl animate-pulse" />
+                      <Sparkles size={48} className="text-primary relative" />
+                   </div>
+                   <div className="space-y-2">
+                      <h3 className="text-xl font-black font-heading text-text-primary">Nasıl Yardımcı Olabilirim?</h3>
+                      <p className="text-sm font-bold text-text-muted max-w-sm mx-auto">
+                         Aşağıdaki konularda veya aklınıza takılan herhangi bir zirai soruda bana danışabilirsiniz.
+                      </p>
+                   </div>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-xl">
+                      {suggestions.map((s, i) => (
+                        <button 
+                          key={i}
+                          onClick={() => { setInput(s); inputRef.current?.focus(); }}
+                          className="p-4 bg-white border border-border rounded-xl text-xs font-bold text-text-primary text-left hover:border-primary hover:text-primary transition-all flex items-center justify-between group shadow-sm"
+                        >
+                           <span className="flex items-center gap-2">
+                              <Lightbulb size={14} className="text-amber-500" /> {s}
+                           </span>
+                           <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
+                      ))}
+                   </div>
                 </div>
-                <div>
-                  <h3 className="font-black text-zinc-700 dark:text-zinc-300 text-lg mb-1">Merhaba, {userProfile?.first_name || 'Çiftçi'}!</h3>
-                  <p className="text-sm text-zinc-500 font-medium max-w-md">
-                    Size gübreleme, ilaçlama, sulama ve hasat zamanlaması hakkında kişiselleştirilmiş tavsiyeler verebilirim.
-                  </p>
+              )}
+
+              {messages.map((msg, i) => (
+                <div key={i} className={cn(
+                  "flex gap-4 items-start",
+                  msg.role === 'user' ? "flex-row-reverse" : "flex-row"
+                )}>
+                   <div className={cn(
+                     "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm",
+                     msg.role === 'assistant' ? "bg-primary text-white" : "bg-surface-3 text-text-primary border border-border"
+                   )}>
+                      {msg.role === 'assistant' ? <Bot size={20} /> : <User size={20} />}
+                   </div>
+                   <div className={cn(
+                     "max-w-[85%] md:max-w-[70%] p-5 rounded-2xl text-sm font-bold leading-relaxed shadow-sm",
+                     msg.role === 'user' 
+                       ? "bg-primary text-white rounded-tr-none" 
+                       : "bg-white text-text-primary border border-border rounded-tl-none"
+                   )}>
+                      {msg.content}
+                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 max-w-lg">
-                  {[
-                    'Buğdayda yaprak sarılığı için ne yapmalıyım?',
-                    'Mısır tarlama ne zaman gübre atmalıyım?',
-                    'Bu haftaki hava durumuna göre ilaçlama uygun mu?',
-                    'Sera domatesimde verim artırmak için öneriler neler?'
-                  ].map((suggestion, i) => (
-                    <button
-                      key={i}
-                      onClick={() => {
-                        if (!isPremium) {
-                          triggerUpsell();
-                          return;
-                        }
-                        setInput(suggestion);
-                        inputRef.current?.focus();
-                      }}
-                      className="p-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 rounded-xl text-xs font-bold text-zinc-600 dark:text-zinc-400 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/10 hover:border-indigo-200 dark:hover:border-indigo-800 hover:text-indigo-700 dark:hover:text-indigo-300 transition-all"
-                    >
-                      <Leaf size={12} className="inline mr-1.5 text-emerald-500" />
-                      {suggestion}
-                    </button>
-                  ))}
+              ))}
+
+              {isLoading && (
+                <div className="flex gap-4 items-start">
+                   <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shrink-0 shadow-sm">
+                      <Bot size={20} />
+                   </div>
+                   <div className="bg-white text-text-primary border border-border rounded-2xl rounded-tl-none p-5 flex items-center gap-3 shadow-sm">
+                      <Loader2 size={18} className="animate-spin text-primary" />
+                      <span className="text-sm font-bold text-text-muted">Analiz ediyorum...</span>
+                   </div>
                 </div>
+              )}
+              <div ref={messagesEndRef} />
+           </div>
+
+           {/* Input Container */}
+           <div className="p-4 border-t border-border bg-white shadow-[0_-4px_12px_rgba(0,0,0,0.02)]">
+              <div className="max-w-4xl mx-auto flex gap-2">
+                 <input 
+                   ref={inputRef}
+                   type="text" 
+                   className="flex-1 bg-surface-2 border border-border rounded-xl px-5 py-3.5 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-bold text-sm text-text-primary placeholder:text-text-muted disabled:opacity-50"
+                   placeholder={isPremium ? "Bir soru sorun (Örn: Domateste mildiyö için ne yapmalıyım?)" : "Sohbet için Premium'a geçin"}
+                   value={input}
+                   onChange={(e) => setInput(e.target.value)}
+                   onKeyDown={handleKeyDown}
+                   disabled={!isPremium}
+                 />
+                 <Button 
+                   onClick={handleSend}
+                   disabled={!input.trim() || isLoading || !isPremium}
+                   className="shrink-0 px-6"
+                 >
+                    <Send size={20} />
+                 </Button>
               </div>
-            )}
-
-            {messages.map((msg, i) => (
-              <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                {msg.role === 'assistant' && (
-                  <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center text-indigo-600 shrink-0 mt-1">
-                    <Bot size={16} />
-                  </div>
-                )}
-                <div className={`max-w-[80%] p-4 rounded-2xl text-sm font-medium leading-relaxed ${
-                  msg.role === 'user' 
-                    ? 'bg-indigo-600 text-white rounded-tr-md' 
-                    : 'bg-zinc-50 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-100 dark:border-zinc-700 rounded-tl-md'
-                }`}>
-                  {msg.content}
-                </div>
-                {msg.role === 'user' && (
-                  <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center text-emerald-600 shrink-0 mt-1">
-                    <User size={16} />
-                  </div>
-                )}
-              </div>
-            ))}
-
-            {isLoading && (
-              <div className="flex gap-3">
-                <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center text-indigo-600 shrink-0">
-                  <Bot size={16} />
-                </div>
-                <div className="bg-zinc-50 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 rounded-2xl rounded-tl-md p-4 flex items-center gap-2">
-                  <Loader2 size={16} className="animate-spin text-indigo-500" />
-                  <span className="text-sm text-zinc-500 font-medium">Düşünüyorum...</span>
-                </div>
-              </div>
-            )}
-
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Input */}
-          <div className="p-4 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
-            <div className="flex gap-2">
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder={isPremium ? 'Sorunuzu yazın...' : 'Premium gereklidir...'}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                onFocus={handleInteraction}
-                disabled={!isPremium}
-                className="flex-1 px-4 py-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-sm font-medium text-zinc-900 dark:text-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-              <button
-                onClick={isPremium ? handleSend : handleInteraction}
-                disabled={isLoading || (!isPremium)}
-                className="px-4 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-bold text-sm"
-              >
-                <Send size={16} />
-              </button>
-            </div>
-          </div>
+           </div>
         </Card>
       </div>
     </div>

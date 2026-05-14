@@ -1,49 +1,75 @@
 'use client';
-
+import { cva, type VariantProps } from 'class-variance-authority';
+import { cn } from '@/lib/utils';
+import { Loader2 } from 'lucide-react';
 import React from 'react';
-import { ButtonProps } from '@/types';
+
+const buttonVariants = cva(
+  // Base — tüm varyantlarda ortak
+  [
+    'inline-flex items-center justify-center gap-2',
+    'font-bold rounded-md',
+    'transition-all duration-150 ease-out',
+    'active:scale-[0.97]',
+    'disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none',
+    'focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+    // Touch hedefi garantisi
+    'min-h-[var(--touch-target)]',
+  ],
+  {
+    variants: {
+      variant: {
+        primary:   'bg-primary text-white hover:bg-primary-dark shadow-sm',
+        secondary: 'bg-primary-100 text-primary-dark hover:bg-primary-100/80',
+        outline:   'border-2 border-primary text-primary bg-transparent hover:bg-primary-50',
+        ghost:     'text-primary bg-transparent hover:bg-primary-50',
+        danger:    'bg-danger text-white hover:bg-red-700 shadow-sm',
+        neutral:   'bg-surface-2 text-text-primary hover:bg-surface-3 border border-border',
+      },
+      size: {
+        sm:  'h-9 px-3 text-sm min-h-[36px]',      // Yardımcı aksiyon
+        md:  'h-11 px-4 text-base min-h-[44px]',   // Standart
+        lg:  'h-13 px-5 text-lg min-h-[52px]',     // Birincil aksiyon
+        xl:  'h-15 px-6 text-xl min-h-[60px]',     // Mobil CTA
+      },
+      fullWidth: {
+        true: 'w-full',
+        false: '',
+      },
+    },
+    defaultVariants: {
+      variant: 'primary',
+      size: 'md',
+      fullWidth: false,
+    },
+  }
+);
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  isLoading?: boolean;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
+}
 
 export default function Button({
-  children,
-  variant = 'primary',
-  size = 'md',
-  isLoading = false,
-  leftIcon,
-  rightIcon,
-  className = '',
-  disabled,
-  ...props
+  variant, size, fullWidth,
+  isLoading, leftIcon, rightIcon,
+  children, className, disabled, ...props
 }: ButtonProps) {
-  
-  const baseStyles = "inline-flex items-center justify-center font-black uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none rounded-2xl";
-  
-  const variants = {
-    primary: "bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-500/25",
-    secondary: "bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-500/25",
-    outline: "border-2 border-zinc-100 dark:border-zinc-800 bg-transparent text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800",
-    danger: "bg-rose-600 text-white hover:bg-rose-700 shadow-lg shadow-rose-500/25",
-    ghost: "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 shadow-none"
-  };
-
-  const sizes = {
-    sm: "px-3 py-1.5 text-[10px]",
-    md: "px-5 py-3 text-xs",
-    lg: "px-6 py-4 text-sm",
-    xl: "px-8 py-5 text-base"
-  };
-
   return (
     <button
-      className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
-      disabled={isLoading || disabled}
+      className={cn(buttonVariants({ variant, size, fullWidth }), className)}
+      disabled={disabled || isLoading}
+      aria-busy={isLoading}
       {...props}
     >
-      {isLoading && (
-        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-      )}
-      {!isLoading && leftIcon && <span className="mr-2">{leftIcon}</span>}
+      {isLoading ? (
+        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+      ) : leftIcon}
       {children}
-      {!isLoading && rightIcon && <span className="ml-2">{rightIcon}</span>}
+      {!isLoading && rightIcon}
     </button>
   );
 }

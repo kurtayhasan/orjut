@@ -54,6 +54,7 @@ type AppContextType = {
   addScoutingLog: (log: any) => Promise<void>;
   deleteScoutingLog: (id: string) => Promise<void>;
   inventory: InventoryItem[];
+  isLoadingInventory: boolean;
   addInventoryItem: (item: any) => Promise<void>;
   updateInventoryItem: (id: string, updates: Partial<InventoryItem>) => Promise<void>;
   deleteInventoryItem: (id: string) => Promise<void>;
@@ -89,6 +90,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [currentUserRole, setCurrentUserRole] = useState<'owner' | 'editor' | 'viewer'>('owner');
   const [isLoadingLands, setIsLoadingLands] = useState(true);
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
+  const [isLoadingInventory, setIsLoadingInventory] = useState(true);
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
@@ -116,6 +118,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     setIsLoadingLands(true);
     setIsLoadingTransactions(true);
+    setIsLoadingInventory(true);
 
     try {
       const [p, l, t, s, i, fo, sl, inv] = await Promise.all([
@@ -155,6 +158,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoadingLands(false);
       setIsLoadingTransactions(false);
+      setIsLoadingInventory(false);
     }
   }, [activeOrgId]);
 
@@ -429,7 +433,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     addFieldOperation, deleteFieldOperation: async (id: string) => { setFieldOperations(prev => prev.filter(o => o.id !== id)); db.deleteFieldOperation(id); },
     addScoutingLog: async (log: Omit<ScoutingLog, 'id'>) => { if (!activeOrgId) return; const { data } = await db.insertScoutingLog({ ...log, org_id: activeOrgId }); if (data) setScoutingLogs(prev => [data, ...prev]); },
     deleteScoutingLog: async (id: string) => { setScoutingLogs(prev => prev.filter(s => s.id !== id)); db.deleteScoutingLog(id); },
-    inventory, addInventoryItem, updateInventoryItem, deleteInventoryItem,
+    inventory, isLoadingInventory, addInventoryItem, updateInventoryItem, deleteInventoryItem,
     isDarkMode, toggleDarkMode: () => setIsDarkMode(!isDarkMode), calculateUnitCost,
     userRole, selectedClientId, setSelectedClientId, activeOrgId,
     isPremium: !!userProfile?.is_premium,

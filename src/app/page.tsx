@@ -1,240 +1,387 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { 
-  ArrowRight, 
-  Satellite, 
-  Bot, 
-  BarChart3, 
-  CheckCircle2
+  ArrowRight, Check, Map, Wallet, Package, 
+  Droplets, Bot, BarChart3, Menu, X, 
+  Smartphone, ShieldCheck, Zap
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
-import { landingTranslations } from '@/lib/translations/landing';
+import { cn } from '@/lib/utils';
 
 export default function LandingPage() {
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
-  const t = landingTranslations.tr;
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleStart = () => {
-    router.push('/login');
-  };
-
-  const scrollToSection = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const features = [
+    {
+      title: "Arazi Haritası",
+      desc: "Parsellerini çiz, uydudan takip et ve sınırlarını belirle.",
+      icon: Map,
+      color: "text-blue-600",
+      bg: "bg-blue-50"
+    },
+    {
+      title: "Masraf Takibi",
+      desc: "Gübre, ilaç ve mazot giderlerini kuruşu kuruşuna kaydet.",
+      icon: Wallet,
+      color: "text-emerald-600",
+      bg: "bg-emerald-50"
+    },
+    {
+      title: "Stok Yönetimi",
+      desc: "Depondaki ürünleri bil, eksilince anında haberin olsun.",
+      icon: Package,
+      color: "text-amber-600",
+      bg: "bg-amber-50"
+    },
+    {
+      title: "Hava & Sulama",
+      desc: "Tarlana özel hava durumu ve akıllı sulama tavsiyeleri.",
+      icon: Droplets,
+      color: "text-cyan-600",
+      bg: "bg-cyan-50"
+    },
+    {
+      title: "AI Asistan",
+      desc: "Zirai konularda 7/24 uzman yapay zekâ danışmanlığı.",
+      icon: Bot,
+      color: "text-purple-600",
+      bg: "bg-purple-50"
+    },
+    {
+      title: "Sezon Raporu",
+      desc: "Yıl sonunda ne kadar kazandığını detaylı analiz et.",
+      icon: BarChart3,
+      color: "text-rose-600",
+      bg: "bg-rose-50"
+    }
+  ];
 
   return (
-    <div className="min-h-screen bg-[#050505] text-zinc-100 selection:bg-emerald-500/30 font-sans overflow-x-hidden">
-      
-      {/* GLOBAL BACKGROUND ELEMENTS */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-600/5 rounded-full blur-[120px] animate-pulse"></div>
-        <div className="absolute bottom-[10%] right-[-10%] w-[40%] h-[40%] bg-indigo-600/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:40px_40px]"></div>
-      </div>
-
+    <div className="min-h-screen bg-bg font-body flex flex-col">
       {/* NAVBAR */}
-      <nav className={`fixed top-0 w-full z-[100] transition-all duration-500 border-b ${scrolled ? 'bg-black/60 backdrop-blur-2xl border-white/10 py-4' : 'bg-transparent border-transparent py-6'}`}>
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-          <div className="flex items-center gap-3 group cursor-pointer">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:rotate-12 transition-transform">
-              <span className="text-white font-black text-xl">O</span>
+      <nav className={cn(
+        "fixed top-0 w-full z-[var(--z-sticky)] transition-all duration-300",
+        scrolled ? "bg-white/90 backdrop-blur-md shadow-sm py-3" : "bg-transparent py-5"
+      )}>
+        <div className="max-w-7xl mx-auto px-5 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
+              <span className="font-heading font-black text-xl">O</span>
             </div>
-            <div className="flex flex-col -space-y-1">
-              <span className="text-xl font-black tracking-tighter">Orjut</span>
-              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">AgTech OS</span>
-            </div>
-          </div>
-          
-          <div className="hidden md:flex items-center gap-10">
-            <button onClick={() => scrollToSection('features')} className="text-sm font-bold text-zinc-400 hover:text-emerald-400 transition-colors uppercase tracking-widest">{t.quickLinks.split(' ')[0]}</button>
-            <button onClick={() => scrollToSection('pricing')} className="text-sm font-bold text-zinc-400 hover:text-emerald-400 transition-colors uppercase tracking-widest">{t.pricingTitle.split(' ')[0]}</button>
-            <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/5 mx-2">
-              <Link href="/" className="px-3 py-1 bg-emerald-600 text-white text-[10px] font-black rounded-lg shadow-lg shadow-emerald-500/20">TR</Link>
-              <Link href="/en" className="px-3 py-1 text-zinc-500 hover:text-white text-[10px] font-black transition-colors">EN</Link>
-            </div>
-            <Link href="/login" className="text-sm font-bold text-zinc-300 hover:text-white transition-colors">Giriş Yap</Link>
-            <Button size="sm" onClick={handleStart} className="!bg-emerald-500 !text-black font-black shadow-lg shadow-emerald-500/20">Ücretsiz Başla</Button>
+            <span className="text-xl font-heading font-extrabold text-text-primary tracking-tight">
+              Orjut <span className="text-primary font-bold">ZiraiAsistan</span>
+            </span>
           </div>
 
-          <button className="md:hidden w-10 h-10 flex flex-col items-center justify-center gap-1.5">
-            <div className="w-6 h-0.5 bg-white"></div>
-            <div className="w-6 h-0.5 bg-white"></div>
+          <div className="hidden md:flex items-center gap-8">
+            <Link href="#features" className="text-sm font-bold text-text-secondary hover:text-primary transition-colors">Özellikler</Link>
+            <Link href="#how-it-works" className="text-sm font-bold text-text-secondary hover:text-primary transition-colors">Nasıl Çalışır?</Link>
+            <Link href="#pricing" className="text-sm font-bold text-text-secondary hover:text-primary transition-colors">Fiyatlandırma</Link>
+            <div className="h-6 w-px bg-border mx-2" />
+            <Link href="/login" className="text-sm font-bold text-text-secondary hover:text-primary">Giriş Yap</Link>
+            <Button onClick={() => router.push('/login')} size="md">Ücretsiz Başla</Button>
+          </div>
+
+          <button 
+            className="md:hidden p-2 text-text-primary"
+            onClick={() => setMobileMenuOpen(true)}
+          >
+            <Menu size={28} />
           </button>
         </div>
       </nav>
 
+      {/* MOBILE MENU */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-[var(--z-modal)] flex flex-col bg-white animate-fade-in">
+          <div className="p-5 flex justify-between items-center border-b border-border">
+             <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white">
+                <span className="font-heading font-black">O</span>
+              </div>
+              <span className="font-heading font-bold">Orjut</span>
+            </div>
+            <button onClick={() => setMobileMenuOpen(false)}>
+              <X size={28} className="text-text-primary" />
+            </button>
+          </div>
+          <div className="flex-1 p-8 flex flex-col gap-6 text-center">
+            <Link href="#features" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-text-primary">Özellikler</Link>
+            <Link href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-text-primary">Nasıl Çalışır?</Link>
+            <Link href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-text-primary">Fiyatlandırma</Link>
+            <div className="mt-8 flex flex-col gap-4">
+              <Button onClick={() => { setMobileMenuOpen(false); router.push('/login'); }} size="xl" fullWidth>Ücretsiz Başla</Button>
+              <Button variant="ghost" onClick={() => { setMobileMenuOpen(false); router.push('/login'); }} size="lg">Giriş Yap</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* HERO SECTION */}
-      <section className="relative pt-44 pb-32">
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="flex flex-col items-center text-center">
-            <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span>
-              <span className="text-xs font-black uppercase tracking-widest text-emerald-500">{t.heroBadge}</span>
+      <section className="pt-32 pb-20 px-5 relative overflow-hidden">
+        {/* Background blobs */}
+        <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[100px] pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto flex flex-col items-center text-center relative z-10">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 rounded-full mb-8 border border-primary-100">
+            <span className="text-xl" aria-hidden="true">🌾</span>
+            <span className="text-sm font-extrabold text-primary uppercase tracking-wider">Türk Çiftçisi İçin Yapıldı</span>
+          </div>
+
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading font-black text-text-primary leading-[1.1] mb-6 tracking-tight max-w-4xl">
+            Tarlandan Kazancına,<br />
+            <span className="text-primary">Her Şey Bir Uygulamada</span>
+          </h1>
+
+          <p className="text-lg md:text-xl text-text-secondary max-w-2xl mb-10 leading-relaxed font-medium">
+            Arazini uydudan takip et, masraflarını kaydet ve verimini artıracak akıllı zirai tavsiyeler al. Üstelik tamamen Türkçe!
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+            <Button onClick={() => router.push('/login')} size="xl" className="px-10" rightIcon={<ArrowRight size={20} />}>
+              Hemen Ücretsiz Başla
+            </Button>
+            <Button variant="neutral" onClick={() => router.push('/login')} size="xl" className="px-10">
+              Giriş Yap
+            </Button>
+          </div>
+
+          <div className="mt-12 flex flex-wrap justify-center gap-x-8 gap-y-4">
+            <div className="flex items-center gap-2 text-sm font-bold text-text-secondary">
+              <Check className="text-primary" size={18} /> ✓ Ücretsiz Kullanım
             </div>
-            
-            <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-8 leading-[0.9] max-w-4xl" dangerouslySetInnerHTML={{ __html: t.heroTitle }} />
-            
-            <p className="text-xl md:text-2xl text-zinc-500 font-medium max-w-2xl mb-12 leading-relaxed">
-              {t.heroSub}
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="xl" onClick={handleStart} className="!rounded-2xl !px-12 !py-6 text-lg font-black group shadow-2xl shadow-emerald-500/20 transition-all hover:scale-105">
-                {t.heroCTA} <ArrowRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
+            <div className="flex items-center gap-2 text-sm font-bold text-text-secondary">
+              <Check className="text-primary" size={18} /> ✓ 5 Dakikada Kurulum
             </div>
+            <div className="flex items-center gap-2 text-sm font-bold text-text-secondary">
+              <Check className="text-primary" size={18} /> ✓ Türkçe Destek
+            </div>
+          </div>
+
+          {/* DASHBOARD MOCKUP - Only for Desktop */}
+          <div className="mt-20 hidden md:block w-full max-w-5xl mx-auto rounded-2xl border-4 border-white shadow-2xl overflow-hidden bg-surface">
+             <div className="h-10 bg-surface-2 border-b border-border flex items-center px-4 gap-2">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-red-400" />
+                  <div className="w-3 h-3 rounded-full bg-amber-400" />
+                  <div className="w-3 h-3 rounded-full bg-green-400" />
+                </div>
+                <div className="flex-1 bg-white mx-10 h-6 rounded-md border border-border flex items-center px-3">
+                  <div className="w-full h-1 bg-border/40 rounded-full" />
+                </div>
+             </div>
+             <div className="aspect-[16/9] bg-bg p-6 grid grid-cols-12 gap-4">
+                <div className="col-span-3 space-y-4">
+                  <div className="h-40 bg-white rounded-xl border border-border" />
+                  <div className="h-20 bg-white rounded-xl border border-border" />
+                  <div className="h-20 bg-white rounded-xl border border-border" />
+                </div>
+                <div className="col-span-6 space-y-4">
+                   <div className="h-20 bg-primary-50 rounded-xl border border-primary-100" />
+                   <div className="h-64 bg-white rounded-xl border border-border" />
+                </div>
+                <div className="col-span-3 space-y-4">
+                   <div className="h-32 bg-white rounded-xl border border-border" />
+                   <div className="h-52 bg-white rounded-xl border border-border" />
+                </div>
+             </div>
           </div>
         </div>
       </section>
 
-      {/* FEATURES */}
-      <section id="features" className="py-32 relative z-10 border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-6 text-center mb-20">
-          <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-6">{t.featureTitle}</h2>
-          <p className="text-zinc-500 font-medium text-lg max-w-2xl mx-auto">{t.featureSub}</p>
+      {/* FEATURES SECTION */}
+      <section id="features" className="py-24 bg-white border-y border-border">
+        <div className="max-w-7xl mx-auto px-5">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-5xl font-heading font-black text-text-primary mb-4 tracking-tight">
+              Tarım İşinizi Kolaylaştıran Özellikler
+            </h2>
+            <p className="text-lg text-text-secondary max-w-2xl mx-auto font-medium">
+              Eski usül not defterlerini bir kenara bırakın. Dijital asistanınızla her şey kayıt altında.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map((f, i) => (
+              <Card key={i} interactive padding="lg" className="flex flex-col items-center text-center">
+                <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mb-6", f.bg)}>
+                  <f.icon className={f.color} size={32} />
+                </div>
+                <h3 className="text-xl font-bold text-text-primary font-heading mb-3">{f.title}</h3>
+                <p className="text-text-secondary leading-relaxed font-medium">{f.desc}</p>
+              </Card>
+            ))}
+          </div>
         </div>
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
-          <Card className="p-8 !bg-zinc-950 !border-white/5 group hover:!border-emerald-500/50 transition-all">
-            <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-500 mb-6 group-hover:scale-110 transition-transform">
-              <Satellite size={24} />
-            </div>
-            <h3 className="text-xl font-black mb-3">{t.ndviTitle}</h3>
-            <p className="text-zinc-500 font-medium">{t.ndviDesc}</p>
-          </Card>
-          <Card className="p-8 !bg-zinc-950 !border-white/5 group hover:!border-indigo-500/50 transition-all">
-            <div className="w-12 h-12 bg-indigo-500/10 rounded-xl flex items-center justify-center text-indigo-500 mb-6 group-hover:scale-110 transition-transform">
-              <Bot size={24} />
-            </div>
-            <h3 className="text-xl font-black mb-3">{t.aiTitle}</h3>
-            <p className="text-zinc-500 font-medium">{t.aiDesc}</p>
-          </Card>
-          <Card className="p-8 !bg-zinc-950 !border-white/5 group hover:!border-emerald-500/50 transition-all">
-            <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-500 mb-6 group-hover:scale-110 transition-transform">
-              <BarChart3 size={24} />
-            </div>
-            <h3 className="text-xl font-black mb-3">{t.financeTitle}</h3>
-            <p className="text-zinc-500 font-medium">{t.financeDesc}</p>
-          </Card>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section id="how-it-works" className="py-24">
+        <div className="max-w-7xl mx-auto px-5">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-5xl font-heading font-black text-text-primary mb-4 tracking-tight">
+              3 Basit Adımda Başlayın
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
+             {/* Connection line for desktop */}
+             <div className="hidden md:block absolute top-1/2 left-0 w-full h-1 bg-primary/10 -translate-y-full z-0" />
+
+             {[
+               { step: "1", title: "Arazini Ekle", desc: "Tarlalarını haritadan seç veya ada-parsel numarasıyla ekle.", icon: Map },
+               { step: "2", title: "Kayıtlarını Tut", desc: "Yapılan her masrafı ve işlemi anında uygulamaya kaydet.", icon: Wallet },
+               { step: "3", title: "Akıllı Öneriler Al", desc: "AI asistanın verilerini analiz etsin, sana yol göstersin.", icon: Bot }
+             ].map((s, i) => (
+               <div key={i} className="flex flex-col items-center text-center relative z-10">
+                 <div className="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center text-2xl font-black mb-6 shadow-xl shadow-primary/20">
+                    {s.step}
+                 </div>
+                 <h3 className="text-2xl font-bold text-text-primary font-heading mb-3">{s.title}</h3>
+                 <p className="text-text-secondary leading-relaxed font-medium max-w-xs">{s.desc}</p>
+               </div>
+             ))}
+          </div>
         </div>
       </section>
 
       {/* PRICING */}
-      <section id="pricing" className="py-32 relative z-10 border-t border-white/5 bg-zinc-950/30">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-6">{t.pricingTitle}</h2>
-            <p className="text-zinc-500 font-medium text-lg max-w-2xl mx-auto">Temel özellikler sonsuza kadar ücretsiz. Yapay zekâ ve uydu verileri için Premium&apos;a geçin.</p>
+      <section id="pricing" className="py-24 bg-surface-2 border-t border-border">
+        <div className="max-w-7xl mx-auto px-5">
+           <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-5xl font-heading font-black text-text-primary mb-4 tracking-tight">
+              Her Ölçeğe Uygun Paketler
+            </h2>
+            <p className="text-lg text-text-secondary font-medium">Temel özellikler her zaman ücretsiz.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-stretch">
-            {/* FREE */}
-            <Card className="p-12 !bg-zinc-950 !border-white/5 flex flex-col h-full hover:!border-white/20 transition-all">
-              <div className="mb-10">
-                <span className="px-3 py-1 bg-white/5 rounded-full text-[10px] font-black uppercase tracking-widest text-zinc-500">Ücretsiz</span>
-                <h3 className="text-3xl font-black mt-4 mb-2">Veri Toplayıcı</h3>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-5xl font-black text-white">0 TL</span>
-                  <span className="text-zinc-500 font-bold">/ sonsuza dek</span>
-                </div>
-              </div>
-              <ul className="space-y-5 mb-12 flex-1">
-                {['Tarla Yönetimi', 'Masraf Takibi', 'Sezon Kayıtları', 'Envanter Yönetimi', 'Sulama Takibi'].map(item => (
-                  <li key={item} className="flex items-center gap-3 text-sm font-bold text-zinc-500">
-                    <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Button variant="outline" className="w-full !rounded-2xl !py-4 font-black" onClick={handleStart}>Ücretsiz Başla</Button>
-            </Card>
 
-            {/* PREMIUM — KOBİ PRO */}
-            <div className="relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 via-emerald-400 to-indigo-500 rounded-[3.5rem] blur-lg opacity-30 animate-pulse" />
-              <Card className="relative !bg-emerald-600 !border-transparent p-12 flex flex-col h-full overflow-hidden shadow-2xl shadow-emerald-500/20 !rounded-[3rem]">
-                <div className="absolute top-0 right-0 bg-white text-black text-[10px] font-black uppercase tracking-[0.2em] px-6 py-3 rounded-bl-3xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+             {/* Free */}
+             <Card padding="lg" className="flex flex-col">
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold text-text-primary font-heading">Ücretsiz Başlangıç</h3>
+                  <div className="mt-4 flex items-baseline gap-1">
+                    <span className="text-4xl font-black text-text-primary">₺0</span>
+                    <span className="text-text-secondary font-bold">/ay</span>
+                  </div>
+                </div>
+                <div className="flex-1 space-y-4 mb-8">
+                  <div className="flex items-center gap-3 text-text-secondary font-bold text-sm">
+                    <Check className="text-primary flex-shrink-0" size={18} /> 3 Adet Arazi Takibi
+                  </div>
+                  <div className="flex items-center gap-3 text-text-secondary font-bold text-sm">
+                    <Check className="text-primary flex-shrink-0" size={18} /> Temel Finans Kayıtları
+                  </div>
+                  <div className="flex items-center gap-3 text-text-secondary font-bold text-sm">
+                    <Check className="text-primary flex-shrink-0" size={18} /> Stok Takibi
+                  </div>
+                </div>
+                <Button variant="neutral" fullWidth onClick={() => router.push('/login')}>Hemen Başla</Button>
+             </Card>
+
+             {/* Pro */}
+             <Card padding="lg" className="flex flex-col border-2 border-primary relative overflow-hidden">
+                <div className="absolute top-0 right-0 bg-primary text-white px-4 py-1 text-xs font-black uppercase tracking-widest rounded-bl-lg">
                   Önerilen
                 </div>
-                <div className="mb-10">
-                  <span className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-black uppercase tracking-widest text-white">KOBİ Pro</span>
-                  <h3 className="text-3xl font-black mt-4 mb-2 text-white">Akıllı Sezon</h3>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-black text-white">1.000 TL</span>
-                    <span className="text-emerald-100/60 font-bold">/yıl</span>
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold text-text-primary font-heading">Pro Çiftçi</h3>
+                  <div className="mt-4 flex items-baseline gap-1">
+                    <span className="text-4xl font-black text-text-primary">₺299</span>
+                    <span className="text-text-secondary font-bold">/ay</span>
                   </div>
-                  <p className="text-emerald-100/80 text-sm font-bold mt-2">veya Aylık 100 TL</p>
                 </div>
-                <ul className="space-y-5 mb-12 flex-1">
-                  {[
-                    'Her Şey (Ücretsiz Plandaki Tüm Özellikler)',
-                    'Yapay Zekâ Asistanı',
-                    'NDVI Uydu Analizi',
-                    'Sınırsız Danışmanlık',
-                    'Öncelikli Teknik Destek'
-                  ].map(item => (
-                    <li key={item} className="flex items-center gap-3 text-sm font-black text-white">
-                      <CheckCircle2 size={18} className="text-white shrink-0" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <Button className="w-full !bg-white !text-black hover:!bg-emerald-50 !rounded-2xl !py-4 font-black shadow-xl" onClick={handleStart}>Premium&apos;a Geç</Button>
-              </Card>
-            </div>
+                <div className="flex-1 space-y-4 mb-8">
+                  <div className="flex items-center gap-3 text-text-primary font-bold text-sm">
+                    <Check className="text-primary flex-shrink-0" size={18} /> Sınırsız Arazi Takibi
+                  </div>
+                  <div className="flex items-center gap-3 text-text-primary font-bold text-sm">
+                    <Check className="text-primary flex-shrink-0" size={18} /> Gelişmiş AI Analizleri
+                  </div>
+                  <div className="flex items-center gap-3 text-text-primary font-bold text-sm">
+                    <Check className="text-primary flex-shrink-0" size={18} /> Uydu NDVI Haritaları
+                  </div>
+                  <div className="flex items-center gap-3 text-text-primary font-bold text-sm">
+                    <Check className="text-primary flex-shrink-0" size={18} /> Öncelikli Canlı Destek
+                  </div>
+                </div>
+                <Button fullWidth onClick={() => router.push('/login')}>Pro'ya Geç</Button>
+             </Card>
           </div>
         </div>
       </section>
 
+      {/* CTA SECTION */}
+      <section className="py-24 bg-primary text-white overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
+        <div className="max-w-4xl mx-auto px-5 text-center relative z-10">
+           <h2 className="text-3xl md:text-5xl font-heading font-black mb-8 leading-tight">
+             Tarlanızın Geleceğini <br className="hidden md:block" /> Dijital Güçle Yönetin
+           </h2>
+           <p className="text-primary-100 text-lg md:text-xl mb-12 font-medium">
+             Hemen kaydolun, 5 dakikada tarlalarınızı dijital dünyaya taşıyın.
+           </p>
+           <Button onClick={() => router.push('/login')} size="xl" className="bg-white text-primary hover:bg-primary-50 px-12">
+             Şimdi Ücretsiz Hesap Oluştur
+           </Button>
+        </div>
+      </section>
+
       {/* FOOTER */}
-      <footer className="py-32 border-t border-white/5 bg-black relative z-10">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-16 mb-24">
-            <div className="col-span-1 md:col-span-2 space-y-8">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center">
-                  <span className="text-white font-black text-2xl">O</span>
-                </div>
-                <span className="text-2xl font-black tracking-tighter">Orjut <span className="text-emerald-500">AgTech</span></span>
+      <footer className="bg-text-primary text-white py-16 px-5 border-t border-white/5">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
+          <div className="col-span-1 md:col-span-2 space-y-6">
+             <div className="flex items-center gap-2">
+              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white">
+                <span className="font-heading font-black text-xl">O</span>
               </div>
-              <p className="text-zinc-500 font-medium max-w-sm text-lg leading-relaxed">
-                {t.footerSub}
-              </p>
+              <span className="text-xl font-heading font-extrabold tracking-tight">
+                Orjut <span className="text-primary">ZiraiAsistan</span>
+              </span>
             </div>
-            
-            <div className="space-y-8">
-              <h4 className="font-black text-white uppercase tracking-[0.3em] text-[10px]">{t.quickLinks}</h4>
-              <ul className="space-y-4 text-sm font-bold text-zinc-500">
-                <li><button onClick={() => scrollToSection('features')} className="hover:text-emerald-500 transition-colors">Özellikler</button></li>
-                <li><button onClick={() => scrollToSection('pricing')} className="hover:text-emerald-500 transition-colors">Fiyatlandırma</button></li>
-                <li><Link href="/login" className="hover:text-emerald-500 transition-colors">Giriş Yap</Link></li>
-              </ul>
-            </div>
-            
-            <div className="space-y-8">
-              <h4 className="font-black text-white uppercase tracking-[0.3em] text-[10px]">{t.legal}</h4>
-              <ul className="space-y-4 text-sm font-bold text-zinc-500">
-                <li><Link href="/legal/privacy" className="hover:text-emerald-500 transition-colors">{t.privacy}</Link></li>
-                <li><Link href="/legal/terms" className="hover:text-emerald-500 transition-colors">{t.terms}</Link></li>
-                <li><a href="mailto:destek@orjut.com" className="hover:text-emerald-500 transition-colors">{t.contactUs}</a></li>
-                <li><Link href="/login" className="hover:text-rose-500 transition-colors text-zinc-600">Hesabımı Sil</Link></li>
-              </ul>
-            </div>
+            <p className="text-text-muted text-sm max-w-sm leading-relaxed font-medium">
+              Türk tarımının dijitalleşme sürecinde çiftçilerimizin yanındayız. Sıfır veri kaybı, maksimum hasat vizyonuyla tarlalarınızı yönetmenizi sağlıyoruz.
+            </p>
           </div>
           
-          <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
-            <p className="text-xs font-black text-zinc-600 uppercase tracking-widest">© 2026 ORJUT AGTECH OS. ALL RIGHTS RESERVED.</p>
+          <div>
+            <h4 className="font-bold mb-6 text-white uppercase text-xs tracking-widest">Bağlantılar</h4>
+            <ul className="space-y-4">
+              <li><Link href="#features" className="text-text-muted hover:text-white transition-colors text-sm font-bold">Özellikler</Link></li>
+              <li><Link href="#how-it-works" className="text-text-muted hover:text-white transition-colors text-sm font-bold">Nasıl Çalışır?</Link></li>
+              <li><Link href="#pricing" className="text-text-muted hover:text-white transition-colors text-sm font-bold">Fiyatlandırma</Link></li>
+            </ul>
           </div>
+
+          <div>
+            <h4 className="font-bold mb-6 text-white uppercase text-xs tracking-widest">Yasal</h4>
+            <ul className="space-y-4">
+              <li><Link href="/legal/terms" className="text-text-muted hover:text-white transition-colors text-sm font-bold">Kullanım Koşulları</Link></li>
+              <li><Link href="/legal/privacy" className="text-text-muted hover:text-white transition-colors text-sm font-bold">Gizlilik Politikası</Link></li>
+              <li><Link href="/legal/cookies" className="text-text-muted hover:text-white transition-colors text-sm font-bold">Çerez Politikası</Link></li>
+            </ul>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto pt-12 mt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-text-muted text-sm font-medium">
+           <p>© 2026 Orjut AgTech. Tüm hakları saklıdır.</p>
+           <div className="flex gap-6">
+              <Link href="#" className="hover:text-white transition-colors">Twitter</Link>
+              <Link href="#" className="hover:text-white transition-colors">Instagram</Link>
+              <Link href="#" className="hover:text-white transition-colors">LinkedIn</Link>
+           </div>
         </div>
       </footer>
     </div>

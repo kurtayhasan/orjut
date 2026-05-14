@@ -1,57 +1,106 @@
 'use client';
-
-import React, { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { X } from 'lucide-react';
-import { BaseModalProps } from '@/types';
+import { cn } from '@/lib/utils';
 
-export default function BaseModal({ 
-  isOpen, 
-  onClose, 
-  title, 
-  children, 
-  className = '',
-  showCloseButton = true
+interface BaseModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title?: string;
+  children: React.ReactNode;
+  footer?: React.ReactNode;
+  size?: 'sm' | 'md' | 'lg';
+}
+
+export default function BaseModal({
+  isOpen, onClose, title, children, footer, size = 'md'
 }: BaseModalProps) {
-  
+
+  // Escape ile kapat
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape') onClose();
+  }, [onClose]);
+
+  // Android geri butonu desteği
   useEffect(() => {
-    if (isOpen) document.body.style.overflow = 'hidden';
-    else document.body.style.overflow = 'unset';
-    return () => { document.body.style.overflow = 'unset'; };
+    if (!isOpen) return;
+    document.addEventListener('keydown', handleKeyDown);
+    window.history.pushState({ modal: true }, '');
+    const handlePop = () => onClose();
+    window.addEventListener('popstate', handlePop);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('popstate', handlePop);
+    };
+  }, [isOpen, handleKeyDown, onClose]);
+
+  // Body scroll kilitle
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-      <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-md animate-in fade-in duration-300"
-        onClick={onClose}
-      />
-      
-      <div className={`
-        relative bg-white dark:bg-zinc-900 
-        w-full max-w-lg rounded-[2.5rem] shadow-2xl 
-        overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-10 duration-500
-        ${className}
-      `}>
-        {showCloseButton && (
-          <button 
-            onClick={onClose}
-            className="absolute top-6 right-6 p-2 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-all z-10"
-          >
-            <X size={20} />
-          </button>
-        )}
+  const maxWidthClass = { sm: 'md:max-w-sm', md: 'md:max-w-md', lg: 'md:max-w-lg' }[size];
 
+  return (
+    <div
+      className="fixed inset-0 z-[var(--z-modal)] flex items-end md:items-center justify-center"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={title ? 'modal-title' : undefined}
+    >
+      {/* Overlay */}
+      <div
+        className="absolute inset-0 bg-black/50 animate-fade-in"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      {/* Panel */}
+      <div className={cn(
+        // Mobil: tam genişlik, alttan
+        'relative w-full bg-surface',
+        'rounded-t-2xl md:rounded-xl',
+        'max-h-[92vh] flex flex-col',
+        'animate-slide-up md:animate-scale-in',
+        // Desktop: ortalanmış
+        'md:mx-4', maxWidthClass
+      )}>
+
+        {/* Handle bar — sadece mobil */}
+        <div className="flex justify-center pt-3 pb-1 md:hidden" aria-hidden="true">
+          <div className="w-10 h-1 rounded-full bg-border-strong" />
+        </div>
+
+        {/* Header */}
         {title && (
-          <div className="px-8 pt-8 pb-4">
-            <h3 className="text-xl font-black text-zinc-900 dark:text-zinc-100 tracking-tight">{title}</h3>
+          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+            <h2 id="modal-title" className="text-lg font-bold text-text-primary font-heading">
+              {title}
+            </h2>
+            <button
+              onClick={onClose}
+              className="p-2 rounded-md text-text-muted hover:text-text-primary hover:bg-surface-2 transition-colors min-h-[var(--touch-target-sm)] min-w-[var(--touch-target-sm)] flex items-center justify-center"
+              aria-label="Kapat"
+            >
+              <X size={20} aria-hidden="true" />
+            </button>
           </div>
         )}
 
-        <div className="p-8">
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-5 custom-scrollbar">
           {children}
         </div>
+
+        {/* Footer */}
+        {footer && (
+          <div className="px-5 py-4 border-t border-border pb-safe">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );

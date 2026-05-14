@@ -1,31 +1,43 @@
-'use client';
+import Button from '@/components/ui/Button';
+import { type LucideIcon } from 'lucide-react';
 
-import React from 'react';
-import { Sprout, Plus } from 'lucide-react';
-import Button from './ui/Button';
-import { EmptyStateProps } from '@/types';
+interface EmptyStateProps {
+  icon?: LucideIcon;
+  emoji?: string;           // Alternatif emoji ikon
+  title: string;
+  description?: string;
+  actionLabel?: string;
+  onAction?: () => void;
+}
 
-export default function EmptyState({ 
-  message, 
-  buttonText, 
-  onAction,
-  icon: Icon = Sprout
+export default function EmptyState({
+  icon: Icon, emoji, title, description, actionLabel, onAction
 }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center p-12 bg-white dark:bg-zinc-900/50 border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-3xl text-center space-y-6 animate-in fade-in zoom-in-95 duration-500">
-      <div className="w-20 h-20 bg-zinc-50 dark:bg-zinc-800 rounded-3xl flex items-center justify-center text-zinc-300 dark:text-zinc-600">
-        <Icon size={40} />
+    <div className="flex flex-col items-center justify-center py-16 px-8 text-center">
+      <div className="mb-4">
+        {emoji ? (
+          <span className="text-6xl" aria-hidden="true">{emoji}</span>
+        ) : Icon ? (
+          <div className="w-16 h-16 rounded-full bg-primary-50 flex items-center justify-center">
+            <Icon size={32} className="text-primary" aria-hidden="true" />
+          </div>
+        ) : null}
       </div>
-      <div className="space-y-2">
-        <h3 className="text-xl font-black text-zinc-900 dark:text-zinc-100 tracking-tight">{message}</h3>
-        <p className="text-sm font-bold text-zinc-500 dark:text-zinc-400 max-w-[240px] mx-auto">Sistemi kullanmaya başlamak için ilk adımı atın.</p>
-      </div>
-      {buttonText && onAction && (
-        <Button 
-          onClick={onAction}
-          leftIcon={<Plus size={18} />}
-        >
-          {buttonText}
+
+      <h3 className="text-lg font-bold text-text-primary font-heading mb-2">
+        {title}
+      </h3>
+
+      {description && (
+        <p className="text-base text-text-secondary max-w-xs mb-6">
+          {description}
+        </p>
+      )}
+
+      {actionLabel && onAction && (
+        <Button onClick={onAction} size="lg">
+          {actionLabel}
         </Button>
       )}
     </div>

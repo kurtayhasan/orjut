@@ -2,117 +2,147 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap');
+
+:root {
+  /* ─── Ana Renk Skalası ─── */
+  --color-primary:        #2D7A3A;
+  --color-primary-light:  #4CAF61;
+  --color-primary-dark:   #1B5E28;
+  --color-primary-50:     #F0F9F2;
+  --color-primary-100:    #D6EFD9;
+
+  /* ─── Yüzey Renkleri ─── */
+  --color-bg:             #F7F5F2;  /* Sayfa arka planı — warm kırık beyaz */
+  --color-surface:        #FFFFFF;  /* Kart yüzeyi */
+  --color-surface-2:      #F0EDE8;  /* Input arka planı */
+  --color-surface-3:      #E8E3DC;  /* Hover/aktif yüzey */
+
+  /* ─── Sınır Renkleri ─── */
+  --color-border:         #E2DDD6;
+  --color-border-strong:  #C8C2B8;
+  --color-border-focus:   #2D7A3A;  /* Focus ring rengi */
+
+  /* ─── Metin Renkleri ─── */
+  --color-text-primary:   #1A1612;  /* Warm siyah */
+  --color-text-secondary: #6B6560;
+  --color-text-muted:     #9D9890;
+  --color-text-disabled:  #C4BFB8;
+  --color-text-inverse:   #FFFFFF;
+  --color-text-on-primary:#FFFFFF;
+
+  /* ─── Semantik Renkler ─── */
+  --color-success:        #2D7A3A;
+  --color-success-bg:     #F0F9F2;
+  --color-warning:        #D97706;
+  --color-warning-bg:     #FFFBEB;
+  --color-danger:         #DC2626;
+  --color-danger-bg:      #FEF2F2;
+  --color-info:           #2563EB;
+  --color-info-bg:        #EFF6FF;
+
+  /* ─── Kategori Renkleri ─── */
+  --color-mazot:          #F97316;
+  --color-mazot-bg:       #FFF7ED;
+  --color-gubre:          #16A34A;
+  --color-gubre-bg:       #F0FDF4;
+  --color-ilac:           #7C3AED;
+  --color-ilac-bg:        #F5F3FF;
+  --color-tohum:          #CA8A04;
+  --color-tohum-bg:       #FEFCE8;
+  --color-isci:           #2563EB;
+  --color-isci-bg:        #EFF6FF;
+  --color-diger:          #6B7280;
+  --color-diger-bg:       #F9FAFB;
+
+  /* ─── Spacing Scale (4px bazlı) ─── */
+  --space-1:  4px;   --space-2:  8px;   --space-3:  12px;
+  --space-4:  16px;  --space-5:  20px;  --space-6:  24px;
+  --space-8:  32px;  --space-10: 40px;  --space-12: 48px;
+  --space-16: 64px;  --space-20: 80px;
+
+  /* ─── Border Radius ─── */
+  --radius-xs:   4px;
+  --radius-sm:   8px;
+  --radius-md:   12px;   /* Butonlar, inputlar */
+  --radius-lg:   16px;   /* Kartlar */
+  --radius-xl:   24px;   /* Modal, büyük kartlar */
+  --radius-2xl:  32px;   /* Hero kartlar */
+  --radius-full: 9999px; /* Pill, badge, avatar */
+
+  /* ─── Shadows ─── */
+  --shadow-xs: 0 1px 2px rgba(26,22,18,0.05);
+  --shadow-sm: 0 1px 3px rgba(26,22,18,0.08), 0 1px 2px rgba(26,22,18,0.04);
+  --shadow-md: 0 4px 12px rgba(26,22,18,0.08), 0 2px 4px rgba(26,22,18,0.04);
+  --shadow-lg: 0 10px 30px rgba(26,22,18,0.10), 0 4px 8px rgba(26,22,18,0.06);
+  --shadow-xl: 0 20px 60px rgba(26,22,18,0.12), 0 8px 16px rgba(26,22,18,0.08);
+
+  /* ─── Tipografi ─── */
+  --font-heading: 'Nunito', sans-serif;
+  --font-body:    'Nunito Sans', sans-serif;
+
+  /* ─── Touch Hedefi ─── */
+  --touch-target: 48px;  /* Minimum tıklanabilir alan */
+  --touch-target-sm: 44px;
+
+  /* ─── Z-Index Scale ─── */
+  --z-base:     0;
+  --z-raised:   10;
+  --z-dropdown: 100;
+  --z-sticky:   200;
+  --z-modal:    1000;
+  --z-toast:    2000;
+}
+
+/* ─── Base Reset ─── */
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 142 76% 36%;
-    --primary-foreground: 355 100% 97%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 142 76% 36%;
-    --radius: 0.75rem;
+  * { box-sizing: border-box; }
+  html { font-family: var(--font-body); -webkit-tap-highlight-color: transparent; }
+  body { background-color: var(--color-bg); color: var(--color-text-primary); }
+  h1, h2, h3, h4, h5 { font-family: var(--font-heading); }
+
+  /* Focus ring — erişilebilirlik için görünür kalacak */
+  :focus-visible {
+    outline: 2px solid var(--color-border-focus);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
   }
 
-  .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 142 70% 50%;
-    --primary-foreground: 144 100% 11%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 142 70% 50%;
-  }
-
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-zinc-50 dark:bg-[#050505] text-zinc-900 dark:text-zinc-100 antialiased transition-colors duration-300;
-    font-family: var(--font-inter), sans-serif;
-    overscroll-behavior-y: none;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-outfit), sans-serif;
-  }
+  /* Metin seçimi */
+  ::selection { background: var(--color-primary-100); }
 }
 
 @layer utilities {
-  .glass {
-    @apply bg-white/10 backdrop-blur-xl border border-white/10;
+  /* ─── Scrollbar ─── */
+  .hide-scrollbar::-webkit-scrollbar { display: none; }
+  .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .custom-scrollbar::-webkit-scrollbar       { width: 6px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 3px;
   }
-  .glass-dark {
-    @apply bg-black/40 backdrop-blur-2xl border border-white/5;
+
+  /* ─── Safe Area ─── */
+  .safe-top    { padding-top:    env(safe-area-inset-top);    }
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+  .safe-left   { padding-left:   env(safe-area-inset-left);  }
+  .safe-right  { padding-right:  env(safe-area-inset-right); }
+  .pb-safe     { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+
+  /* ─── Touch Feedback ─── */
+  .touch-feedback {
+    transition: background-color 0.1s ease, transform 0.1s ease;
   }
-}
+  .touch-feedback:active {
+    background-color: var(--color-surface-2);
+    transform: scale(0.98);
+  }
 
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  @apply bg-transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  @apply bg-zinc-200 dark:bg-zinc-800 rounded-full;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  @apply bg-zinc-300 dark:bg-zinc-700;
-}
-
-/* Phone Input Dark Theme */
-.phone-input-dark .PhoneInputInput {
-  background: transparent;
-  border: none;
-  color: white;
-  outline: none;
-  font-size: 0.875rem;
-}
-
-.phone-input-dark .PhoneInputInput::placeholder {
-  color: rgb(71 85 105);
-}
-
-.phone-input-dark .PhoneInputCountrySelect {
-  background: #111;
-  color: white;
-}
-
-/* Animations */
-@keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
+  /* ─── Minimum Touch Hedefi ─── */
+  .touch-target {
+    min-height: var(--touch-target);
+    min-width:  var(--touch-target);
+  }
 }

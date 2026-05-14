@@ -8,26 +8,17 @@ import NetworkStatus from './NetworkStatus';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 export default function Header() {
-  const { lang, setLang, setIsSidebarOpen, userProfile, userRole } = useAppContext();
+  const { setIsSidebarOpen, userProfile, userRole } = useAppContext();
   const [isEndModalOpen, setEndModalOpen] = useState(false);
   const [isProfileOpen, setProfileOpen] = useState(false);
-  const [userName, setUserName] = useState('');
   const profileRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
 
-  useEffect(() => {
-    if (userProfile) {
-      setUserName(`${userProfile.first_name} ${userProfile.last_name}`);
-    } else {
-      const name = localStorage.getItem('user_name') || '';
-      setUserName(name);
-    }
-  }, [userProfile]);
-
-  // Dışarı tıklanınca menüyü kapat
+  // Handle outside click for profile dropdown
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
@@ -38,7 +29,7 @@ export default function Header() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const isSubPage = pathname !== '/dashboard' && pathname.length > 10; // Simple check for sub-pages
+  const isSubPage = pathname !== '/dashboard' && pathname.split('/').length > 2;
 
   const handleBack = () => {
     if (window.history.length > 2) {
@@ -52,129 +43,122 @@ export default function Header() {
     try {
       const { supabase } = await import('@/lib/supabase');
       await supabase.auth.signOut();
-      localStorage.clear(); // Clear everything
+      localStorage.clear();
       toast.success("Başarıyla çıkış yapıldı.");
-      router.push('/');
+      window.location.href = '/';
     } catch (err) {
       console.error("Logout error:", err);
-      router.push('/');
+      window.location.href = '/';
     }
   };
 
-  const initials = userName
-    ? userName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
-    : '?';
+  const userName = userProfile ? `${userProfile.first_name} ${userProfile.last_name}` : 'Çiftçi';
+  const initials = userName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+
+  // Get current page title for mobile
+  const getPageTitle = () => {
+    if (pathname === '/dashboard') return 'Ana Sayfa';
+    if (pathname.includes('/lands')) return 'Arazilerim';
+    if (pathname.includes('/finance')) return 'Finans';
+    if (pathname.includes('/inventory')) return 'Stok Yönetimi';
+    if (pathname.includes('/operations')) return 'Zirai İşlemler';
+    if (pathname.includes('/scouting')) return 'Arazi Gözlemi';
+    if (pathname.includes('/irrigation')) return 'Sulama Takibi';
+    if (pathname.includes('/seasons')) return 'Sezonlar';
+    if (pathname.includes('/ai')) return 'AI Asistan';
+    if (pathname.includes('/settings')) return 'Ayarlar';
+    return 'Orjut';
+  };
 
   return (
     <>
-      <header className="bg-white/80 dark:bg-[#050505]/80 backdrop-blur-md border-b border-zinc-200 dark:border-white/5 p-4 px-4 md:px-8 flex justify-between items-center z-10 shrink-0 h-16 sticky top-0 transition-colors duration-300">
+      <header className="h-[60px] md:h-[72px] bg-surface border-b border-border px-4 md:px-8 flex items-center justify-between sticky top-0 z-[var(--z-sticky)]">
+        {/* LEFT: BACK BUTTON OR GREETING */}
         <div className="flex items-center gap-3">
           {isSubPage ? (
             <button 
               onClick={handleBack}
-              className="p-2 -ml-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-all active:scale-95"
+              className="w-10 h-10 flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-surface-2 rounded-md transition-colors"
+              aria-label="Geri Dön"
             >
               <ArrowLeft size={24} />
             </button>
           ) : (
             <button 
               onClick={() => setIsSidebarOpen(true)}
-              className="p-2 -ml-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl md:hidden transition-all active:scale-95"
+              className="w-10 h-10 flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-surface-2 rounded-md lg:hidden transition-colors"
+              aria-label="Menüyü Aç"
             >
               <Menu size={24} />
             </button>
           )}
-          <div className="font-bold text-indigo-600 flex items-center gap-2">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center sm:hidden shadow-lg shadow-indigo-500/20">
-              <span className="text-white text-xs font-black">O</span>
-            </div>
-            <span className="hidden sm:block dark:text-zinc-100 font-black tracking-tight text-lg">ZiraiAsistan</span>
+          
+          <div className="hidden md:block">
+            <h1 className="text-lg font-bold text-text-primary font-heading">
+              {isSubPage ? getPageTitle() : `Merhaba, ${userProfile?.first_name || 'Çiftçi'} 👋`}
+            </h1>
           </div>
         </div>
-        
+
+        {/* MIDDLE: MOBILE TITLE */}
+        <div className="md:hidden">
+          <h2 className="text-base font-bold text-text-primary font-heading truncate max-w-[150px]">
+            {getPageTitle()}
+          </h2>
+        </div>
+
+        {/* RIGHT: ACTIONS */}
         <div className="flex items-center gap-2 md:gap-4">
           <div className="hidden sm:block">
-            <NetworkStatus />
+             <NetworkStatus />
           </div>
-          
-          <div className="relative group">
-            <button className="relative p-2 text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors">
-              <Bell size={20} />
-              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white dark:border-zinc-950"></span>
-            </button>
-            <div className="absolute right-0 top-12 w-80 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-100 dark:border-zinc-800 py-4 px-2 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-              <h4 className="px-4 text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-4">🔔 Bildirimler & Yapılacaklar</h4>
-              <div className="space-y-1">
-                <div className="p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 rounded-xl transition-all cursor-pointer group/item border border-transparent hover:border-zinc-100 dark:hover:border-zinc-800">
-                  <p className="text-xs font-black text-zinc-900 dark:text-zinc-100 mb-1 flex items-center justify-between">
-                    Mühendis Notu <span className="text-[9px] bg-emerald-500/10 text-emerald-600 px-1.5 py-0.5 rounded">Yeni</span>
-                  </p>
-                  <p className="text-xs text-zinc-500 font-bold leading-relaxed">Kızıltepe 1 nolu tarlaya Üre gübresi atılacak. Yağış öncesi uygun zaman.</p>
-                </div>
-                <div className="p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 rounded-xl transition-all cursor-pointer opacity-60">
-                  <p className="text-xs font-black text-zinc-900 dark:text-zinc-100 mb-1">Hasat Planlaması</p>
-                  <p className="text-xs text-zinc-500 font-bold leading-relaxed">Mısır sezonu kapanış işlemleri için verileri tamamlayın.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <button 
-            onClick={() => setEndModalOpen(true)}
-            className="flex items-center gap-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-white px-4 py-2 rounded-xl text-xs font-black transition-all shadow-xl shadow-zinc-200 dark:shadow-none active:scale-95 uppercase tracking-widest"
-          >
-            <span>🌙 <span className="hidden md:inline">Günü Kapat</span></span>
+
+          {/* Notifications */}
+          <button className="w-10 h-10 flex items-center justify-center text-text-muted hover:text-primary transition-colors relative">
+            <Bell size={20} />
+            <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-danger rounded-full border-2 border-surface"></span>
           </button>
 
-          <div className="hidden lg:flex bg-zinc-100 dark:bg-zinc-900 p-1 rounded-xl border border-zinc-200 dark:border-zinc-800">
-            <button 
-              onClick={() => setLang('tr')}
-              className={`px-3 py-1 rounded-lg text-[10px] font-black transition-all ${lang === 'tr' ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
-            >
-              TR
-            </button>
-            <button 
-              onClick={() => setLang('en')}
-              className={`px-3 py-1 rounded-lg text-[10px] font-black transition-all ${lang === 'en' ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
-            >
-              EN
-            </button>
-          </div>
+          {/* Günü Kapat */}
+          <button 
+            onClick={() => setEndModalOpen(true)}
+            className="hidden sm:flex items-center gap-2 bg-surface-2 border border-border text-text-primary hover:bg-surface-3 px-4 py-2 rounded-md text-xs font-bold transition-all active:scale-95"
+          >
+            <span>🌙 Günü Kapat</span>
+          </button>
 
-          {/* Profil Avatarı + Dropdown */}
+          {/* Profile Dropdown */}
           <div className="relative" ref={profileRef}>
             <button
               onClick={() => setProfileOpen(!isProfileOpen)}
-              className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white text-xs font-black border-2 border-white dark:border-zinc-800 shadow-xl shadow-indigo-500/20 cursor-pointer hover:scale-105 transition-all active:scale-95"
+              className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white text-xs font-black border-2 border-surface shadow-md hover:scale-105 transition-all active:scale-95"
             >
               {initials}
             </button>
 
             {isProfileOpen && (
-              <div className="absolute right-0 top-14 w-60 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-100 dark:border-zinc-800 py-2 z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
-                <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
-                  <p className="font-black text-sm text-zinc-900 dark:text-zinc-100 tracking-tight">{userName || 'Kullanıcı'}</p>
-                  <p className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
-                    {userRole === 'admin' ? 'Süper Yönetici' : userRole === 'engineer' ? 'Ziraat Mühendisi' : 'Çiftçi Hesabı'}
+              <div className="absolute right-0 top-12 w-56 bg-surface rounded-lg shadow-xl border border-border py-2 z-[var(--z-dropdown)] animate-scale-in">
+                <div className="px-4 py-3 border-b border-border mb-1">
+                  <p className="font-bold text-sm text-text-primary truncate">{userName}</p>
+                  <p className="text-[10px] font-black text-text-muted uppercase tracking-wider">
+                    {userRole === 'admin' ? 'Yönetici' : userRole === 'engineer' ? 'Mühendis' : 'Çiftçi'}
                   </p>
                 </div>
-                <div className="p-1">
-                  <Link
-                    href="/dashboard/settings"
-                    onClick={() => setProfileOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-xl transition-colors"
-                  >
-                    <Settings size={16} className="text-zinc-400 dark:text-zinc-500" />
-                    Ayarlar
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl transition-colors"
-                  >
-                    <LogOut size={16} />
-                    Çıkış Yap
-                  </button>
-                </div>
+                <Link
+                  href="/dashboard/settings"
+                  onClick={() => setProfileOpen(false)}
+                  className="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-text-secondary hover:text-primary hover:bg-primary-50 transition-colors"
+                >
+                  <Settings size={18} />
+                  Ayarlar
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-danger hover:bg-danger-bg transition-colors"
+                >
+                  <LogOut size={18} />
+                  Çıkış Yap
+                </button>
               </div>
             )}
           </div>

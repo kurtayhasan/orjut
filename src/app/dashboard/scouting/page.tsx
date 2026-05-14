@@ -2,12 +2,24 @@
 
 import React, { useState } from 'react';
 import { useAppContext } from '@/context/AppContext';
-import { ClipboardCheck, Plus, Trash2, Calendar, MapPin, Search, HeartPulse, Sprout, Wheat, Activity } from 'lucide-react';
+import { 
+  ClipboardCheck, Plus, Trash2, Calendar, 
+  MapPin, Search, HeartPulse, Sprout, 
+  Wheat, Activity, MoreVertical, Info,
+  AlertCircle, CheckCircle2
+} from 'lucide-react';
 import { toast } from 'sonner';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
+import BaseModal from '@/components/ui/BaseModal';
+import EmptyState from '@/components/EmptyState';
+import { cn, formatDateShort } from '@/lib/utils';
 
 export default function ScoutingPage() {
   const { lands, scoutingLogs, addScoutingLog, deleteScoutingLog } = useAppContext();
   
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedLandId, setSelectedLandId] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [growthStage, setGrowthStage] = useState<'cimlenme' | 'ciceklenme' | 'meyve_tutumu' | 'hasat'>('cimlenme');
@@ -24,28 +36,32 @@ export default function ScoutingPage() {
     }
     
     setIsSubmitting(true);
-    await addScoutingLog({
-      land_id: selectedLandId,
-      date,
-      growth_stage: growthStage,
-      health_status: healthStatus,
-      notes
-    });
-    setIsSubmitting(false);
-    
-    // Reset form
-    setNotes('');
+    try {
+      await addScoutingLog({
+        land_id: selectedLandId,
+        date,
+        growth_stage: growthStage,
+        health_status: healthStatus,
+        notes
+      });
+      toast.success("Gözlem raporu kaydedildi.");
+      setIsAddModalOpen(false);
+      setNotes('');
+    } catch (err) {
+      toast.error("Rapor kaydedilemedi.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const getLandDisplay = (landId: string) => {
     const land = lands.find(l => l.id === landId);
-    if (!land) return 'Bilinmeyen Arazi';
-    return `${land.district || land.city} - Ada ${land.block_no} / Parsel ${land.parcel_no}`;
+    return land ? `${land.district || land.city} - A:${land.block_no}/P:${land.parcel_no}` : 'Bilinmeyen Arazi';
   };
 
   const getGrowthStageLabel = (stage: string) => {
     switch (stage) {
-      case 'cimlenme': return 'Çimlenme / Erken Evre';
+      case 'cimlenme': return 'Çimlenme';
       case 'ciceklenme': return 'Çiçeklenme';
       case 'meyve_tutumu': return 'Meyve Tutumu';
       case 'hasat': return 'Hasat Dönemi';
@@ -56,206 +72,153 @@ export default function ScoutingPage() {
   const getHealthStatusLabel = (status: string) => {
     switch (status) {
       case 'saglikli': return 'Sağlıklı';
-      case 'hastalik': return 'Hastalık Belirtisi';
-      case 'zararli': return 'Zararlı/Böcek Tespiti';
+      case 'hastalik': return 'Hastalık Şüphesi';
+      case 'zararli': return 'Zararlı Tespiti';
       default: return status;
     }
   };
 
-  const getHealthColor = (status: string) => {
-    switch (status) {
-      case 'saglikli': return 'bg-emerald-100 text-emerald-600';
-      case 'hastalik': return 'bg-amber-100 text-amber-600';
-      case 'zararli': return 'bg-rose-100 text-rose-600';
-      default: return 'bg-zinc-100 text-zinc-600';
-    }
-  };
-
   return (
-    <div className="space-y-6 pb-24">
-      {/* Header */}
-      <header className="flex justify-between items-center bg-white border border-zinc-200 p-6 rounded-3xl shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className="bg-emerald-100 p-3 rounded-2xl text-emerald-600">
-            <ClipboardCheck size={28} />
-          </div>
-          <div>
-            <h1 className="text-2xl font-black text-zinc-900 tracking-tight">Arazi Kontrolü</h1>
-            <p className="text-zinc-500 font-medium text-sm">Gözlem raporları ve bitki sağlığı takibi</p>
-          </div>
+    <div className="space-y-6 animate-fade-in">
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black font-heading text-text-primary tracking-tight">Arazi Gözlemi</h1>
+          <p className="text-text-muted font-bold text-sm">Bitki sağlığını ve gelişim evrelerini dökümante edin.</p>
         </div>
-      </header>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Form */}
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-3xl p-6 border border-zinc-100 shadow-sm sticky top-24">
-            <h2 className="text-lg font-black text-zinc-900 mb-6 flex items-center gap-2">
-              <Plus size={20} className="text-emerald-500" /> Yeni Gözlem Raporu
-            </h2>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Arazi Seçimi</label>
-                <div className="relative">
-                  <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
-                  <select 
-                    className="w-full pl-10 pr-4 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-emerald-500 focus:bg-white transition-all text-sm font-semibold appearance-none cursor-pointer"
-                    value={selectedLandId}
-                    onChange={e => setSelectedLandId(e.target.value)}
-                    required
-                  >
-                    <option value="" disabled>Arazi seçin...</option>
-                    {lands.map(l => (
-                      <option key={l.id} value={l.id}>{getLandDisplay(l.id)} ({l.crop_type})</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Tarih</label>
-                <div className="relative">
-                  <Calendar size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
-                  <input 
-                    type="date"
-                    required
-                    className="w-full pl-10 pr-4 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-emerald-500 focus:bg-white transition-all text-sm font-semibold"
-                    value={date}
-                    onChange={e => setDate(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Büyüme Evresi</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { id: 'cimlenme', label: 'Çimlenme', icon: <Sprout size={16} /> },
-                    { id: 'ciceklenme', label: 'Çiçeklenme', icon: <Activity size={16} /> },
-                    { id: 'meyve_tutumu', label: 'Meyve Tutumu', icon: <Wheat size={16} /> },
-                    { id: 'hasat', label: 'Hasat', icon: <ClipboardCheck size={16} /> },
-                  ].map(s => (
-                    <button
-                      key={s.id}
-                      type="button"
-                      onClick={() => setGrowthStage(s.id as any)}
-                      className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border-2 text-xs font-bold transition-all ${growthStage === s.id ? 'bg-emerald-50 border-emerald-500 text-emerald-600' : 'bg-zinc-50 border-zinc-100 text-zinc-400 hover:bg-white'}`}
-                    >
-                      {s.icon}
-                      {s.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Sağlık Durumu</label>
-                <div className="flex flex-col gap-2">
-                  {[
-                    { id: 'saglikli', label: 'Her Şey Yolunda (Sağlıklı)', color: 'border-emerald-200 text-emerald-600', active: 'bg-emerald-50 border-emerald-500' },
-                    { id: 'hastalik', label: 'Hastalık Şüphesi', color: 'border-amber-200 text-amber-600', active: 'bg-amber-50 border-amber-500' },
-                    { id: 'zararli', label: 'Zararlı / Böcek Tespiti', color: 'border-rose-200 text-rose-600', active: 'bg-rose-50 border-rose-500' },
-                  ].map(h => (
-                    <button
-                      key={h.id}
-                      type="button"
-                      onClick={() => setHealthStatus(h.id as any)}
-                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 text-sm font-bold transition-all ${healthStatus === h.id ? h.active : 'bg-zinc-50 border-zinc-100 text-zinc-400 hover:bg-white'}`}
-                    >
-                      <span>{h.label}</span>
-                      {healthStatus === h.id && <HeartPulse size={16} className="animate-pulse" />}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-1">Gözlem Notları</label>
-                <textarea 
-                  rows={3}
-                  placeholder="Yapraklarda sararma var, sulama sıklığı artırılmalı vb."
-                  className="w-full px-4 py-3 bg-zinc-50 border-2 border-zinc-100 rounded-xl outline-none focus:border-emerald-500 focus:bg-white transition-all text-sm font-semibold resize-none"
-                  value={notes}
-                  onChange={e => setNotes(e.target.value)}
-                />
-              </div>
-
-              <button 
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-emerald-600 text-white font-bold py-3.5 rounded-xl hover:bg-emerald-700 transition-all shadow-md hover:shadow-emerald-200 active:scale-[0.98] mt-2 disabled:opacity-50"
-              >
-                {isSubmitting ? 'Kaydediliyor...' : 'Raporu Kaydet'}
-              </button>
-            </form>
-          </div>
-        </div>
-
-        {/* List */}
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-3xl p-6 border border-zinc-100 shadow-sm min-h-[500px]">
-            <h2 className="text-lg font-black text-zinc-900 mb-6 flex items-center gap-2">
-              <Search size={20} className="text-zinc-400" /> Geçmiş Gözlemler
-            </h2>
-
-            <div className="space-y-4">
-              {scoutingLogs.length === 0 ? (
-                <div className="text-center p-12 bg-zinc-50 rounded-2xl border border-zinc-100 border-dashed">
-                  <div className="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <ClipboardCheck size={28} />
-                  </div>
-                  <h3 className="font-bold text-zinc-900 mb-1">Henüz Rapor Yok</h3>
-                  <p className="text-zinc-500 text-sm">Arazilerinizdeki bitki gelişimini buradan takip edin.</p>
-                </div>
-              ) : (
-                scoutingLogs.map(log => (
-                  <div key={log.id} className="p-5 bg-zinc-50 border border-zinc-100 rounded-3xl hover:bg-white hover:shadow-lg transition-all group relative">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${getHealthColor(log.health_status)}`}>
-                          <HeartPulse size={18} />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-zinc-900">{getLandDisplay(log.land_id)}</h4>
-                          <div className="text-xs text-zinc-500 font-medium">
-                            {new Date(log.date).toLocaleDateString('tr-TR')}
-                          </div>
-                        </div>
-                      </div>
-                      <button 
-                        onClick={() => deleteScoutingLog(log.id)}
-                        className="p-2 text-zinc-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div className="bg-white p-3 rounded-2xl border border-zinc-100">
-                        <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Gelişim</div>
-                        <div className="text-sm font-bold text-zinc-700">{getGrowthStageLabel(log.growth_stage)}</div>
-                      </div>
-                      <div className="bg-white p-3 rounded-2xl border border-zinc-100">
-                        <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Durum</div>
-                        <div className={`text-sm font-bold ${getHealthColor(log.health_status).split(' ')[1]}`}>
-                          {getHealthStatusLabel(log.health_status)}
-                        </div>
-                      </div>
-                    </div>
-
-                    {log.notes && (
-                      <div className="bg-indigo-50/50 p-4 rounded-2xl text-sm text-zinc-600 leading-relaxed italic">
-                        "{log.notes}"
-                      </div>
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
+        <Button size="md" leftIcon={<Plus size={20} />} onClick={() => setIsAddModalOpen(true)}>Yeni Gözlem Ekle</Button>
       </div>
+
+      {/* TIMELINE */}
+      <div className="space-y-4">
+         <div className="flex items-center justify-between px-1">
+            <h3 className="text-sm font-black font-heading text-text-primary uppercase tracking-tight">Gözlem Geçmişi</h3>
+            <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">{scoutingLogs.length} Rapor</span>
+         </div>
+
+         <div className="space-y-4">
+            {scoutingLogs.length > 0 ? (
+              scoutingLogs.map((log) => (
+                <Card key={log.id} padding="lg" className="hover:shadow-md transition-all group">
+                   <div className="flex flex-col md:flex-row gap-6">
+                      <div className="flex flex-col items-center gap-2 md:w-24 shrink-0 border-r border-border pr-6 md:pr-0 md:border-r-0 md:border-b-0">
+                         <div className={cn(
+                           "w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm",
+                           log.health_status === 'saglikli' ? "bg-success-bg text-success" : 
+                           log.health_status === 'hastalik' ? "bg-warning-bg text-warning" : "bg-danger-bg text-danger"
+                         )}>
+                            <HeartPulse size={24} />
+                         </div>
+                         <span className="text-[10px] font-black uppercase tracking-widest text-text-muted">{formatDateShort(log.date)}</span>
+                      </div>
+
+                      <div className="flex-1 space-y-4">
+                         <div className="flex items-start justify-between">
+                            <div>
+                               <h4 className="text-lg font-bold text-text-primary leading-tight">{getLandDisplay(log.land_id)}</h4>
+                               <p className="text-xs font-bold text-text-muted mt-1 uppercase tracking-wider">{getGrowthStageLabel(log.growth_stage || 'cimlenme')} Evresi</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                               <span className={cn(
+                                 "px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider",
+                                 log.health_status === 'saglikli' ? "bg-success text-white" : 
+                                 log.health_status === 'hastalik' ? "bg-warning text-[#1B2E1C]" : "bg-danger text-white"
+                               )}>
+                                  {getHealthStatusLabel(log.health_status || 'saglikli')}
+                               </span>
+                               <button 
+                                 onClick={() => { deleteScoutingLog(log.id); toast.success("Rapor silindi."); }}
+                                 className="p-2 text-text-muted hover:text-danger hover:bg-danger-bg rounded-lg transition-colors md:opacity-0 md:group-hover:opacity-100"
+                               >
+                                  <Trash2 size={18} />
+                               </button>
+                            </div>
+                         </div>
+
+                         {log.notes && (
+                           <div className="p-4 bg-surface-2 rounded-xl border border-border text-sm text-text-primary leading-relaxed italic">
+                              "{log.notes}"
+                           </div>
+                         )}
+                      </div>
+                   </div>
+                </Card>
+              ))
+            ) : (
+              <EmptyState title="Gözlem kaydı yok" description="Tarlalarınızdaki gelişimi takip etmek için ilk raporu oluşturun." emoji="🔍" />
+            )}
+         </div>
+      </div>
+
+      {/* ADD MODAL */}
+      <BaseModal 
+        isOpen={isAddModalOpen} 
+        onClose={() => setIsAddModalOpen(false)}
+        title="Yeni Gözlem Raporu"
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+           <Input as="select" label="Arazi Seçimi" value={selectedLandId} onChange={e => setSelectedLandId(e.target.value)} required>
+              <option value="" disabled>Seçiniz...</option>
+              {lands.map(l => (
+                <option key={l.id} value={l.id}>{l.district || l.city} - A:{l.block_no}/P.{l.parcel_no}</option>
+              ))}
+           </Input>
+
+           <Input label="Gözlem Tarihi" type="date" value={date} onChange={e => setDate(e.target.value)} required />
+
+           <div className="space-y-1.5">
+              <label className="text-sm font-bold text-text-primary">Büyüme Evresi</label>
+              <div className="grid grid-cols-2 gap-2">
+                 {(['cimlenme', 'ciceklenme', 'meyve_tutumu', 'hasat'] as const).map(s => (
+                   <button
+                     key={s}
+                     type="button"
+                     onClick={() => setGrowthStage(s)}
+                     className={cn(
+                       "p-3 rounded-lg border-2 flex items-center gap-2 text-xs font-bold transition-all",
+                       growthStage === s ? "bg-primary-50 border-primary text-primary shadow-sm" : "bg-surface-2 border-border text-text-muted"
+                     )}
+                   >
+                     {s === 'cimlenme' ? <Sprout size={16} /> : s === 'ciceklenme' ? <Activity size={16} /> : s === 'meyve_tutumu' ? <Wheat size={16} /> : <ClipboardCheck size={16} />}
+                     {getGrowthStageLabel(s)}
+                   </button>
+                 ))}
+              </div>
+           </div>
+
+           <div className="space-y-1.5">
+              <label className="text-sm font-bold text-text-primary">Genel Sağlık Durumu</label>
+              <div className="flex flex-col gap-2">
+                 {(['saglikli', 'hastalik', 'zararli'] as const).map(h => (
+                   <button
+                     key={h}
+                     type="button"
+                     onClick={() => setHealthStatus(h)}
+                     className={cn(
+                       "w-full flex items-center justify-between px-4 py-3 rounded-lg border-2 text-sm font-bold transition-all",
+                       healthStatus === h ? (
+                         h === 'saglikli' ? "bg-success-bg border-success text-success" :
+                         h === 'hastalik' ? "bg-warning-bg border-warning text-warning" : "bg-danger-bg border-danger text-danger"
+                       ) : "bg-surface-2 border-border text-text-muted"
+                     )}
+                   >
+                     <span>{getHealthStatusLabel(h)}</span>
+                     {healthStatus === h && (
+                       h === 'saglikli' ? <CheckCircle2 size={18} /> : h === 'hastalik' ? <AlertCircle size={18} /> : <AlertCircle size={18} />
+                     )}
+                   </button>
+                 ))}
+              </div>
+           </div>
+
+           <Input label="Gözlem Notları" placeholder="Örn: Alt yapraklarda hafif sararma var..." value={notes} onChange={e => setNotes(e.target.value)} />
+
+           <div className="flex gap-3 pt-4">
+              <Button variant="ghost" fullWidth onClick={() => setIsAddModalOpen(false)}>Vazgeç</Button>
+              <Button fullWidth type="submit" isLoading={isSubmitting}>Raporu Kaydet</Button>
+           </div>
+        </form>
+      </BaseModal>
     </div>
   );
 }
