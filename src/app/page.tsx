@@ -137,17 +137,17 @@ export default function LandingPage() {
 
         <div className="max-w-7xl mx-auto flex flex-col items-center text-center relative z-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 rounded-full mb-8 border border-primary-100">
-            <span className="text-xl" aria-hidden="true">🌾</span>
-            <span className="text-sm font-extrabold text-primary uppercase tracking-wider">Türk Çiftçisi İçin Yapıldı</span>
+            <span className="text-xl" aria-hidden="true">🛡️</span>
+            <span className="text-sm font-extrabold text-primary uppercase tracking-wider">Enterprise AgTech Çözümü</span>
           </div>
 
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading font-black text-text-primary leading-[1.1] mb-6 tracking-tight max-w-4xl">
-            Tarlandan Kazancına,<br />
-            <span className="text-primary">Her Şey Bir Uygulamada</span>
+            Tarlanızı Geleceğe Taşıyan<br />
+            <span className="text-primary">Dijital İş Ortağınız</span>
           </h1>
 
           <p className="text-lg md:text-xl text-text-secondary max-w-2xl mb-10 leading-relaxed font-medium">
-            Arazini uydudan takip et, masraflarını kaydet ve verimini artıracak akıllı zirai tavsiyeler al. Üstelik tamamen Türkçe!
+            Geleneksel tarım yöntemlerini yapay zeka ve veri analiziyle birleştirin. Arazi yönetimi, stok takibi ve zirai reçetelerle veriminizi maksimuma çıkarın.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
@@ -155,19 +155,19 @@ export default function LandingPage() {
               Hemen Ücretsiz Başla
             </Button>
             <Button variant="neutral" onClick={() => router.push('/login')} size="xl" className="px-10">
-              Giriş Yap
+              Sisteme Gir
             </Button>
           </div>
 
           <div className="mt-12 flex flex-wrap justify-center gap-x-8 gap-y-4">
             <div className="flex items-center gap-2 text-sm font-bold text-text-secondary">
-              <Check className="text-primary" size={18} /> ✓ Ücretsiz Kullanım
+              <Check className="text-primary" size={18} /> ✓ Kurumsal Veri Güvenliği
             </div>
             <div className="flex items-center gap-2 text-sm font-bold text-text-secondary">
-              <Check className="text-primary" size={18} /> ✓ 5 Dakikada Kurulum
+              <Check className="text-primary" size={18} /> ✓ Proaktif AI Danışmanlığı
             </div>
             <div className="flex items-center gap-2 text-sm font-bold text-text-secondary">
-              <Check className="text-primary" size={18} /> ✓ Türkçe Destek
+              <Check className="text-primary" size={18} /> ✓ NDVI Uydu Analizi
             </div>
           </div>
 
@@ -294,14 +294,17 @@ export default function LandingPage() {
 
              {/* Pro */}
              <Card padding="lg" className="flex flex-col border-2 border-primary relative overflow-hidden">
-                <div className="absolute top-0 right-0 bg-primary text-white px-4 py-1 text-xs font-black uppercase tracking-widest rounded-bl-lg">
-                  Önerilen
+                <div className="absolute top-0 right-0 bg-primary text-white px-4 py-1 text-xs font-black uppercase tracking-widest rounded-bl-lg z-10">
+                   2 AY HEDİYE
                 </div>
                 <div className="mb-6">
-                  <h3 className="text-xl font-bold text-text-primary font-heading">Pro Çiftçi</h3>
-                  <div className="mt-4 flex items-baseline gap-1">
-                    <span className="text-4xl font-black text-text-primary">₺299</span>
-                    <span className="text-text-secondary font-bold">/ay</span>
+                  <h3 className="text-xl font-bold text-text-primary font-heading">KOBİ Pro</h3>
+                  <div className="mt-4">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-4xl font-black text-text-primary">₺99</span>
+                      <span className="text-text-secondary font-bold">/ay</span>
+                    </div>
+                    <p className="text-xs text-primary font-black mt-1 uppercase tracking-tighter">Yıllık 1.000 TL</p>
                   </div>
                 </div>
                 <div className="flex-1 space-y-4 mb-8">
@@ -309,13 +312,13 @@ export default function LandingPage() {
                     <Check className="text-primary flex-shrink-0" size={18} /> Sınırsız Arazi Takibi
                   </div>
                   <div className="flex items-center gap-3 text-text-primary font-bold text-sm">
-                    <Check className="text-primary flex-shrink-0" size={18} /> Gelişmiş AI Analizleri
+                    <Check className="text-primary flex-shrink-0" size={18} /> Proaktif Yapay Zeka Danışmanı
                   </div>
                   <div className="flex items-center gap-3 text-text-primary font-bold text-sm">
-                    <Check className="text-primary flex-shrink-0" size={18} /> Uydu NDVI Haritaları
+                    <Check className="text-primary flex-shrink-0" size={18} /> NDVI Uydu Haritaları
                   </div>
                   <div className="flex items-center gap-3 text-text-primary font-bold text-sm">
-                    <Check className="text-primary flex-shrink-0" size={18} /> Öncelikli Canlı Destek
+                    <Check className="text-primary flex-shrink-0" size={18} /> Gelişmiş Finansal Raporlama
                   </div>
                 </div>
                 <Button fullWidth onClick={() => router.push('/login')}>Pro'ya Geç</Button>
