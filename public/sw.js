@@ -1,3 +1,4 @@
+// Last Updated: 2026-05-16 01:16
 const CACHE_NAME = 'ziraiasistan-cache-v2';
 const OFFLINE_URL = '/';
 
