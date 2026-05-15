@@ -23,7 +23,6 @@ type AppContextType = {
   criticalAlert: string | null;
   totalSavings: number;
   dailySpent: number;
-  dailyActions: number;
   lands: Land[];
   transactions: Transaction[];
   irrigationLogs: IrrigationLog[];
@@ -84,7 +83,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [totalArea, setTotalArea] = useState<number>(0);
   const [totalSavings, setTotalSavings] = useState<number>(0);
   const [dailySpent, setDailySpent] = useState<number>(0);
-  const [dailyActions, setDailyActions] = useState<number>(0);
   const [dailyInsight, setDailyInsight] = useState<string | null>(null);
   const [criticalAlert, setCriticalAlert] = useState<string | null>(null);
   const [lands, setLands] = useState<Land[]>([]);
@@ -124,7 +122,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setTotalArea(0);
     setTotalSavings(0);
     setDailySpent(0);
-    setDailyActions(0);
     setDailyInsight(null);
     setCriticalAlert(null);
     setUserProfile(null);
@@ -181,7 +178,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (inv.data) setInventory(inv.data);
 
       const { data: allTx } = await db.getTransactions(activeOrgId);
-      if (allTx) setTotalExpenses(allTx.reduce((sum: number, tx: any) => sum + Number(tx.amount || 0), 0));
+      if (allTx) {
+        setTotalExpenses(allTx.reduce((sum: number, tx: any) => sum + Number(tx.amount || 0), 0));
+        const todayStr = new Date().toISOString().split('T')[0];
+        setDailySpent(allTx.filter((tx: any) => tx.date === todayStr && tx.type === 'expense').reduce((sum: number, tx: any) => sum + Number(tx.amount || 0), 0));
+      }
 
     } catch (e) {
       console.error("Critical Data Fetch Error:", e);
@@ -552,7 +553,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const value = {
     lang, setLang, t, totalExpenses, totalArea, addExpense, updateExpense, deleteExpense,
     weather: { temp: weatherData?.temperature || null, windspeed: weatherData?.windSpeed || null, loading: false, error: null },
-    dailyInsight, criticalAlert, totalSavings, dailySpent, dailyActions, lands, transactions, irrigationLogs,
+    dailyInsight, criticalAlert, totalSavings, dailySpent, lands, transactions, irrigationLogs,
     isLoadingLands, isLoadingTransactions, addLand, updateLand, deleteLand,
     addIrrigationLog, deleteIrrigationLog, logSaving,
     requestWeatherAndInsight, startNewSeason, toggleSeasonStatus,

@@ -382,9 +382,9 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto pt-12 mt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-text-muted text-sm font-medium">
            <p>© 2026 Orjut AgTech. Tüm hakları saklıdır.</p>
            <div className="flex gap-6">
-              <Link href="#" className="hover:text-white transition-colors">Twitter</Link>
-              <Link href="#" className="hover:text-white transition-colors">Instagram</Link>
-              <Link href="#" className="hover:text-white transition-colors">LinkedIn</Link>
+              <Link href="/" className="hover:text-white transition-colors">Twitter</Link>
+              <Link href="/" className="hover:text-white transition-colors">Instagram</Link>
+              <Link href="/" className="hover:text-white transition-colors">LinkedIn</Link>
            </div>
         </div>
       </footer>
