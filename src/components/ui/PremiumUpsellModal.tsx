@@ -55,7 +55,7 @@ export default function PremiumUpsellModal({ isOpen, onClose }: PremiumUpsellMod
 
             {/* Headline */}
             <h2 className="text-2xl font-black text-center text-white tracking-tight mb-2">
-              Bu Özellik KOBİ Pro Paketine Dâhildir
+              Bu Özellik Hasat Pro Paketine Dâhildir
             </h2>
             <p className="text-sm text-zinc-400 text-center font-medium mb-8 leading-relaxed">
               Yapay zekâ analizleri ve uydu görüntüleri için Premium&apos;a geçin.

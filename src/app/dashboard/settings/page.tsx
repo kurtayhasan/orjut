@@ -97,7 +97,7 @@ export default function SettingsPage() {
             <h3 className="text-lg font-black text-zinc-900">{userProfile?.name}</h3>
             <p className="text-sm text-zinc-500 font-medium mb-6">{userProfile?.phone}</p>
             <div className="pt-6 border-t border-zinc-100">
-              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full">Pro Üyelik</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full">Hasat Pro Üyelik</span>
             </div>
           </div>
 

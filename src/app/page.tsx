@@ -298,7 +298,7 @@ export default function LandingPage() {
                    2 AY HEDİYE
                 </div>
                 <div className="mb-6">
-                  <h3 className="text-xl font-bold text-text-primary font-heading">KOBİ Pro</h3>
+                  <h3 className="text-xl font-bold text-text-primary font-heading">Hasat Pro</h3>
                   <div className="mt-4">
                     <div className="flex items-baseline gap-1">
                       <span className="text-4xl font-black text-text-primary">₺99</span>
