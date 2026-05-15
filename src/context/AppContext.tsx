@@ -52,6 +52,7 @@ type AppContextType = {
   addFieldOperation: (op: any) => Promise<void>;
   deleteFieldOperation: (id: string) => Promise<void>;
   addScoutingLog: (log: any) => Promise<void>;
+  updateScoutingLog: (id: string, updates: Partial<ScoutingLog>) => Promise<void>;
   deleteScoutingLog: (id: string) => Promise<void>;
   inventory: InventoryItem[];
   isLoadingInventory: boolean;
@@ -469,6 +470,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     weatherData, currentUserRole, userProfile, fieldOperations, scoutingLogs,
     addFieldOperation, deleteFieldOperation: async (id: string) => { setFieldOperations(prev => prev.filter(o => o.id !== id)); db.deleteFieldOperation(id); },
     addScoutingLog: async (log: Omit<ScoutingLog, 'id'>) => { if (!activeOrgId) return; const { data } = await db.insertScoutingLog({ ...log, org_id: activeOrgId }); if (data) setScoutingLogs(prev => [data, ...prev]); },
+    updateScoutingLog: async (id: string, updates: Partial<ScoutingLog>) => { 
+      try {
+        const { error } = await db.updateScoutingLog(id, updates);
+        if (error) throw error;
+        setScoutingLogs(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
+        toast.success("Tavsiye kaydedildi");
+      } catch (err) {
+        toast.error("Kaydedilemedi");
+      }
+    },
     deleteScoutingLog: async (id: string) => { setScoutingLogs(prev => prev.filter(s => s.id !== id)); db.deleteScoutingLog(id); },
     inventory, isLoadingInventory, addInventoryItem, updateInventoryItem, deleteInventoryItem,
     isDarkMode, toggleDarkMode: () => setIsDarkMode(!isDarkMode), calculateUnitCost,

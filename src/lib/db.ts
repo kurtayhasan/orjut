@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { Land, Transaction, Season, InventoryItem } from '@/types';
+import type { Land, Transaction, Season, InventoryItem, ScoutingLog } from '@/types';
 
 // ─────────────────────────────────────────────
 // Generic query helper — eliminates boilerplate
@@ -113,6 +113,9 @@ export const db = {
 
   insertScoutingLog: (log: Record<string, unknown>) =>
     from('scouting_logs').insert([log]).select().single(),
+
+  updateScoutingLog: (id: string, updates: Partial<ScoutingLog>) =>
+    from('scouting_logs').update(updates).eq('id', id),
 
   deleteScoutingLog: (id: string) =>
     from('scouting_logs').delete().eq('id', id),

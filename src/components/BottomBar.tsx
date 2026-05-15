@@ -15,7 +15,7 @@ import Button from './ui/Button';
 export default function BottomBar({ className }: { className?: string }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { setIsExpenseModalOpen } = useAppContext();
+  const { setIsExpenseModalOpen, setIsSidebarOpen } = useAppContext();
   const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
 
   const tabs = [
@@ -27,8 +27,10 @@ export default function BottomBar({ className }: { className?: string }) {
   ];
 
   const handleFabClick = () => setIsActionSheetOpen(true);
+  
+  // PHASE 1: Open Sidebar instead of pushing to settings
   const handleMoreClick = () => {
-    router.push('/dashboard/settings');
+    setIsSidebarOpen(true);
   };
 
   return (

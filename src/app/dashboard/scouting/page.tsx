@@ -6,7 +6,8 @@ import {
   ClipboardCheck, Plus, Trash2, Calendar, 
   MapPin, Search, HeartPulse, Sprout, 
   Wheat, Activity, MoreVertical, Info,
-  AlertCircle, CheckCircle2
+  AlertCircle, CheckCircle2, GraduationCap, 
+  ArrowRight, ShieldCheck, Tag
 } from 'lucide-react';
 import { toast } from 'sonner';
 import Card from '@/components/ui/Card';
@@ -15,16 +16,23 @@ import Input from '@/components/ui/Input';
 import BaseModal from '@/components/ui/BaseModal';
 import EmptyState from '@/components/EmptyState';
 import { cn, formatDateShort } from '@/lib/utils';
+import { ScoutingLog } from '@/types';
 
 export default function ScoutingPage() {
-  const { lands, scoutingLogs, addScoutingLog, deleteScoutingLog } = useAppContext();
+  const { lands, scoutingLogs, addScoutingLog, deleteScoutingLog, userRole, updateScoutingLog } = useAppContext();
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isPrescriptionModalOpen, setIsPrescriptionModalOpen] = useState(false);
+  const [selectedLog, setSelectedLog] = useState<ScoutingLog | null>(null);
+  
   const [selectedLandId, setSelectedLandId] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [growthStage, setGrowthStage] = useState<'cimlenme' | 'ciceklenme' | 'meyve_tutumu' | 'hasat'>('cimlenme');
   const [healthStatus, setHealthStatus] = useState<'saglikli' | 'hastalik' | 'zararli'>('saglikli');
   const [notes, setNotes] = useState('');
+  
+  const [prescriptionAction, setPrescriptionAction] = useState('');
+  const [prescriptionNotes, setPrescriptionNotes] = useState('');
   
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -49,6 +57,27 @@ export default function ScoutingPage() {
       setNotes('');
     } catch (err) {
       toast.error("Rapor kaydedilemedi.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handlePrescriptionSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedLog || !prescriptionAction) return;
+
+    setIsSubmitting(true);
+    try {
+      await updateScoutingLog(selectedLog.id, {
+        prescription_action: prescriptionAction,
+        prescription_notes: prescriptionNotes
+      });
+      setIsPrescriptionModalOpen(false);
+      setSelectedLog(null);
+      setPrescriptionAction('');
+      setPrescriptionNotes('');
+    } catch (err) {
+      toast.error("Tavsiye kaydedilemedi.");
     } finally {
       setIsSubmitting(false);
     }
@@ -99,7 +128,7 @@ export default function ScoutingPage() {
          <div className="space-y-4">
             {scoutingLogs.length > 0 ? (
               scoutingLogs.map((log) => (
-                <Card key={log.id} padding="lg" className="hover:shadow-md transition-all group">
+                <Card key={log.id} padding="lg" className="hover:shadow-md transition-all group overflow-hidden">
                    <div className="flex flex-col md:flex-row gap-6">
                       <div className="flex flex-col items-center gap-2 md:w-24 shrink-0 border-r border-border pr-6 md:pr-0 md:border-r-0 md:border-b-0">
                          <div className={cn(
@@ -137,8 +166,36 @@ export default function ScoutingPage() {
 
                          {log.notes && (
                            <div className="p-4 bg-surface-2 rounded-xl border border-border text-sm text-text-primary leading-relaxed italic">
-                              "{log.notes}"
+                               "{log.notes}"
                            </div>
+                         )}
+
+                         {/* PHASE 3: Prescription Loop */}
+                         {log.prescription_action ? (
+                           <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl relative">
+                              <div className="absolute top-0 right-0 p-2 opacity-10 pointer-events-none">
+                                <GraduationCap size={40} className="text-amber-900" />
+                              </div>
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="px-2 py-0.5 bg-amber-400 text-[#1B2E1C] text-[9px] font-black rounded uppercase tracking-widest flex items-center gap-1 shadow-sm">
+                                  <ShieldCheck size={10} /> Mühendis Tavsiyesi
+                                </span>
+                              </div>
+                              <h5 className="font-black text-amber-900 text-sm">{log.prescription_action}</h5>
+                              {log.prescription_notes && <p className="text-xs font-bold text-amber-800/80 mt-1">{log.prescription_notes}</p>}
+                           </div>
+                         ) : (
+                           userRole === 'engineer' && (
+                             <Button 
+                               variant="outline" 
+                               size="sm" 
+                               className="border-emerald-200 text-emerald-700 hover:bg-emerald-50 bg-emerald-50/30"
+                               leftIcon={<GraduationCap size={16} />}
+                               onClick={() => { setSelectedLog(log); setIsPrescriptionModalOpen(true); }}
+                             >
+                               Zirai Tavsiye / Reçete Yaz
+                             </Button>
+                           )
                          )}
                       </div>
                    </div>
@@ -151,11 +208,7 @@ export default function ScoutingPage() {
       </div>
 
       {/* ADD MODAL */}
-      <BaseModal 
-        isOpen={isAddModalOpen} 
-        onClose={() => setIsAddModalOpen(false)}
-        title="Yeni Gözlem Raporu"
-      >
+      <BaseModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Yeni Gözlem Raporu">
         <form onSubmit={handleSubmit} className="space-y-4">
            <Input as="select" label="Arazi Seçimi" value={selectedLandId} onChange={e => setSelectedLandId(e.target.value)} required>
               <option value="" disabled>Seçiniz...</option>
@@ -216,6 +269,39 @@ export default function ScoutingPage() {
            <div className="flex gap-3 pt-4">
               <Button variant="ghost" fullWidth onClick={() => setIsAddModalOpen(false)}>Vazgeç</Button>
               <Button fullWidth type="submit" isLoading={isSubmitting}>Raporu Kaydet</Button>
+           </div>
+        </form>
+      </BaseModal>
+
+      {/* PRESCRIPTION MODAL */}
+      <BaseModal isOpen={isPrescriptionModalOpen} onClose={() => setIsPrescriptionModalOpen(false)} title="Zirai Tavsiye / Reçete">
+        <form onSubmit={handlePrescriptionSubmit} className="space-y-4">
+           <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex items-center gap-3">
+              <div className="p-2 bg-white rounded-lg text-emerald-600 shadow-sm">
+                <GraduationCap size={20} />
+              </div>
+              <div className="min-w-0">
+                <h6 className="text-xs font-black text-emerald-900 uppercase tracking-tight">Uzman Teşhisi</h6>
+                <p className="text-[11px] font-bold text-emerald-800 truncate">
+                  {selectedLog ? getLandDisplay(selectedLog.land_id) : ''} - {selectedLog ? getHealthStatusLabel(selectedLog.health_status || 'saglikli') : ''}
+                </p>
+              </div>
+           </div>
+
+           <Input as="select" label="Önerilen İşlem" value={prescriptionAction} onChange={e => setPrescriptionAction(e.target.value)} required>
+              <option value="" disabled>İşlem seçin...</option>
+              <option value="Hemen İlaçlama Gerekiyor">Hemen İlaçlama Gerekiyor</option>
+              <option value="Gübre Takviyesi Önerilir">Gübre Takviyesi Önerilir</option>
+              <option value="Sulama Miktarı Artırılmalı">Sulama Miktarı Artırılmalı</option>
+              <option value="Hasat Zamanı Yaklaşıyor">Hasat Zamanı Yaklaşıyor</option>
+              <option value="Acil Saha Kontrolü Gerekli">Acil Saha Kontrolü Gerekli</option>
+           </Input>
+
+           <Input as="textarea" label="Mühendis Notu" placeholder="Çiftçiye detaylı talimat bırakın..." value={prescriptionNotes} onChange={e => setPrescriptionNotes(e.target.value)} rows={4} />
+
+           <div className="flex gap-3 pt-4">
+              <Button variant="ghost" fullWidth onClick={() => setIsPrescriptionModalOpen(false)}>Vazgeç</Button>
+              <Button fullWidth type="submit" isLoading={isSubmitting} className="bg-emerald-600 hover:bg-emerald-700">Tavsiyeyi Gönder</Button>
            </div>
         </form>
       </BaseModal>

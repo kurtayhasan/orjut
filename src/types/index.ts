@@ -72,6 +72,9 @@ export interface ScoutingLog {
   health_status?: 'saglikli' | 'hastalik' | 'zararli'; // New UI field
   growth_stage?: 'cimlenme' | 'ciceklenme' | 'meyve_tutumu' | 'hasat'; // New UI field
   image_url?:   string;
+  // Phase 3: Diagnosis & Prescription Loop
+  prescription_action?: string;
+  prescription_notes?:  string;
 }
 
 export interface FieldOperation {

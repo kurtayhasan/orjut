@@ -9,6 +9,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement | HTMLSe
   leftIcon?: React.ReactNode;
   rightElement?: React.ReactNode;
   as?: 'input' | 'select' | 'textarea';
+  rows?: number;
 }
 
 const Input = forwardRef<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement, InputProps>(
