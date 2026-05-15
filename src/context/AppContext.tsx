@@ -15,7 +15,7 @@ type AppContextType = {
   t: (key: keyof typeof translations['en']) => string;
   totalExpenses: number;
   totalArea: number;
-  addExpense: (amount: number, category: string, date: string, land_id: string, receipt_url?: string, receipt_thumbnail_url?: string, inventoryData?: { name: string, type: string, quantity: number, unit: string, id?: string }, season_id?: string) => Promise<void>;
+  addExpense: (amount: number, category: string, date: string, land_id: string, receipt_url?: string, receipt_thumbnail_url?: string, inventoryData?: { name: string, type: string, quantity: number, unit: string, id?: string }, season_id?: string, hybridData?: { appliedAmount: number, landId: string, type: string }) => Promise<void>;
   updateExpense: (id: string, updates: any) => Promise<void>;
   deleteExpense: (id: string) => Promise<void>;
   weather: { temp: number | null, windspeed: number | null, loading: boolean, error: string | null };
@@ -249,7 +249,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const addExpense = async (amount: number, category: string, date: string, land_id: string, receipt_url?: string, receipt_thumbnail_url?: string, inventoryData?: { name: string, type: string, quantity: number, unit: string, id?: string }, season_id?: string) => {
+  const addExpense = async (
+    amount: number, 
+    category: string, 
+    date: string, 
+    land_id: string, 
+    receipt_url?: string, 
+    receipt_thumbnail_url?: string, 
+    inventoryData?: { name: string, type: string, quantity: number, unit: string, id?: string }, 
+    season_id?: string,
+    hybridData?: { appliedAmount: number, landId: string, type: string }
+  ) => {
     if (!activeOrgId) return;
     const newTx: any = { 
       amount, description: category, date, type: 'expense', category, land_id, org_id: activeOrgId,
@@ -263,15 +273,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setTransactions(prev => [data, ...prev]);
         setTotalExpenses(prev => prev + amount);
         
+        let targetInventoryId = inventoryData?.id;
+
         if (inventoryData) {
           const unitCost = calculateUnitCost(amount, inventoryData.quantity);
           
           if (inventoryData.id) {
-            // Update existing stock (Phase 2 Smart Stock)
+            // Update existing stock
             const item = inventory.find(i => i.id === inventoryData.id);
             if (item) {
+              const newQty = item.quantity + inventoryData.quantity;
               await updateInventoryItem(item.id, { 
-                quantity: item.quantity + inventoryData.quantity,
+                quantity: newQty,
                 unit_cost: unitCost,
                 last_purchase_date: date
               });
@@ -279,15 +292,36 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             }
           } else {
             // New stock entry
-            await addInventoryItem({ 
+            const { data: invItem } = await db.insertInventoryItem({ 
+              org_id: activeOrgId,
               item_name: inventoryData.name, 
-              type: inventoryData.type, 
+              type: inventoryData.type as any, 
               quantity: inventoryData.quantity, 
               unit: inventoryData.unit, 
               unit_cost: unitCost, 
               last_purchase_date: date 
             });
-            toast.success("Harcama kaydedildi ve yeni stok oluşturuldu");
+            if (invItem) {
+              setInventory(prev => [invItem, ...prev]);
+              targetInventoryId = invItem.id;
+              toast.success("Harcama kaydedildi ve yeni stok oluşturuldu");
+            }
+          }
+
+          // Handle Hybrid Application (Phase 2 Smart Flow)
+          if (hybridData && targetInventoryId) {
+            await addFieldOperation({
+              land_id: hybridData.landId,
+              type: hybridData.type as any,
+              date,
+              amount: hybridData.appliedAmount,
+              unit: inventoryData.unit,
+              method: 'Satın alma sonrası doğrudan uygulama',
+              notes: 'Satın alınan miktarın bir kısmı arazide kullanıldı.',
+              inventory_id: targetInventoryId
+            });
+            // Stock is automatically subtracted by addFieldOperation in our context logic
+            toast.success("Hibrit işlem: Alım yapıldı ve araziye uygulandı.");
           }
         } else {
           toast.success("Masraf başarıyla kaydedildi");

@@ -97,6 +97,12 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
         id: stockSelectionMode === 'existing' ? existingStockId : undefined
       } : undefined;
 
+      const hybridData = isHybridApplied ? {
+        appliedAmount: Number(appliedAmount),
+        landId: hybridLandId,
+        type: category === 'Gübre/İlaç' ? 'gubre' : category === 'Tohum' ? 'planting' : 'su'
+      } : undefined;
+
       // 1. Process Stock Usage (Pure Stock Mode)
       if (isUsingStock && selectedInventoryId && quantity) {
         const item = inventory.find(i => i.id === selectedInventoryId);
@@ -105,44 +111,31 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
           if (newQty < 0) toast.warning("Stok miktarı sıfırın altına düşecek!");
           await updateInventoryItem(selectedInventoryId, { quantity: newQty });
         }
-      }
-
-      // 2. Process Purchase (Expense + Optional Stock Entry)
-      await addExpense(Number(amount || 0), category, date, landId, receiptUrl, receiptThumbnail, inventoryData, seasonId);
-      
-      // 3. Process Hybrid Workflow (Immediate Application)
-      if (isHybridApplied && appliedAmount && hybridLandId) {
-        // Calculate remaining inventory after application
-        const totalPurchased = Number(quantity);
-        const applied = Number(appliedAmount);
         
-        // Add field operation
+        // Pure stock usage also needs a field operation
         await addFieldOperation({
-          land_id: hybridLandId,
+          land_id: landId,
           type: category === 'Gübre/İlaç' ? 'gubre' : category === 'Tohum' ? 'planting' : 'su',
           date,
-          amount: applied,
+          amount: Number(quantity),
           unit,
-          method: 'Satın alma sonrası doğrudan uygulama',
-          notes: 'Satın alınan miktarın bir kısmı arazide kullanıldı.'
+          method: 'Stoktan kullanım',
+          notes: 'Depodan alınan ürün araziye uygulandı.',
+          inventory_id: selectedInventoryId
         });
-
-        // Since addExpense already added 'totalPurchased' to stock,
-        // and addFieldOperation would typically subtract from stock if we provided an inventory_id...
-        // But here we want a specific hybrid behavior.
-        // If we didn't provide inventory_id to addFieldOperation, it won't subtract.
-        // So we subtract manually from the recently added stock.
-        
-        // Find the item (it might be the existing one or the one just created)
-        const item = inventory.find(i => 
-          stockSelectionMode === 'existing' ? i.id === existingStockId : (i.item_name === (invName || category) && i.type === inventoryData?.type)
+      } else {
+        // 2. Process Purchase (Expense + Optional Stock Entry + Optional Hybrid App)
+        await addExpense(
+          Number(amount || 0), 
+          category, 
+          date, 
+          landId, 
+          receiptUrl, 
+          receiptThumbnail, 
+          inventoryData, 
+          seasonId,
+          hybridData
         );
-        
-        if (item) {
-          await updateInventoryItem(item.id, { quantity: item.quantity - applied });
-        }
-        
-        toast.success("Hibrit işlem: Alım yapıldı ve araziye uygulandı.");
       }
 
       toast.success("Kayıt başarıyla oluşturuldu.");
