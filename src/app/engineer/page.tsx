@@ -26,10 +26,8 @@ export default function EngineerDashboard() {
 
     const fetchClients = async () => {
       try {
-        // Mock fetch for engineer's clients. In a real scenario, this would filter by engineer_id.
         const { data } = await db.getAllProfiles();
         if (data) {
-           // For mock purposes, an engineer sees farmers.
            setClients(data.filter((u: any) => u.role === 'farmer'));
         }
       } catch (err) {

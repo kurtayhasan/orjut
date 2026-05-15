@@ -9,7 +9,7 @@ import {
   ChevronRight, ArrowRight, Sparkles
 } from 'lucide-react';
 import EmptyState from '@/components/EmptyState';
-import SeasonCompareCard from '@/components/seasons/SeasonCompareCard';
+
 import { generateSeasonPDF, generateSeasonExcel, shareViaWhatsApp } from '@/lib/reportGenerator';
 import { toast } from 'sonner';
 import Card from '@/components/ui/Card';
@@ -173,40 +173,7 @@ export default function SeasonsPage() {
               )}
            </div>
 
-           {seasons.length >= 2 ? (
-             <SeasonCompareCard season1={seasons[0]} season2={seasons[1]} />
-           ) : (
-             <Card className="bg-white/[0.01] border-dashed border-white/10 py-12 text-center">
-                <div className="bg-white/5 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/5">
-                   <History size={32} className="text-text-muted" />
-                </div>
-                <p className="text-sm font-bold text-text-muted max-w-xs mx-auto">
-                   Karşılaştırma ve detaylı analiz için en az 2 sezon kaydına ihtiyacınız var.
-                </p>
-             </Card>
-           )}
-
-           {/* INSIGHT CARD */}
-           <Card className="bg-primary/10 border-primary/20 overflow-hidden relative">
-              <div className="absolute top-0 right-0 p-4 opacity-10">
-                 <Sparkles size={64} className="text-primary" />
-              </div>
-              <div className="relative z-10 space-y-3">
-                 <div className="flex items-center gap-2">
-                    <Sparkles size={16} className="text-primary" />
-                    <span className="text-[10px] font-black text-primary uppercase tracking-widest">SİSTEM TAVSİYESİ</span>
-                 </div>
-                 <h4 className="text-lg font-black text-zinc-100 tracking-tight leading-tight">
-                    Sezonlar arası kârlılık oranınızı %14 artırabilirsiniz.
-                 </h4>
-                 <p className="text-sm text-text-muted font-medium leading-relaxed">
-                    Geçen yılın mazot ve gübre kullanım verileri incelendiğinde, bu sezon daha optimize bir stok yönetimi ile maliyetleri düşürmeniz mümkün.
-                 </p>
-                 <button className="text-xs font-black text-primary flex items-center gap-1 hover:underline pt-2">
-                    VERİ ANALİZİNİ GÖR <ArrowRight size={14} />
-                 </button>
-              </div>
-           </Card>
+           {/* Removed mock comparison and insight cards for data integrity. Real aggregations will be implemented here. */}
         </div>
       </div>
 

@@ -99,42 +99,9 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                {/* Mock Pending Request 1 */}
-                <tr className="hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
-                  <td className="px-6 py-4">
-                    <p className="font-bold">Ahmet Yılmaz</p>
-                    <p className="text-xs text-zinc-500">0532 111 22 33</p>
-                  </td>
-                  <td className="px-6 py-4">
-                    <p className="font-bold text-zinc-900 dark:text-zinc-100">1.000 ₺</p>
-                    <p className="text-xs text-zinc-500">Yıllık Plan (EFT/Havale)</p>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="px-3 py-1 bg-amber-100 text-amber-700 text-[10px] font-black uppercase tracking-widest rounded-full">Onay Bekliyor</span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <Button size="sm" onClick={() => toast.success("Ahmet Yılmaz kullanıcısının Hasat Pro aboneliği onaylandı!")}>
-                      Onayla
-                    </Button>
-                  </td>
-                </tr>
-                {/* Mock Pending Request 2 */}
-                <tr className="hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
-                  <td className="px-6 py-4">
-                    <p className="font-bold">Mehmet Kaya</p>
-                    <p className="text-xs text-zinc-500">0544 555 66 77</p>
-                  </td>
-                  <td className="px-6 py-4">
-                    <p className="font-bold text-zinc-900 dark:text-zinc-100">99 ₺</p>
-                    <p className="text-xs text-zinc-500">Aylık Plan (EFT/Havale)</p>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="px-3 py-1 bg-amber-100 text-amber-700 text-[10px] font-black uppercase tracking-widest rounded-full">Onay Bekliyor</span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <Button size="sm" onClick={() => toast.success("Mehmet Kaya kullanıcısının Hasat Pro aboneliği onaylandı!")}>
-                      Onayla
-                    </Button>
+                <tr>
+                  <td colSpan={4} className="px-6 py-12 text-center text-zinc-500 font-medium">
+                    Bekleyen Hasat Pro onay talebi bulunmamaktadır.
                   </td>
                 </tr>
               </tbody>

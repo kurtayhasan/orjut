@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAppContext } from '@/context/AppContext';
 import EndOfDayModal from './EndOfDayModal';
-import { Bell, Menu, LogOut, User, Settings, ArrowLeft } from 'lucide-react';
+import { Bell, Menu, User, Settings, ArrowLeft } from 'lucide-react';
 import NetworkStatus from './NetworkStatus';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -13,21 +13,10 @@ import { cn } from '@/lib/utils';
 export default function Header() {
   const { setIsSidebarOpen, userProfile, userRole } = useAppContext();
   const [isEndModalOpen, setEndModalOpen] = useState(false);
-  const [isProfileOpen, setProfileOpen] = useState(false);
-  const profileRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
 
-  // Handle outside click for profile dropdown
-  useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
-        setProfileOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, []);
+
 
   const isSubPage = pathname !== '/dashboard' && pathname.split('/').length > 2;
 
@@ -39,18 +28,7 @@ export default function Header() {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      const { supabase } = await import('@/lib/supabase');
-      await supabase.auth.signOut();
-      localStorage.clear();
-      toast.success("Başarıyla çıkış yapıldı.");
-      window.location.href = '/';
-    } catch (err) {
-      console.error("Logout error:", err);
-      window.location.href = '/';
-    }
-  };
+
 
   const userName = userProfile ? `${userProfile.first_name} ${userProfile.last_name}` : 'Çiftçi';
   const initials = userName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
@@ -127,41 +105,14 @@ export default function Header() {
             <span>🌙 Günü Kapat</span>
           </button>
 
-          {/* Profile Dropdown */}
-          <div className="relative" ref={profileRef}>
-            <button
-              onClick={() => setProfileOpen(!isProfileOpen)}
-              className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white text-xs font-black border-2 border-surface shadow-md hover:scale-105 transition-all active:scale-95"
-            >
-              {initials}
-            </button>
-
-            {isProfileOpen && (
-              <div className="absolute right-0 top-12 w-56 bg-surface rounded-lg shadow-xl border border-border py-2 z-[var(--z-dropdown)] animate-scale-in">
-                <div className="px-4 py-3 border-b border-border mb-1">
-                  <p className="font-bold text-sm text-text-primary truncate">{userName}</p>
-                  <p className="text-[10px] font-black text-text-muted uppercase tracking-wider">
-                    {userRole === 'admin' ? 'Yönetici' : userRole === 'engineer' ? 'Mühendis' : 'Çiftçi'}
-                  </p>
-                </div>
-                <Link
-                  href="/dashboard/settings"
-                  onClick={() => setProfileOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-text-secondary hover:text-primary hover:bg-primary-50 transition-colors"
-                >
-                  <Settings size={18} />
-                  Ayarlar
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-danger hover:bg-danger-bg transition-colors"
-                >
-                  <LogOut size={18} />
-                  Çıkış Yap
-                </button>
-              </div>
-            )}
-          </div>
+          {/* Profile Link */}
+          <Link
+            href="/dashboard/settings"
+            className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white text-xs font-black border-2 border-surface shadow-md hover:scale-105 transition-all active:scale-95"
+            aria-label="Profil ve Ayarlar"
+          >
+            {initials}
+          </Link>
         </div>
       </header>
 
