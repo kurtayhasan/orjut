@@ -13,7 +13,8 @@ import {
   Plus, Bell, Search, Settings,
   LogOut, PieChart, BarChart3,
   Sun, Wind, CloudRain, Sparkles, AlertTriangle,
-  BrainCircuit, ShieldCheck, Microscope, Zap
+  BrainCircuit, ShieldCheck, Microscope, Zap,
+  GraduationCap, ArrowRight
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
