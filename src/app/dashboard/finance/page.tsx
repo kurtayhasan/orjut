@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils';
 import EmptyState from '@/components/EmptyState';
 
 export default function FinancePage() {
-  const { transactions, lands, totalExpenses, deleteExpense, updateExpense } = useAppContext();
+  const { transactions, lands, totalExpenses, deleteExpense, updateExpense, setIsExpenseModalOpen } = useAppContext();
   const categoryTotals = useCategoryTotals(transactions);
   
   const [filter, setFilter] = useState<'all' | 'expense' | 'income'>('all');
@@ -77,7 +77,7 @@ export default function FinancePage() {
         <div className="flex items-center gap-2">
            <Button variant="neutral" onClick={handleExportExcel} leftIcon={<FileText size={18} />}>Excel</Button>
            <Button variant="neutral" onClick={handleExportPDF} leftIcon={<Download size={18} />}>PDF</Button>
-           <Button size="md" leftIcon={<Plus size={20} />}>İşlem Ekle</Button>
+            <Button size="md" leftIcon={<Plus size={20} />} onClick={() => setIsExpenseModalOpen(true)}>İşlem Ekle</Button>
         </div>
       </div>
 

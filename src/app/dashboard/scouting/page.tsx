@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useAppContext } from '@/context/AppContext';
 import { 
   ClipboardCheck, Plus, Trash2, Calendar, 
   MapPin, Search, HeartPulse, Sprout, 
   Wheat, Activity, MoreVertical, Info,
   AlertCircle, CheckCircle2, GraduationCap, 
-  ArrowRight, ShieldCheck, Tag
+  ArrowRight, ShieldCheck, Tag, Tractor
 } from 'lucide-react';
 import { toast } from 'sonner';
 import Card from '@/components/ui/Card';
@@ -183,6 +184,19 @@ export default function ScoutingPage() {
                               </div>
                               <h5 className="font-black text-amber-900 text-sm">{log.prescription_action}</h5>
                               {log.prescription_notes && <p className="text-xs font-bold text-amber-800/80 mt-1">{log.prescription_notes}</p>}
+                              
+                              {userRole === 'farmer' && (
+                                <Link 
+                                  href={`/dashboard/operations?new=true&land_id=${log.land_id}&type=${
+                                    log.prescription_action.includes('İlaçlama') ? 'ilac' : 
+                                    log.prescription_action.includes('Gübre') ? 'gubre' : 'su'
+                                  }&notes=${encodeURIComponent('Mühendis Tavsiyesi: ' + log.prescription_action)}`}
+                                >
+                                  <Button size="sm" className="mt-4 bg-amber-600 hover:bg-amber-700 shadow-lg shadow-amber-200" leftIcon={<Tractor size={16} />}>
+                                    Tavsiyeyi Uygula
+                                  </Button>
+                                </Link>
+                              )}
                            </div>
                          ) : (
                            userRole === 'engineer' && (

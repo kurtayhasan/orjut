@@ -22,7 +22,7 @@ const CROP_LIFECYCLES: Record<string, number> = {
 };
 
 export default function InventoryPage() {
-  const { lands, inventory, addInventoryItem, deleteInventoryItem, isLoadingInventory } = useAppContext();
+  const { lands, inventory, addInventoryItem, deleteInventoryItem, isLoadingInventory, setIsExpenseModalOpen } = useAppContext();
   const [view, setView] = useState<'crops' | 'inputs'>('crops');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   
@@ -239,13 +239,28 @@ export default function InventoryPage() {
                     </div>
                     <div className="space-y-2">
                        {lowStockItems.map(item => (
-                         <div key={item.id} className="flex justify-between items-center text-xs font-bold text-text-primary">
-                            <span>{item.item_name}</span>
+                         <button 
+                           key={item.id} 
+                           onClick={() => setIsExpenseModalOpen(true)}
+                           className="w-full flex justify-between items-center text-xs font-bold text-text-primary p-2 hover:bg-white/40 rounded-lg transition-colors text-left"
+                         >
+                            <div className="flex items-center gap-2">
+                               <div className="w-1.5 h-1.5 rounded-full bg-danger animate-pulse" />
+                               <span>{item.item_name}</span>
+                            </div>
                             <span className="text-danger">{item.quantity} {item.unit}</span>
-                         </div>
+                         </button>
                        ))}
                     </div>
-                    <Button variant="danger" size="sm" fullWidth className="mt-4">Tedarik Listesi Oluştur</Button>
+                    <Button 
+                      variant="danger" 
+                      size="sm" 
+                      fullWidth 
+                      className="mt-4"
+                      onClick={() => setIsExpenseModalOpen(true)}
+                    >
+                      Eksikleri Tedarik Et
+                    </Button>
                  </Card>
                )}
 

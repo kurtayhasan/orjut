@@ -443,11 +443,31 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const weather = await fetchWeather(lat, lon);
       setWeatherData(weather);
       const landContexts: LandContext[] = lands.map(land => ({
-        cropName: land.crop_type, sowingDate: land.planting_date || new Date().toISOString(),
+        id: land.id,
+        cropName: land.crop_type, 
+        sowingDate: land.planting_date || new Date().toISOString(),
         currentDay: land.planting_date ? Math.floor((Date.now() - new Date(land.planting_date).getTime()) / 86400000) : 0,
-        totalArea: land.size_decare || 0
+        totalArea: land.size_decare || 0,
+        lastOperations: fieldOperations
+          .filter(o => o.land_id === land.id)
+          .slice(0, 3)
+          .map(o => `${o.date}: ${o.type} (${o.amount} ${o.unit || ''})`),
+        scoutingNotes: scoutingLogs
+          .filter(s => s.land_id === land.id)
+          .slice(0, 3)
+          .map(s => `${s.date}: ${s.health_status} - ${s.notes}`)
       }));
-      const prompt = buildAIPrompt({ weather, lands: landContexts, date: new Date().toLocaleDateString('tr-TR') });
+
+      const inventoryStatus = inventory
+        .filter(i => i.quantity < 10)
+        .map(i => `${i.item_name} (${i.quantity} ${i.unit} kaldı)`);
+
+      const prompt = buildAIPrompt({ 
+        weather, 
+        lands: landContexts, 
+        inventoryStatus,
+        date: new Date().toLocaleDateString('tr-TR') 
+      });
       const res = await fetch('/api/ai/daily-insight', { method: 'POST', body: JSON.stringify({ prompt }) });
       const data = await res.json();
       if (data.success) {

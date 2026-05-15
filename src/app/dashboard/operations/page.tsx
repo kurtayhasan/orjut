@@ -38,6 +38,15 @@ export default function OperationsPage() {
   useEffect(() => {
     if (searchParams.get('new') === 'true') {
       setIsAddModalOpen(true);
+      
+      // Phase 4: Pre-fill from prescription
+      const landId = searchParams.get('land_id');
+      const opType = searchParams.get('type');
+      const opNotes = searchParams.get('notes');
+      
+      if (landId) setSelectedLandId(landId);
+      if (opType) setType(opType as any);
+      if (opNotes) setNotes(opNotes);
     }
   }, [searchParams]);
 

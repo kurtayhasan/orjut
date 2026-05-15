@@ -12,7 +12,8 @@ import {
   FlaskConical, Bug, Tractor,
   Plus, Bell, Search, Settings,
   LogOut, PieChart, BarChart3,
-  Sun, Wind, CloudRain, Sparkles
+  Sun, Wind, CloudRain, Sparkles, AlertTriangle,
+  BrainCircuit, ShieldCheck, Microscope, Zap
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -41,10 +42,13 @@ export default function DashboardPage() {
   const { 
     lands, transactions, isLoadingTransactions, 
     userProfile, weather, dailyInsight, 
-    requestWeatherAndInsight 
+    requestWeatherAndInsight, inventory, setIsExpenseModalOpen,
+    fieldOperations, scoutingLogs
   } = useAppContext();
 
   const [activeTab, setActiveTab] = useState<'all' | 'expense' | 'income'>('all');
+
+  const lowStockItems = useMemo(() => inventory.filter(i => i.quantity < 10), [inventory]);
 
   const filteredTransactions = useMemo(() => {
     const list = transactions.slice(0, 5);
@@ -58,6 +62,17 @@ export default function DashboardPage() {
 
   const categories = ['Mazot', 'Gübre', 'İlaç', 'Tohum', 'İşçilik'];
 
+  // Helper to get last activity for a land
+  const getLandLastActivity = (landId: string) => {
+    const ops = fieldOperations.filter(o => o.land_id === landId).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const scs = scoutingLogs.filter(s => s.land_id === landId).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
+    const lastOp = ops[0];
+    const lastSc = scs[0];
+    
+    return { lastOp, lastSc };
+  };
+
   return (
     <div className="space-y-8 animate-fade-in pb-10">
       {/* BÖLÜM 1 — KARŞILAMA VE HIZLI AKSİYONLAR */}
@@ -69,81 +84,179 @@ export default function DashboardPage() {
           <p className="text-text-muted font-bold text-sm">Arazilerinizde her şey yolunda görünüyor.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/dashboard/finance">
-            <Button variant="outline" size="md" leftIcon={<Plus size={18} />}>MASRAF EKLE</Button>
-          </Link>
+          <Button variant="outline" size="md" leftIcon={<Plus size={18} />} onClick={() => setIsExpenseModalOpen(true)}>MASRAF EKLE</Button>
           <Link href="/dashboard/operations">
             <Button size="md" leftIcon={<Tractor size={18} />}>İŞLEM KAYDET</Button>
           </Link>
         </div>
       </div>
 
-      {/* BÖLÜM 2 — AI ANALİZ VE HAVA DURUMU */}
-      <Card padding="none" className="bg-primary border-none shadow-xl overflow-hidden relative group">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-primary-dark opacity-100" />
-        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-          <Sparkles size={120} />
-        </div>
-        
-        <div className="relative z-10 p-6 md:p-8 flex flex-col md:flex-row items-center gap-8">
-          {/* Weather Widget */}
-          <div className="flex items-center gap-6 bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10 shrink-0">
-            <div className="text-center">
-              <Sun className="text-amber-300 mb-1 mx-auto" size={32} />
-              <div className="text-3xl font-black text-white">{weather.temp ?? '--'}°</div>
-              <div className="text-[10px] font-black text-white/70 uppercase tracking-widest">SÖKE, AYDIN</div>
+      {/* BÖLÜM 2 — PREMIUM AI ANALİZ VE HAVA DURUMU (EXPANDED) */}
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+        <Card padding="none" className="xl:col-span-3 bg-primary border-none shadow-2xl overflow-hidden relative group min-h-[320px] flex flex-col">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark opacity-100" />
+          
+          {/* Animated Background Elements */}
+          <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-all duration-700 transform group-hover:scale-110">
+            <BrainCircuit size={200} />
+          </div>
+          <div className="absolute bottom-0 left-0 p-12 opacity-5">
+            <Sparkles size={160} />
+          </div>
+          
+          <div className="relative z-10 p-6 md:p-10 flex flex-col flex-1">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-8 mb-8">
+              {/* Weather Widget */}
+              <div className="flex items-center gap-6 bg-white/10 backdrop-blur-xl p-5 rounded-3xl border border-white/20 shadow-lg shrink-0">
+                <div className="text-center">
+                  <Sun className="text-amber-300 mb-1 mx-auto drop-shadow-md" size={40} />
+                  <div className="text-4xl font-black text-white">{weather.temp ?? '--'}°</div>
+                  <div className="text-[10px] font-black text-white/70 uppercase tracking-widest mt-1">SÖKE, AYDIN</div>
+                </div>
+                <div className="w-px h-16 bg-white/20" />
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 text-white/90 text-sm font-bold">
+                    <Wind size={18} className="text-blue-200" /> {weather.windspeed ?? '--'} km/s
+                  </div>
+                  <div className="flex items-center gap-3 text-white/90 text-sm font-bold">
+                    <CloudRain size={18} className="text-blue-300" /> %12 Yağış
+                  </div>
+                </div>
+              </div>
+
+              {/* AI Insight Header */}
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="bg-white/20 p-2 rounded-xl backdrop-blur-md">
+                    <Zap size={20} className="text-amber-300 fill-amber-300" />
+                  </div>
+                  <span className="text-xs font-black text-white uppercase tracking-[0.2em]">Akıllı Tarım Asistanı</span>
+                </div>
+                <h2 className="text-2xl md:text-4xl font-black font-heading text-white leading-tight mb-4 tracking-tight">
+                  {dailyInsight ? "Sizin için 24 saatlik arazi raporu hazır." : "Verilerinizi yapay zeka ile işleyin."}
+                </h2>
+                {dailyInsight ? (
+                  <div className="space-y-4">
+                    <p className="text-base md:text-lg font-medium text-white/90 leading-relaxed max-w-3xl">
+                      {dailyInsight}
+                    </p>
+                    <div className="flex gap-4 pt-2">
+                       <Button size="sm" variant="neutral" className="bg-white text-primary border-none hover:bg-white/90" leftIcon={<Microscope size={16} />}>Detaylı Rapor</Button>
+                       <Button size="sm" variant="outline" className="border-white/40 text-white hover:bg-white/10">Verileri Güncelle</Button>
+                    </div>
+                  </div>
+                ) : (
+                   <Button onClick={handleStartAnalysis} variant="neutral" className="bg-white text-primary hover:bg-white/90" leftIcon={<Sparkles size={18} />}>Yapay Zekayı Çalıştır</Button>
+                )}
+              </div>
             </div>
-            <div className="w-px h-12 bg-white/20" />
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-white/90 text-xs font-bold">
-                <Wind size={14} /> {weather.windspeed ?? '--'} km/s
-              </div>
-              <div className="flex items-center gap-2 text-white/90 text-xs font-bold">
-                <CloudRain size={14} /> %12 Yağış
-              </div>
+
+            {/* Per-Land AI Status (New Phase) */}
+            <div className="mt-auto grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t border-white/10">
+               {lands.slice(0, 3).map(land => {
+                 const { lastOp, lastSc } = getLandLastActivity(land.id);
+                 return (
+                   <div key={land.id} className="bg-white/5 backdrop-blur-sm p-4 rounded-2xl border border-white/5 hover:bg-white/10 transition-colors cursor-pointer group/item">
+                      <div className="flex justify-between items-start mb-2">
+                         <h4 className="text-xs font-black text-white/80 uppercase tracking-wider truncate mr-2">{land.district} - {land.crop_type}</h4>
+                         <ShieldCheck size={14} className={cn(lastSc?.health_status === 'saglikli' ? "text-emerald-400" : "text-amber-400")} />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                         <span className="text-[10px] text-white/50 font-bold">
+                           {lastOp ? `${formatDateShort(lastOp.date)}: ${lastOp.type}` : 'İşlem yok'}
+                         </span>
+                         <span className="text-[11px] text-white/90 font-black leading-tight line-clamp-1">
+                           {lastSc?.notes || 'Gözlem kaydı bekleniyor...'}
+                         </span>
+                      </div>
+                   </div>
+                 );
+               })}
+               {lands.length === 0 && (
+                 <div className="md:col-span-3 text-center py-4">
+                    <p className="text-xs font-bold text-white/40 italic">Arazi verisi bulunamadı. AI analizi için lütfen arazi ekleyin.</p>
+                 </div>
+               )}
             </div>
           </div>
+        </Card>
 
-          {/* AI Insight */}
-          <div className="flex-1 text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-              <div className="bg-white/20 p-1.5 rounded-lg">
-                <Activity size={16} className="text-white" />
+        {/* Quick Stats Column (Repositioned) */}
+        <div className="flex flex-col gap-6">
+           <Card padding="md" className="bg-surface-2 border-border shadow-inner flex-1">
+              <div className="flex items-center gap-2 mb-6">
+                 <BarChart3 size={20} className="text-text-primary" />
+                 <h4 className="text-sm font-black font-heading uppercase tracking-widest text-text-primary">Gider Analizi</h4>
               </div>
-              <span className="text-[10px] font-black text-white/80 uppercase tracking-widest">GÜNLÜK ZİRAİ ANALİZ</span>
-            </div>
-            <h2 className="text-xl md:text-2xl font-black font-heading text-white leading-tight mb-3">
-              {dailyInsight ? "Bugün için sulama tavsiyeniz hazır." : "Arazilerinizi yapay zeka ile analiz edin."}
-            </h2>
-            {dailyInsight ? (
-              <p className="text-sm font-medium text-white/90 leading-relaxed max-w-2xl line-clamp-2">
-                {dailyInsight}
-              </p>
-            ) : (
-               <button onClick={handleStartAnalysis} className="text-xs font-black text-primary hover:underline mt-2">Detaylı analiz raporu oluştur →</button>
-            )}
-          </div>
-        </div>
-      </Card>
+              <div className="space-y-5">
+                 {categories.map((cat, idx) => (
+                   <div key={cat} className="space-y-1.5">
+                      <div className="flex justify-between text-[11px] font-black uppercase tracking-tighter">
+                         <span className="text-text-muted">{cat}</span>
+                         <span className="text-text-primary">{20 + idx * 4}%</span>
+                      </div>
+                      <div className="h-2 w-full bg-surface-3 rounded-full overflow-hidden">
+                         <div className={cn("h-full rounded-full", idx === 0 ? "bg-primary" : "bg-primary/60")} style={{ width: `${20 + idx * 4}%` }} />
+                      </div>
+                   </div>
+                 ))}
+              </div>
+           </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+           {/* Critical Stock Widget (Phase 2) */}
+           {lowStockItems.length > 0 && (
+             <Card className="bg-danger-bg border-danger/20" padding="md">
+               <div className="flex items-center gap-2 text-danger mb-3">
+                 <AlertTriangle size={20} />
+                 <h4 className="text-sm font-black font-heading uppercase tracking-tight">Kritik Stok</h4>
+               </div>
+               <div className="space-y-2">
+                 {lowStockItems.slice(0, 2).map(item => (
+                   <button 
+                     key={item.id}
+                     onClick={() => setIsExpenseModalOpen(true)}
+                     className="w-full flex justify-between items-center p-2 rounded-lg hover:bg-white/50 transition-colors"
+                   >
+                     <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-danger animate-pulse" />
+                        <span className="text-xs font-bold text-text-primary">{item.item_name}</span>
+                     </div>
+                     <span className="text-xs font-black text-danger">{item.quantity} {item.unit}</span>
+                   </button>
+                 ))}
+                 <Button 
+                   variant="danger" 
+                   size="sm" 
+                   fullWidth 
+                   className="mt-2"
+                   onClick={() => setIsExpenseModalOpen(true)}
+                 >
+                   Eksikleri Tamamla
+                 </Button>
+               </div>
+             </Card>
+           )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         {/* BÖLÜM 4 — SON İŞLEMLER */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between px-1">
-            <h3 className="text-base font-black font-heading text-text-primary uppercase tracking-tight">Son İşlemler</h3>
-            <Link href="/dashboard/finance" className="text-xs font-black text-primary hover:underline">TÜMÜ →</Link>
+            <h3 className="text-lg font-black font-heading text-text-primary uppercase tracking-tight">İşlem Günlüğü</h3>
+            <Link href="/dashboard/finance" className="text-xs font-black text-primary hover:underline">TÜM GEÇMİŞ →</Link>
           </div>
-          <Card padding="none" className="divide-y divide-border overflow-hidden">
+          <Card padding="none" className="divide-y divide-border overflow-hidden shadow-sm">
             {isLoadingTransactions ? (
               <ListSkeleton count={5} />
             ) : filteredTransactions.length === 0 ? (
               <EmptyState title="Henüz işlem yok" description="Harcalarınızı buraya kaydederek takibini yapabilirsiniz." emoji="💸" />
             ) : (
               filteredTransactions.map((tx) => (
-                <div key={tx.id} className="p-4 flex items-center justify-between hover:bg-surface-2 transition-colors active:bg-surface-3 cursor-pointer group">
+                <div key={tx.id} className="p-5 flex items-center justify-between hover:bg-surface-2 transition-colors active:bg-surface-3 cursor-pointer group">
                   <div className="flex items-center gap-4 min-w-0">
                     <div className={cn(
-                      "w-11 h-11 rounded-full flex items-center justify-center shrink-0 shadow-sm border border-black/5",
+                      "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border border-black/5",
                       tx.description === 'Mazot' ? 'bg-orange-100 text-orange-600' : 
                       tx.description === 'Gübre' ? 'bg-emerald-100 text-emerald-600' : 
                       tx.description === 'İlaç' ? 'bg-purple-100 text-purple-600' : 
@@ -153,20 +266,22 @@ export default function DashboardPage() {
                       {tx.description === 'Mazot' ? '⛽' : tx.description === 'Gübre' ? '🌱' : tx.description === 'İlaç' ? '🧪' : tx.description === 'Tohum' ? '🌾' : tx.description === 'İşçilik' ? '🧑‍🌾' : '📦'}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-bold text-text-primary truncate">{tx.description}</p>
-                      <p className="text-xs font-bold text-text-muted truncate">
-                        {tx.lands ? `Ada ${tx.lands.block_no}/P. ${tx.lands.parcel_no}` : 'Genel İşlem'} • {formatDateShort(tx.date)}
+                      <p className="font-bold text-text-primary truncate text-base leading-none mb-1.5">{tx.description}</p>
+                      <p className="text-[11px] font-bold text-text-muted uppercase tracking-wider flex items-center gap-2">
+                        {tx.lands ? <><MapPin size={10} /> {tx.lands.district} / {tx.lands.parcel_no}</> : 'Genel İşlem'} 
+                        <span className="opacity-30">•</span> 
+                        <Calendar size={10} /> {formatDateShort(tx.date)}
                       </p>
                     </div>
                   </div>
                   <div className="text-right flex flex-col items-end">
                     <span className={cn(
-                      "font-black text-base",
+                      "font-black text-lg tracking-tight",
                       tx.type === 'expense' ? "text-danger" : "text-success"
                     )}>
                       {tx.type === 'expense' ? '-' : '+'}{formatCurrency(tx.amount)}
                     </span>
-                    {tx.receipt_url && <span className="text-[10px] font-bold text-text-muted">📁 Fiş Eklendi</span>}
+                    {tx.receipt_url && <span className="text-[9px] font-black text-primary uppercase bg-primary-50 px-1.5 py-0.5 rounded mt-1">Belge Mevcut</span>}
                   </div>
                 </div>
               ))
@@ -174,54 +289,41 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* BÖLÜM 5 — ARAZİ ÖZETİ */}
-        <div className="space-y-4">
+        {/* BÖLÜM 5 — ARAZİ ÖZETİ VE NAVİGASYON */}
+        <div className="space-y-6">
           <div className="flex items-center justify-between px-1">
-            <h3 className="text-base font-black font-heading text-text-primary uppercase tracking-tight">Aktif Araziler</h3>
-            <Link href="/dashboard/lands" className="text-xs font-black text-primary hover:underline">YÖNET →</Link>
+            <h3 className="text-lg font-black font-heading text-text-primary uppercase tracking-tight">Arazilerim</h3>
+            <Link href="/dashboard/lands" className="text-xs font-black text-primary hover:underline">TÜMÜ →</Link>
           </div>
-          <div className="space-y-3">
-             {lands.slice(0, 3).map(land => (
-               <Card key={land.id} padding="sm" hoverable className="flex items-center justify-between group">
-                  <div className="flex items-center gap-3">
-                     <div className="w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                        <LandPlot size={20} />
+          <div className="grid grid-cols-1 gap-4">
+             {lands.slice(0, 4).map(land => (
+               <Card key={land.id} padding="md" hoverable className="flex items-center justify-between group cursor-pointer border-2 hover:border-primary/20">
+                  <div className="flex items-center gap-4">
+                     <div className="w-12 h-12 bg-primary-50 rounded-2xl flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
+                        <LandPlot size={24} />
                      </div>
                      <div>
-                        <h4 className="font-bold text-text-primary text-sm leading-tight">{land.district || land.city}</h4>
-                        <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{land.crop_type}</p>
+                        <h4 className="font-black text-text-primary text-base leading-tight mb-1">{land.district || land.city}</h4>
+                        <div className="flex items-center gap-2">
+                           <span className="text-[10px] font-black text-text-muted uppercase tracking-widest bg-surface-2 px-2 py-0.5 rounded">{land.crop_type}</span>
+                           <span className="text-[10px] font-bold text-text-muted">{land.size_decare} Dönüm</span>
+                        </div>
                      </div>
                   </div>
-                  <ChevronRight size={16} className="text-text-muted" />
+                  <div className="w-8 h-8 rounded-full bg-surface-2 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                    <ChevronRight size={18} className="text-text-muted group-hover:text-primary" />
+                  </div>
                </Card>
              ))}
              {lands.length === 0 && (
-               <div className="bg-surface-2 p-6 rounded-2xl border-2 border-dashed border-border text-center">
-                  <p className="text-xs font-bold text-text-muted">Kayıtlı araziniz bulunmuyor.</p>
+               <div className="bg-surface-2 p-10 rounded-3xl border-2 border-dashed border-border text-center">
+                  <p className="text-sm font-bold text-text-muted">Henüz arazi kaydı yapmadınız.</p>
+                  <Link href="/dashboard/lands">
+                    <Button variant="outline" size="sm" className="mt-4">Arazi Ekle</Button>
+                  </Link>
                </div>
              )}
           </div>
-          
-          {/* Quick Stats Widget */}
-          <Card padding="md" className="bg-surface-2 border-border shadow-inner mt-6">
-             <div className="flex items-center gap-2 mb-4">
-                <BarChart3 size={18} className="text-text-primary" />
-                <h4 className="text-xs font-black font-heading uppercase tracking-widest text-text-primary">Gider Özeti</h4>
-             </div>
-             <div className="space-y-3">
-                {categories.map(cat => (
-                  <div key={cat} className="space-y-1">
-                     <div className="flex justify-between text-[10px] font-black uppercase tracking-tighter">
-                        <span className="text-text-muted">{cat}</span>
-                        <span className="text-text-primary">%24</span>
-                     </div>
-                     <div className="h-1.5 w-full bg-surface-3 rounded-full overflow-hidden">
-                        <div className="h-full bg-primary rounded-full" style={{ width: '24%' }} />
-                     </div>
-                  </div>
-                ))}
-             </div>
-          </Card>
         </div>
       </div>
     </div>
