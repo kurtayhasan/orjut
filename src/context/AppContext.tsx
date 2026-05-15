@@ -15,7 +15,7 @@ type AppContextType = {
   t: (key: keyof typeof translations['en']) => string;
   totalExpenses: number;
   totalArea: number;
-  addExpense: (amount: number, category: string, date: string, land_id: string, receipt_url?: string, receipt_thumbnail_url?: string, inventoryData?: { name: string, type: string, quantity: number, unit: string }, season_id?: string) => Promise<void>;
+  addExpense: (amount: number, category: string, date: string, land_id: string, receipt_url?: string, receipt_thumbnail_url?: string, inventoryData?: { name: string, type: string, quantity: number, unit: string, id?: string }, season_id?: string) => Promise<void>;
   updateExpense: (id: string, updates: any) => Promise<void>;
   deleteExpense: (id: string) => Promise<void>;
   weather: { temp: number | null, windspeed: number | null, loading: boolean, error: string | null };
@@ -69,6 +69,8 @@ type AppContextType = {
   showUpsell: boolean;
   triggerUpsell: () => void;
   closeUpsell: () => void;
+  isExpenseModalOpen: boolean;
+  setIsExpenseModalOpen: (isOpen: boolean) => void;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -101,6 +103,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [userRole, setUserRole] = useState<'farmer' | 'engineer' | 'admin'>('farmer');
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [showUpsell, setShowUpsell] = useState(false);
+  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+
   const triggerUpsell = useCallback(() => setShowUpsell(true), []);
   const closeUpsell = useCallback(() => setShowUpsell(false), []);
 
@@ -110,7 +114,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const myId = userProfile?.id || (typeof window !== 'undefined' ? localStorage.getItem('user_id') : null);
     
     // PHASE 3: Zero-UUID Protection & Auth Matching
-    // Ensure we don't return dummy IDs or zeros
     if (!myId || myId === '00000000-0000-0000-0000-000000000000') return null;
     
     if (userRole === 'engineer' && selectedClientId) return selectedClientId;
@@ -189,10 +192,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addLand = async (land: any) => {
-    if (!activeOrgId) {
-      toast.error("Oturum bilgisi alınamadı. Lütfen tekrar giriş yapın.");
-      return;
-    }
+    if (!activeOrgId) return;
     try {
       const { data, error } = await db.insertLand({ ...land, org_id: activeOrgId });
       if (error) throw error;
@@ -223,8 +223,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const land = lands.find(l => l.id === id);
       if (!land) return;
 
-      // PHASE 2: Orphan Data Prevention
-      // We manually clean up related data before deleting the land to ensure consistency
       await Promise.all([
         db.deleteTransactionsByLand(id),
         db.deleteIrrigationLogsByLand(id),
@@ -235,11 +233,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const { error } = await db.deleteLand(id);
       if (error) throw error;
       
-      // Update local state
       if (land) setTotalArea(prev => prev - Number(land.size_decare || 0));
       setLands(prev => prev.filter(l => l.id !== id));
       
-      // Clean up linked states
       setTransactions(prev => prev.filter(t => t.land_id !== id));
       setIrrigationLogs(prev => prev.filter(l => l.land_id !== id));
       setScoutingLogs(prev => prev.filter(s => s.land_id !== id));
@@ -247,12 +243,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       
       toast.success("Arazi ve bağlı tüm veriler silindi");
     } catch (err: any) {
-      toast.error("Silme hatası: Veri bütünlüğü korunamadı");
-      console.error("Delete Land Error:", err);
+      toast.error("Silme hatası");
     }
   };
 
-  const addExpense = async (amount: number, category: string, date: string, land_id: string, receipt_url?: string, receipt_thumbnail_url?: string, inventoryData?: { name: string, type: string, quantity: number, unit: string }, season_id?: string) => {
+  const addExpense = async (amount: number, category: string, date: string, land_id: string, receipt_url?: string, receipt_thumbnail_url?: string, inventoryData?: { name: string, type: string, quantity: number, unit: string, id?: string }, season_id?: string) => {
     if (!activeOrgId) return;
     const newTx: any = { 
       amount, description: category, date, type: 'expense', category, land_id, org_id: activeOrgId,
@@ -265,10 +260,33 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (data) {
         setTransactions(prev => [data, ...prev]);
         setTotalExpenses(prev => prev + amount);
+        
         if (inventoryData) {
           const unitCost = calculateUnitCost(amount, inventoryData.quantity);
-          await addInventoryItem({ ...inventoryData, last_unit_cost: unitCost, last_purchase_date: date });
-          toast.success("Masraf ve Stok başarıyla eklendi");
+          
+          if (inventoryData.id) {
+            // Update existing stock (Phase 2 Smart Stock)
+            const item = inventory.find(i => i.id === inventoryData.id);
+            if (item) {
+              await updateInventoryItem(item.id, { 
+                quantity: item.quantity + inventoryData.quantity,
+                unit_cost: unitCost,
+                last_purchase_date: date
+              });
+              toast.success("Harcama kaydedildi ve mevcut stok güncellendi");
+            }
+          } else {
+            // New stock entry
+            await addInventoryItem({ 
+              item_name: inventoryData.name, 
+              type: inventoryData.type, 
+              quantity: inventoryData.quantity, 
+              unit: inventoryData.unit, 
+              unit_cost: unitCost, 
+              last_purchase_date: date 
+            });
+            toast.success("Harcama kaydedildi ve yeni stok oluşturuldu");
+          }
         } else {
           toast.success("Masraf başarıyla kaydedildi");
         }
@@ -333,18 +351,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addInventoryItem = async (item: any) => {
     if (!activeOrgId) return;
     try {
-      // Ensure numeric values to prevent DB errors
-      const sanitizedItem = {
-        ...item,
-        quantity: Number(item.quantity || 0),
-        last_unit_cost: Number(item.last_unit_cost || 0)
-      };
-      
-      const { data, error } = await db.insertInventoryItem({ ...sanitizedItem, org_id: activeOrgId });
-      if (error) {
-        toast.error(`Stok ekleme hatası: ${error.message}`);
-        throw error;
-      }
+      const { data, error } = await db.insertInventoryItem({ ...item, org_id: activeOrgId });
+      if (error) throw error;
       if (data) setInventory(prev => [...prev, data]);
     } catch (err: any) {
       console.error("Inventory error:", err);
@@ -467,7 +475,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     userRole, selectedClientId, setSelectedClientId, activeOrgId,
     isPremium: !!userProfile?.is_premium,
     isDemo: false,
-    showUpsell, triggerUpsell, closeUpsell
+    showUpsell, triggerUpsell, closeUpsell,
+    isExpenseModalOpen, setIsExpenseModalOpen
   };
 
   return (

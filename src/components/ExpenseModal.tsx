@@ -12,12 +12,16 @@ import {
   Wallet, Fuel, Sprout, 
   Users, Package, Calendar, 
   MapPin, Archive, Tag, Camera,
-  Box, RefreshCcw
+  Box, RefreshCcw, Activity
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function ExpenseModal({ isOpen, onClose, defaultCategory }: ExpenseModalProps) {
-  const { addExpense, lands, seasons, activeSeason, inventory, updateInventoryItem } = useAppContext();
+  const { 
+    addExpense, lands, seasons, activeSeason, 
+    inventory, updateInventoryItem, addFieldOperation 
+  } = useAppContext();
+  
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [landId, setLandId] = useState('');
@@ -29,10 +33,17 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
   // Stock adding
   const [addToInventory, setAddToInventory] = useState(false);
   const [invName, setInvName] = useState('');
+  const [stockSelectionMode, setStockSelectionMode] = useState<'new' | 'existing'>('existing');
+  const [existingStockId, setExistingStockId] = useState('');
   
   // Stock using
   const [isUsingStock, setIsUsingStock] = useState(false);
   const [selectedInventoryId, setSelectedInventoryId] = useState('');
+  
+  // Hybrid Workflow
+  const [isHybridApplied, setIsHybridApplied] = useState(false);
+  const [appliedAmount, setAppliedAmount] = useState('');
+  const [hybridLandId, setHybridLandId] = useState('');
   
   const [quantity, setQuantity] = useState('');
   const [unit, setUnit] = useState('kg');
@@ -43,6 +54,9 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
       if (activeSeason) setSeasonId(activeSeason.id);
       setIsUsingStock(false);
       setAddToInventory(false);
+      setIsHybridApplied(false);
+      setAppliedAmount('');
+      setStockSelectionMode('existing');
     }
   }, [isOpen, defaultCategory, activeSeason]);
 
@@ -64,32 +78,74 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
       return;
     }
 
+    if (addToInventory && stockSelectionMode === 'existing' && !existingStockId) {
+      toast.error("Lütfen mevcut bir stok ürünü seçin veya 'Yeni Ürün' olarak kaydedin.");
+      return;
+    }
+
+    if (isHybridApplied && (!appliedAmount || !hybridLandId)) {
+      toast.error("Hibrit işlem için miktar ve arazi seçimi zorunludur.");
+      return;
+    }
+
     try {
       const inventoryData = addToInventory ? {
         name: invName || category,
         type: category === 'Gübre/İlaç' ? 'fertilizer' : category === 'Tohum' ? 'seed' : category === 'Mazot' ? 'fuel' : 'other',
         quantity: Number(quantity),
-        unit: unit
+        unit: unit,
+        id: stockSelectionMode === 'existing' ? existingStockId : undefined
       } : undefined;
 
-      // If using stock, we might want to update inventory quantity
+      // 1. Process Stock Usage (Pure Stock Mode)
       if (isUsingStock && selectedInventoryId && quantity) {
         const item = inventory.find(i => i.id === selectedInventoryId);
         if (item) {
           const newQty = item.quantity - Number(quantity);
-          if (newQty < 0) {
-            toast.warning("Stok miktarı sıfırın altına düşecek!");
-          }
+          if (newQty < 0) toast.warning("Stok miktarı sıfırın altına düşecek!");
           await updateInventoryItem(selectedInventoryId, { quantity: newQty });
         }
       }
 
+      // 2. Process Purchase (Expense + Optional Stock Entry)
       await addExpense(Number(amount || 0), category, date, landId, receiptUrl, receiptThumbnail, inventoryData, seasonId);
       
+      // 3. Process Hybrid Workflow (Immediate Application)
+      if (isHybridApplied && appliedAmount && hybridLandId) {
+        // Calculate remaining inventory after application
+        const totalPurchased = Number(quantity);
+        const applied = Number(appliedAmount);
+        
+        // Add field operation
+        await addFieldOperation({
+          land_id: hybridLandId,
+          type: category === 'Gübre/İlaç' ? 'gubre' : category === 'Tohum' ? 'planting' : 'su',
+          date,
+          amount: applied,
+          unit,
+          method: 'Satın alma sonrası doğrudan uygulama',
+          notes: 'Satın alınan miktarın bir kısmı arazide kullanıldı.'
+        });
+
+        // Since addExpense already added 'totalPurchased' to stock,
+        // and addFieldOperation would typically subtract from stock if we provided an inventory_id...
+        // But here we want a specific hybrid behavior.
+        // If we didn't provide inventory_id to addFieldOperation, it won't subtract.
+        // So we subtract manually from the recently added stock.
+        
+        // Find the item (it might be the existing one or the one just created)
+        const item = inventory.find(i => 
+          stockSelectionMode === 'existing' ? i.id === existingStockId : (i.item_name === (invName || category) && i.type === inventoryData?.type)
+        );
+        
+        if (item) {
+          await updateInventoryItem(item.id, { quantity: item.quantity - applied });
+        }
+        
+        toast.success("Hibrit işlem: Alım yapıldı ve araziye uygulandı.");
+      }
+
       toast.success("Kayıt başarıyla oluşturuldu.");
-      // Reset form
-      setAmount(''); setQuantity(''); setUnit('kg'); setAddToInventory(false); setIsUsingStock(false); 
-      setInvName(''); setReceiptUrl(''); setReceiptThumbnail(''); setSelectedInventoryId('');
       onClose();
     } catch (err) {
       toast.error("Kayıt oluşturulurken bir hata oluştu.");
@@ -104,7 +160,6 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
     { id: 'Diğer', label: 'Diğer', icon: Package, color: 'text-zinc-500' }
   ];
 
-  // Filter inventory based on category
   const filteredInventory = inventory.filter(item => {
     if (category === 'Mazot') return item.type === 'fuel';
     if (category === 'Gübre/İlaç') return item.type === 'fertilizer';
@@ -131,14 +186,15 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
                       setCategory(cat.id);
                       setIsUsingStock(false);
                       setAddToInventory(false);
+                      setIsHybridApplied(false);
                     }}
                     className={cn(
-                      "flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all gap-2",
+                      "flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all gap-2 min-h-[56px]",
                       isActive ? "bg-primary-50 border-primary text-primary shadow-sm" : "bg-surface-2 border-border text-text-muted"
                     )}
                   >
                     <Icon size={20} className={isActive ? "text-primary" : "text-text-muted"} />
-                    <span className="text-[9px] font-black uppercase tracking-tighter">{cat.label}</span>
+                    <span className="text-[9px] font-black uppercase tracking-tighter text-center">{cat.label}</span>
                   </button>
                 );
               })}
@@ -154,7 +210,6 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
              value={amount} 
              onChange={(e: any) => setAmount(e.target.value)} 
              required={!isUsingStock}
-             autoFocus={!isUsingStock}
              className="text-2xl font-black text-primary"
            />
            <div className="flex gap-2">
@@ -165,7 +220,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
                 value={quantity} 
                 onChange={(e: any) => setQuantity(e.target.value)} 
                 className="flex-1 font-bold"
-                required={isUsingStock}
+                required={isUsingStock || addToInventory}
               />
               <Input 
                 as="select" 
@@ -186,25 +241,24 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
 
         {/* LAND & DATE */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-           <Input as="select" label="Arazi" value={landId} onChange={(e: any) => setLandId(e.target.value)} required>
+           <Input as="select" label="Finansın Bağlı Olduğu Arazi" value={landId} onChange={(e: any) => setLandId(e.target.value)} required>
               <option value="" disabled>Seçiniz...</option>
               {lands.map((land) => (
                 <option key={land.id} value={land.id}>{land.district || land.city} (A:{land.block_no}/P:{land.parcel_no})</option>
               ))}
            </Input>
-           <Input label="Tarih" type="date" value={date} onChange={(e: any) => setDate(e.target.value)} required />
+           <Input label="Harcama Tarihi" type="date" value={date} onChange={(e: any) => setDate(e.target.value)} required />
         </div>
 
-        {/* INVENTORY BRIDGE (Phase 4) */}
+        {/* INVENTORY BRIDGE */}
         {['Gübre/İlaç', 'Tohum', 'Mazot'].includes(category) && (
           <div className="space-y-3">
              <div className="grid grid-cols-2 gap-3">
-                {/* Option 1: Add to stock */}
                 <button
                   type="button"
-                  onClick={() => { setAddToInventory(!addToInventory); setIsUsingStock(false); }}
+                  onClick={() => { setAddToInventory(!addToInventory); setIsUsingStock(false); setIsHybridApplied(false); }}
                   className={cn(
-                    "p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all",
+                    "p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all min-h-[64px]",
                     addToInventory ? "bg-primary-50 border-primary text-primary shadow-sm" : "bg-surface-2 border-border text-text-muted"
                   )}
                 >
@@ -212,12 +266,11 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
                   <span className="text-[10px] font-black uppercase tracking-widest text-center">Stoka Ekle</span>
                 </button>
 
-                {/* Option 2: Use from stock */}
                 <button
                   type="button"
-                  onClick={() => { setIsUsingStock(!isUsingStock); setAddToInventory(false); setAmount('0'); }}
+                  onClick={() => { setIsUsingStock(!isUsingStock); setAddToInventory(false); setIsHybridApplied(false); setAmount('0'); }}
                   className={cn(
-                    "p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all",
+                    "p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all min-h-[64px]",
                     isUsingStock ? "bg-primary-50 border-primary text-primary shadow-sm" : "bg-surface-2 border-border text-text-muted"
                   )}
                 >
@@ -226,18 +279,88 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
                 </button>
              </div>
 
-             {/* Add to inventory extra fields */}
+             {/* Add to inventory extra fields (Phase 2 Smart Stock) */}
              {addToInventory && (
-               <div className="p-4 bg-primary-50 border border-primary/20 rounded-xl animate-scale-in">
-                  <Input 
-                    label="Stok Kayıt Adı"
-                    placeholder="Ürün/Marka Adı (Örn: Üre 46)" 
-                    value={invName} 
-                    onChange={(e: any) => setInvName(e.target.value)} 
-                    required={addToInventory}
-                    className="bg-white"
-                  />
-                  <p className="text-[10px] font-bold text-primary uppercase mt-2">Bu harcama envanterinize yeni bir giriş olarak kaydedilecek.</p>
+               <div className="p-4 bg-primary-50 border border-primary/20 rounded-xl animate-scale-in space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black text-primary uppercase tracking-widest ml-1">Ürün Seçimi</label>
+                    <select 
+                      className="w-full p-3 rounded-lg border border-primary/20 bg-white font-bold text-sm focus:ring-primary focus:border-primary"
+                      value={stockSelectionMode}
+                      onChange={(e: any) => setStockSelectionMode(e.target.value)}
+                    >
+                      <option value="existing">Mevcut Stoktan Seç</option>
+                      <option value="new">+ Yeni Ürün Kaydet</option>
+                    </select>
+                  </div>
+
+                  {stockSelectionMode === 'existing' ? (
+                    <Input 
+                      as="select" 
+                      label="Stoktaki Ürün"
+                      value={existingStockId}
+                      onChange={(e: any) => setExistingStockId(e.target.value)}
+                      required={addToInventory && stockSelectionMode === 'existing'}
+                      className="bg-white"
+                    >
+                      <option value="" disabled>Ürün seçin...</option>
+                      {filteredInventory.map(item => (
+                        <option key={item.id} value={item.id}>{item.item_name} ({item.quantity} {item.unit})</option>
+                      ))}
+                    </Input>
+                  ) : (
+                    <Input 
+                      label="Yeni Ürün Adı"
+                      placeholder="Ürün/Marka Adı (Örn: Üre 46)" 
+                      value={invName} 
+                      onChange={(e: any) => setInvName(e.target.value)} 
+                      required={addToInventory && stockSelectionMode === 'new'}
+                      className="bg-white"
+                    />
+                  )}
+
+                  {/* Hybrid Workflow Toggle (Phase 3) */}
+                  <div className="pt-2 border-t border-primary/10">
+                    <label className="flex items-center gap-3 cursor-pointer group">
+                      <input 
+                        type="checkbox" 
+                        className="w-5 h-5 rounded border-primary/30 text-primary focus:ring-primary"
+                        checked={isHybridApplied}
+                        onChange={e => setIsHybridApplied(e.target.checked)}
+                      />
+                      <div>
+                         <p className="text-xs font-black text-primary">Aldığım Miktarın Bir Kısmını Hemen Uygula</p>
+                         <p className="text-[9px] font-bold text-primary/70 uppercase">Zirai işlem kaydı otomatik oluşturulur.</p>
+                      </div>
+                    </label>
+
+                    {isHybridApplied && (
+                      <div className="mt-4 grid grid-cols-2 gap-3 animate-scale-in">
+                        <Input 
+                          label="Uygulanan Miktar"
+                          type="number"
+                          placeholder="0"
+                          value={appliedAmount}
+                          onChange={(e: any) => setAppliedAmount(e.target.value)}
+                          required={isHybridApplied}
+                          className="bg-white"
+                        />
+                        <Input 
+                          as="select"
+                          label="Uygulanan Arazi"
+                          value={hybridLandId}
+                          onChange={(e: any) => setHybridLandId(e.target.value)}
+                          required={isHybridApplied}
+                          className="bg-white"
+                        >
+                          <option value="" disabled>Seçiniz...</option>
+                          {lands.map(l => (
+                            <option key={l.id} value={l.id}>{l.district || l.city}</option>
+                          ))}
+                        </Input>
+                      </div>
+                    )}
+                  </div>
                </div>
              )}
 
@@ -276,8 +399,8 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
 
         {/* FOOTER */}
         <div className="flex gap-3 pt-4 border-t border-border">
-           <Button variant="ghost" fullWidth onClick={onClose} type="button">Vazgeç</Button>
-           <Button fullWidth type="submit" size="lg">Kayıt İşlemini Tamamla</Button>
+           <Button variant="ghost" fullWidth onClick={onClose} type="button" className="min-h-[48px]">Vazgeç</Button>
+           <Button fullWidth type="submit" size="lg" className="min-h-[48px]">Kayıt İşlemini Tamamla</Button>
         </div>
       </form>
     </BaseModal>

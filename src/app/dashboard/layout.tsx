@@ -1,11 +1,17 @@
+'use client';
+
 import React from 'react';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import BottomBar from '@/components/BottomBar';
 import AuthGuard from '@/components/AuthGuard';
+import ExpenseModal from '@/components/ExpenseModal';
+import { useAppContext } from '@/context/AppContext';
 import { cn } from '@/lib/utils';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const { isExpenseModalOpen, setIsExpenseModalOpen } = useAppContext();
+
   return (
     <AuthGuard>
       <div className="flex h-screen bg-bg text-text-primary overflow-hidden">
@@ -23,6 +29,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           {/* Mobile Bottom Bar — hidden on desktop */}
           <BottomBar className="lg:hidden" />
+          
+          {/* Global Expense Modal */}
+          <ExpenseModal 
+            isOpen={isExpenseModalOpen} 
+            onClose={() => setIsExpenseModalOpen(false)} 
+            defaultCategory="Diğer"
+          />
         </div>
       </div>
     </AuthGuard>

@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { 
   Plus, Wallet, Map, LayoutDashboard, 
@@ -9,15 +8,15 @@ import {
   Droplets, X, Sprout
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import ExpenseModal from './ExpenseModal';
+import { useAppContext } from '@/context/AppContext';
 import BaseModal from './ui/BaseModal';
 import Button from './ui/Button';
 
 export default function BottomBar({ className }: { className?: string }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { setIsExpenseModalOpen } = useAppContext();
   const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
-  const [modalCategory, setModalCategory] = useState<string | null>(null);
 
   const tabs = [
     { label: 'Ana Sayfa', icon: LayoutDashboard, href: '/dashboard' },
@@ -29,10 +28,6 @@ export default function BottomBar({ className }: { className?: string }) {
 
   const handleFabClick = () => setIsActionSheetOpen(true);
   const handleMoreClick = () => {
-    // In a real PWA, this would open a more comprehensive overlay or the sidebar
-    // For now, let's just push to settings or open sidebar if possible
-    // We'll assume the Sidebar component handles the mobile view when triggered from Header
-    // but here we can open a custom "More" modal if needed.
     router.push('/dashboard/settings');
   };
 
@@ -94,9 +89,9 @@ export default function BottomBar({ className }: { className?: string }) {
             variant="neutral" 
             fullWidth 
             size="lg"
-            className="justify-start px-6"
+            className="justify-start px-6 min-h-[56px]"
             leftIcon={<div className="p-2 bg-emerald-100 text-emerald-600 rounded-lg"><Wallet size={20} /></div>}
-            onClick={() => { setIsActionSheetOpen(false); setModalCategory('Diğer'); }}
+            onClick={() => { setIsActionSheetOpen(false); setIsExpenseModalOpen(true); }}
           >
             <div className="flex flex-col items-start">
               <span className="font-bold">Yeni Masraf Kaydet</span>
@@ -108,7 +103,7 @@ export default function BottomBar({ className }: { className?: string }) {
             variant="neutral" 
             fullWidth 
             size="lg"
-            className="justify-start px-6"
+            className="justify-start px-6 min-h-[56px]"
             leftIcon={<div className="p-2 bg-blue-100 text-blue-600 rounded-lg"><Tractor size={20} /></div>}
             onClick={() => { setIsActionSheetOpen(false); router.push('/dashboard/operations?new=true'); }}
           >
@@ -122,7 +117,7 @@ export default function BottomBar({ className }: { className?: string }) {
             variant="neutral" 
             fullWidth 
             size="lg"
-            className="justify-start px-6"
+            className="justify-start px-6 min-h-[56px]"
             leftIcon={<div className="p-2 bg-amber-100 text-amber-600 rounded-lg"><ClipboardCheck size={20} /></div>}
             onClick={() => { setIsActionSheetOpen(false); router.push('/dashboard/scouting'); }}
           >
@@ -136,7 +131,7 @@ export default function BottomBar({ className }: { className?: string }) {
             variant="neutral" 
             fullWidth 
             size="lg"
-            className="justify-start px-6"
+            className="justify-start px-6 min-h-[56px]"
             leftIcon={<div className="p-2 bg-cyan-100 text-cyan-600 rounded-lg"><Droplets size={20} /></div>}
             onClick={() => { setIsActionSheetOpen(false); router.push('/dashboard/irrigation'); }}
           >
@@ -150,19 +145,13 @@ export default function BottomBar({ className }: { className?: string }) {
             variant="ghost" 
             fullWidth 
             size="lg" 
-            className="mt-4 text-danger font-black"
+            className="mt-4 text-danger font-black min-h-[48px]"
             onClick={() => setIsActionSheetOpen(false)}
           >
             İptal
           </Button>
         </div>
       </BaseModal>
-
-      <ExpenseModal 
-        isOpen={!!modalCategory} 
-        onClose={() => setModalCategory(null)} 
-        defaultCategory={modalCategory || ''} 
-      />
     </>
   );
 }
