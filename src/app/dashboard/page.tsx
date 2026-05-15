@@ -132,7 +132,7 @@ export default function DashboardPage() {
             <Sparkles size={160} />
           </div>
           
-          <div className="relative z-10 p-6 md:p-10 flex flex-col flex-1">
+          <div className="relative z-0 p-6 md:p-10 flex flex-col flex-1">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-8 mb-8">
               {/* Weather Widget */}
               <div className="flex items-center gap-6 bg-white/10 backdrop-blur-xl p-5 rounded-3xl border border-white/20 shadow-lg shrink-0">

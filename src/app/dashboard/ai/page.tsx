@@ -121,7 +121,7 @@ export default function AIPage() {
       {/* CHAT AREA */}
       <div className="flex-1 relative min-h-0">
         {!isPremium && (
-          <div className="absolute inset-0 z-30 flex items-center justify-center p-6 bg-surface/40 backdrop-blur-md rounded-2xl border border-border/50">
+          <div className="absolute inset-0 z-10 flex items-center justify-center p-6 bg-surface/40 backdrop-blur-md rounded-2xl border border-border/50">
              <Card padding="lg" className="max-w-md w-full text-center space-y-6 shadow-2xl border-primary/20">
                 <div className="w-16 h-16 bg-amber-400 text-[#1B2E1C] rounded-2xl flex items-center justify-center mx-auto shadow-lg rotate-3">
                    <Lock size={32} />

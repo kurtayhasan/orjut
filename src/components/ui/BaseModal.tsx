@@ -1,5 +1,6 @@
 'use client';
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -15,6 +16,11 @@ interface BaseModalProps {
 export default function BaseModal({
   isOpen, onClose, title, children, footer, size = 'md'
 }: BaseModalProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Escape ile kapat
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -40,20 +46,20 @@ export default function BaseModal({
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const maxWidthClass = { sm: 'md:max-w-sm', md: 'md:max-w-md', lg: 'md:max-w-lg' }[size];
 
-  return (
+  const modalContent = (
     <div
-      className="fixed inset-0 z-70 flex items-end md:items-center justify-center"
+      className="fixed inset-0 z-[9999] flex items-end md:items-center justify-center bg-black/60 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby={title ? 'modal-title' : undefined}
     >
-      {/* Overlay */}
+      {/* Overlay is now part of the parent container to simplify stacking */}
       <div
-        className="absolute inset-0 bg-black/50 animate-fade-in"
+        className="absolute inset-0 animate-fade-in"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -104,4 +110,6 @@ export default function BaseModal({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }

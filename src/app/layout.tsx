@@ -77,7 +77,7 @@ export default function RootLayout({
       <body className="antialiased font-body bg-[#050505]">
         <ServiceWorkerRegister />
         <AppProvider>
-          <Toaster position="top-center" richColors theme="dark" closeButton />
+          <Toaster position="top-center" richColors theme="dark" closeButton style={{ zIndex: 10000 }} />
           {children}
           <CookieConsent />
         </AppProvider>
