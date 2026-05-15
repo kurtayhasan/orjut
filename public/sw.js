@@ -1,5 +1,5 @@
-// Last Updated: 2026-05-16 01:16
-const CACHE_NAME = 'ziraiasistan-cache-v2';
+// Last Updated: 2026-05-16 01:28
+const CACHE_NAME = 'ziraiasistan-cache-v3';
 const OFFLINE_URL = '/';
 
 const CACHED_URLS = [
