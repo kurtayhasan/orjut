@@ -168,4 +168,17 @@ export const db = {
       .select('*, engineer:profiles!engineer_id(*)')
       .eq('farmer_id', farmerId)
       .eq('status', 'pending'),
+
+  /* ── Bulk Deletes (Orphan Prevention) ──── */
+  deleteTransactionsByLand: (landId: string) =>
+    from('transactions').delete().eq('land_id', landId),
+
+  deleteIrrigationLogsByLand: (landId: string) =>
+    from('irrigation_logs').delete().eq('land_id', landId),
+
+  deleteScoutingLogsByLand: (landId: string) =>
+    from('scouting_logs').delete().eq('land_id', landId),
+
+  deleteFieldOperationsByLand: (landId: string) =>
+    from('field_operations').delete().eq('land_id', landId),
 };

@@ -108,6 +108,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const activeOrgId = useMemo(() => {
     const myId = userProfile?.id || (typeof window !== 'undefined' ? localStorage.getItem('user_id') : null);
+    
+    // PHASE 3: Zero-UUID Protection & Auth Matching
+    // Ensure we don't return dummy IDs or zeros
+    if (!myId || myId === '00000000-0000-0000-0000-000000000000') return null;
+    
     if (userRole === 'engineer' && selectedClientId) return selectedClientId;
     return myId;
   }, [userRole, selectedClientId, userProfile?.id]);
@@ -184,7 +189,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addLand = async (land: any) => {
-    if (!activeOrgId) return;
+    if (!activeOrgId) {
+      toast.error("Oturum bilgisi alınamadı. Lütfen tekrar giriş yapın.");
+      return;
+    }
     try {
       const { data, error } = await db.insertLand({ ...land, org_id: activeOrgId });
       if (error) throw error;
@@ -213,13 +221,34 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const deleteLand = async (id: string) => {
     try {
       const land = lands.find(l => l.id === id);
+      if (!land) return;
+
+      // PHASE 2: Orphan Data Prevention
+      // We manually clean up related data before deleting the land to ensure consistency
+      await Promise.all([
+        db.deleteTransactionsByLand(id),
+        db.deleteIrrigationLogsByLand(id),
+        db.deleteScoutingLogsByLand(id),
+        db.deleteFieldOperationsByLand(id)
+      ]);
+
       const { error } = await db.deleteLand(id);
       if (error) throw error;
+      
+      // Update local state
       if (land) setTotalArea(prev => prev - Number(land.size_decare || 0));
       setLands(prev => prev.filter(l => l.id !== id));
-      toast.success("Arazi silindi");
+      
+      // Clean up linked states
+      setTransactions(prev => prev.filter(t => t.land_id !== id));
+      setIrrigationLogs(prev => prev.filter(l => l.land_id !== id));
+      setScoutingLogs(prev => prev.filter(s => s.land_id !== id));
+      setFieldOperations(prev => prev.filter(o => o.land_id !== id));
+      
+      toast.success("Arazi ve bağlı tüm veriler silindi");
     } catch (err: any) {
-      toast.error("Silme hatası");
+      toast.error("Silme hatası: Veri bütünlüğü korunamadı");
+      console.error("Delete Land Error:", err);
     }
   };
 
@@ -428,7 +457,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     isLoadingLands, isLoadingTransactions, addLand, updateLand, deleteLand,
     addIrrigationLog, deleteIrrigationLog, logSaving,
     requestWeatherAndInsight, startNewSeason, toggleSeasonStatus,
-    isDemo: false, isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s: Season) => setActiveSeason(s),
+    isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s: Season) => setActiveSeason(s),
     weatherData, currentUserRole, userProfile, fieldOperations, scoutingLogs,
     addFieldOperation, deleteFieldOperation: async (id: string) => { setFieldOperations(prev => prev.filter(o => o.id !== id)); db.deleteFieldOperation(id); },
     addScoutingLog: async (log: Omit<ScoutingLog, 'id'>) => { if (!activeOrgId) return; const { data } = await db.insertScoutingLog({ ...log, org_id: activeOrgId }); if (data) setScoutingLogs(prev => [data, ...prev]); },
@@ -437,6 +466,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     isDarkMode, toggleDarkMode: () => setIsDarkMode(!isDarkMode), calculateUnitCost,
     userRole, selectedClientId, setSelectedClientId, activeOrgId,
     isPremium: !!userProfile?.is_premium,
+    isDemo: false,
     showUpsell, triggerUpsell, closeUpsell
   };
 

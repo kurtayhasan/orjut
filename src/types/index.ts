@@ -95,7 +95,7 @@ export interface IrrigationLog {
   duration_minutes?:number; // Legacy
   water_amount_m3?: number; // Legacy
   amount:           number; // New UI field (can map to duration or m3)
-  unit:             string; // New UI field (saat, ton, litre)
+  unit:             'lt' | 'm3' | 'saat' | 'mm'; // Strict union type for SaaS hardening
   method:           string; // New UI field
   notes?:           string; // New UI field
 }
@@ -108,6 +108,14 @@ export interface Season {
   start_date: string;
   end_date:   string;
   is_active:  boolean;
+}
+
+export interface DailySummary {
+  id:      string;
+  user_id: string | null; // UUID or Null for shared insights
+  date:    string;
+  content: string;
+  metadata?: any;
 }
 
 // ─── Aggregate / Computed Types ───────────────────────────────────────────────

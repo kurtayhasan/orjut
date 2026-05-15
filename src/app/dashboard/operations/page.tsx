@@ -16,6 +16,7 @@ import Input from '@/components/ui/Input';
 import BaseModal from '@/components/ui/BaseModal';
 import EmptyState from '@/components/EmptyState';
 import { cn, formatDateShort } from '@/lib/utils';
+import { operationSchema } from '@/lib/schemas/operation.schema';
 
 export default function OperationsPage() {
   const { lands, fieldOperations, addFieldOperation, deleteFieldOperation, inventory } = useAppContext();
@@ -43,8 +44,21 @@ export default function OperationsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedLandId || !date || !amount || !unit || !method) {
-      toast.error("Lütfen zorunlu alanları doldurun.");
+    
+    const opData = {
+      land_id: selectedLandId,
+      type,
+      date,
+      amount: Number(amount),
+      unit,
+      method,
+      inventory_id: selectedInventoryId || null,
+      notes
+    };
+
+    const validation = operationSchema.safeParse(opData);
+    if (!validation.success) {
+      toast.error(validation.error.issues[0].message);
       return;
     }
     

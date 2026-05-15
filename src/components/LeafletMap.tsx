@@ -12,6 +12,7 @@ import { Country, State, City, ICountry, IState, ICity } from 'country-state-cit
 import { EditControl } from 'react-leaflet-draw';
 import * as turf from '@turf/turf';
 import 'leaflet-draw/dist/leaflet.draw.css';
+import { landSchema } from '@/lib/schemas/land.schema';
 
 // Fix Leaflet default icon issues in Next.js
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -181,14 +182,9 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
   };
 
   const handleSavePlot = async () => {
-    if (!selectedCrop || !plotSize || !city || !plantingDate) {
-      toast.error("Lütfen tüm zorunlu alanları (İl, Dönüm, Ürün ve Ekim Tarihi) doldurun.");
-      return;
-    }
-    
     const landData: any = {
       city, district, neighborhood, block_no: blockNo, parcel_no: parcelNo, 
-      size: plotSize, size_decare: Number(plotSize), crop_type: selectedCrop, 
+      size_decare: Number(plotSize), crop_type: selectedCrop, 
       planting_date: plantingDate,
       soil_type: soilType, is_irrigated: isIrrigated,
       environment_type: environmentType,
@@ -196,6 +192,12 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
       lat: markerPosition?.lat, lng: markerPosition?.lng,
       boundaries: boundaries
     };
+
+    const validation = landSchema.safeParse(landData);
+    if (!validation.success) {
+      toast.error(validation.error.issues[0].message);
+      return;
+    }
 
     if (editingLandId) {
       landData.id = editingLandId;
