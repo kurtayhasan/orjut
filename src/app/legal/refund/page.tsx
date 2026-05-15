@@ -24,7 +24,7 @@ export default function RefundPage() {
           <section>
             <h2 className="text-2xl font-black text-white mb-4">1. Hizmet Niteliği ve Cayma Hakkı İstisnası</h2>
             <p>
-              Orjut AgTech OS, elektronik ortamda anında ifa edilen bir SaaS (Software as a Service) hizmetidir. 
+              Kurtay Bilişim, elektronik ortamda anında ifa edilen bir SaaS (Software as a Service) hizmetidir. 
               6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği uyarınca; 
               <strong> "Elektronik ortamda anında ifa edilen hizmetler ve tüketiciye anında teslim edilen gayrimaddi mallar"</strong> cayma hakkı kapsamı dışındadır.
             </p>
@@ -60,7 +60,7 @@ export default function RefundPage() {
           <section>
             <h2 className="text-2xl font-black text-white mb-4">5. İletişim</h2>
             <p>
-              İptal ve iade taleplerinizle ilgili her türlü soru için <strong>destek@orjut.com</strong> adresine e-posta gönderebilirsiniz.
+              İptal ve iade taleplerinizle ilgili her türlü soru için <strong>kurtayhasan[at]gmail.com</strong> adresine e-posta gönderebilirsiniz.
             </p>
           </section>
         </div>

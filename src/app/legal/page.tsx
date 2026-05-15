@@ -24,7 +24,7 @@ export default function LegalPage() {
             </div>
             <div>
               <h1 className="text-3xl font-black tracking-tight text-zinc-900">Yasal Bilgilendirmeler</h1>
-              <p className="text-zinc-500 font-medium">Orjut AgTech OS Kullanım ve Gizlilik Şartları</p>
+              <p className="text-zinc-500 font-medium">Kurtay Bilişim Kullanım ve Gizlilik Şartları</p>
             </div>
           </div>
 
@@ -37,7 +37,7 @@ export default function LegalPage() {
               </h2>
               <div className="text-zinc-600 leading-relaxed space-y-4 text-sm font-medium">
                 <p>
-                  Orjut AgTech OS (&quot;Platform&quot;) olarak, kişisel verilerinizin güvenliğine en üst düzeyde önem veriyoruz. 6698 sayılı Kişisel Verilerin Korunması Kanunu (&quot;KVKK&quot;) ve Avrupa Birliği Genel Veri Koruma Tüzüğü (&quot;GDPR&quot;) standartları uyarınca, verileriniz şeffaflık, hukuka uygunluk ve dürüstlük kuralları çerçevesinde işlenmektedir.
+                  Kurtay Bilişim (&quot;Platform&quot;) olarak, kişisel verilerinizin güvenliğine en üst düzeyde önem veriyoruz. 6698 sayılı Kişisel Verilerin Korunması Kanunu (&quot;KVKK&quot;) ve Avrupa Birliği Genel Veri Koruma Tüzüğü (&quot;GDPR&quot;) standartları uyarınca, verileriniz şeffaflık, hukuka uygunluk ve dürüstlük kuralları çerçevesinde işlenmektedir.
                 </p>
                 <p>
                   <strong>İşlenen Veriler:</strong> Ad, soyad, iletişim bilgileri, finansal işlemleriniz ve tarımsal arazi bilgileriniz (ada, parsel, coğrafi koordinatlar).
@@ -80,7 +80,7 @@ export default function LegalPage() {
                   Platform, uçtan uca veri izolasyonu prensibiyle çalışır. Kaydettiğiniz her arazi, not ve finansal işlem, sadece sizin kullanıcı kimliğinizle eşleştirilir (Row Level Security - RLS). Platforma davet etmediğiniz sürece diğer kullanıcılar veya sistem yöneticileri verilerinize erişemez.
                 </p>
                 <p>
-                  Kullanıcı şifreleriniz ve hassas kimlik doğrulama bilgileriniz şifrelenmiş (Hashed) olarak tutulur. Orjut, bu bilgileri göremez ve değiştiremez.
+                  Kullanıcı şifreleriniz ve hassas kimlik doğrulama bilgileriniz şifrelenmiş (Hashed) olarak tutulur. Kurtay Bilişim, bu bilgileri göremez ve değiştiremez.
                 </p>
               </div>
             </section>

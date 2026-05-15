@@ -221,7 +221,7 @@ export default function EnglishLandingPage() {
               <ul className="space-y-4 text-sm font-bold text-zinc-500">
                 <li><Link href="/legal/privacy" className="hover:text-emerald-500 transition-colors">{t.privacy}</Link></li>
                 <li><Link href="/legal/terms" className="hover:text-emerald-500 transition-colors">{t.terms}</Link></li>
-                <li><a href="mailto:support@orjut.com" className="hover:text-emerald-500 transition-colors">{t.contactUs}</a></li>
+                <li><a href="mailto:kurtayhasan@gmail.com" className="hover:text-emerald-500 transition-colors">{t.contactUs}</a></li>
               </ul>
             </div>
           </div>

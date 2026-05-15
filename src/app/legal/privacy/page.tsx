@@ -24,7 +24,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-2xl font-black text-white mb-4">1. Veri Toplama ve Kullanımı</h2>
             <p>
-              Orjut AgTech OS ("Hizmet"), çiftçilik operasyonlarınızı optimize etmek amacıyla arazileriniz, finansal işlemleriniz ve envanter verilerinizi toplar. 
+              Kurtay Bilişim ("Hizmet"), çiftçilik operasyonlarınızı optimize etmek amacıyla arazileriniz, finansal işlemleriniz ve envanter verilerinizi toplar. 
               Bu veriler, Supabase altyapısı üzerinde güvenli bir şekilde saklanır ve yalnızca size hizmet sunmak, analizler (NDVI, AI Danışmanlık) üretmek için kullanılır.
             </p>
           </section>
@@ -56,7 +56,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-2xl font-black text-white mb-4">5. İletişim</h2>
             <p>
-              Gizlilik politikamız hakkındaki sorularınız için <strong>destek@orjut.com</strong> adresinden bize ulaşabilirsiniz.
+              Gizlilik politikamız hakkındaki sorularınız için <strong>kurtayhasan[at]gmail.com</strong> adresinden bize ulaşabilirsiniz.
             </p>
           </section>
         </div>

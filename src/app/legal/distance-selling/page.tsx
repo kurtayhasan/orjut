@@ -24,8 +24,8 @@ export default function DistanceSellingPage() {
           <section>
             <h2 className="text-2xl font-black text-white mb-4">1. TARAFLAR</h2>
             <div className="bg-zinc-900/50 p-6 rounded-2xl border border-white/5 space-y-4">
-              <p><strong>SATICI:</strong> Orjut ZiraiAsistan Teknoloji ve Yazılım A.Ş.</p>
-              <p><strong>E-POSTA:</strong> destek@orjut.com</p>
+              <p><strong>SATICI:</strong> Kurtay Bilişim Teknoloji ve Yazılım A.Ş.</p>
+              <p><strong>E-POSTA:</strong> kurtayhasan[at]gmail.com</p>
               <p><strong>ALICI:</strong> Sitede sunulan hizmetlerden faydalanan ve ödeme yapan kullanıcı.</p>
             </div>
           </section>
@@ -33,7 +33,7 @@ export default function DistanceSellingPage() {
           <section>
             <h2 className="text-2xl font-black text-white mb-4">2. KONU</h2>
             <p>
-              İşbu Sözleşme'nin konusu, ALICI'nın SATICI'ya ait www.orjut.com internet sitesi üzerinden elektronik ortamda siparişini yaptığı aşağıda nitelikleri ve satış ücreti belirtilen hizmetin satışı ve teslimi ile ilgili olarak 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği hükümleri gereğince tarafların hak ve yükümlülüklerinin saptanmasıdır.
+              İşbu Sözleşme'nin konusu, ALICI'nın SATICI'ya ait internet sitesi üzerinden elektronik ortamda siparişini yaptığı aşağıda nitelikleri ve satış ücreti belirtilen hizmetin satışı ve teslimi ile ilgili olarak 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği hükümleri gereğince tarafların hak ve yükümlülüklerinin saptanmasıdır.
             </p>
           </section>
 

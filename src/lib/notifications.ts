@@ -26,7 +26,11 @@ export async function requestNotificationPermission(orgId: string): Promise<bool
     const registration = await navigator.serviceWorker.register('/sw.js');
     await navigator.serviceWorker.ready;
 
-    const publicVapidKey = process.env.NEXT_PUBLIC_VAPID_KEY ?? '';
+    const publicVapidKey = process.env.NEXT_PUBLIC_VAPID_KEY;
+    if (!publicVapidKey) {
+      throw new Error('VAPID anahtarı eksik, anlık bildirim sistemi geçici olarak kullanılamıyor.');
+    }
+
     let subscription = await registration.pushManager.getSubscription();
 
     if (!subscription) {
@@ -44,9 +48,9 @@ export async function requestNotificationPermission(orgId: string): Promise<bool
 
     toast.success('Bildirimler başarıyla aktifleştirildi!');
     return true;
-  } catch (err) {
+  } catch (err: any) {
     console.error('Notification setup error:', err);
-    toast.error('Bildirimler ayarlanırken bir hata oluştu.');
+    toast.error(`Bildirim hatası: ${err.message || 'Bilinmeyen hata'}`);
     return false;
   }
 }

@@ -41,18 +41,37 @@ export default function SettingsPage() {
   }, []);
 
   const handleNotificationToggle = async () => {
+    if (notificationsEnabled) {
+      toast.info("Bildirimleriniz zaten aktif durumda.");
+      return;
+    }
+    
     if (!activeOrgId) {
       toast.error("Oturum hatası. Lütfen tekrar giriş yapın.");
       return;
     }
+
     try {
+      // Browser native API call test
+      if (!('Notification' in window)) {
+        toast.error("Tarayıcınız bildirimleri desteklemiyor.");
+        return;
+      }
+
+      toast.loading("Bildirim izni isteniyor...", { id: "notif-toast" });
       const granted = await requestNotificationPermission(activeOrgId);
+      
       if (granted) {
         setNotificationsEnabled(true);
-        toast.success("Bildirimler başarıyla aktif edildi.");
+        setPermissionStatus('granted');
+        toast.success("Bildirimler başarıyla aktif edildi.", { id: "notif-toast" });
+      } else {
+        setPermissionStatus(Notification.permission);
+        toast.dismiss("notif-toast");
       }
-    } catch (err) {
-      toast.error("Bildirim izni alınamadı.");
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Bildirim izni alınırken beklenmedik bir hata oluştu: " + err.message, { id: "notif-toast" });
     }
   };
 

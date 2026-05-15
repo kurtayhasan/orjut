@@ -24,7 +24,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-black text-white mb-4">1. Hizmet Kapsamı</h2>
             <p>
-              Orjut AgTech OS, tarımsal verimliliği artırmak için veri yönetimi, NDVI uydu analizi ve yapay zeka destekli danışmanlık hizmetleri sunan bir SaaS platformudur. 
+              Kurtay Bilişim, tarımsal verimliliği artırmak için veri yönetimi, NDVI uydu analizi ve yapay zeka destekli danışmanlık hizmetleri sunan bir SaaS platformudur. 
               Sistemi kullanarak bu koşulları kabul etmiş sayılırsınız.
             </p>
           </section>
@@ -41,7 +41,7 @@ export default function TermsPage() {
             <h2 className="text-2xl font-black text-white mb-4">3. Kullanıcı Sorumlulukları</h2>
             <p>
               Kullanıcılar sisteme girdikleri verilerin doğruluğundan sorumludur. 
-              Hatalı veri girişi kaynaklı yanlış analizlerden veya finansal kayıplardan Orjut sorumlu tutulamaz.
+              Hatalı veri girişi kaynaklı yanlış analizlerden veya finansal kayıplardan Kurtay Bilişim sorumlu tutulamaz.
             </p>
           </section>
 
@@ -56,7 +56,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-black text-white mb-4">5. Fikri Mülkiyet</h2>
             <p>
-              Yazılımın tüm hakları Orjut'a aittir. Yazılımın kopyalanması, tersine mühendislik yapılması veya izinsiz dağıtılması yasal işleme tabidir.
+              Yazılımın tüm hakları Kurtay Bilişim'e aittir. Yazılımın kopyalanması, tersine mühendislik yapılması veya izinsiz dağıtılması yasal işleme tabidir.
             </p>
           </section>
         </div>

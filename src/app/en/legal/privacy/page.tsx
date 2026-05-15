@@ -56,7 +56,7 @@ export default function EnglishPrivacyPage() {
           <section>
             <h2 className="text-2xl font-black text-white mb-4">5. Contact</h2>
             <p>
-              For questions about our privacy policy, you can reach us at <strong>support@orjut.com</strong>.
+              For questions about our privacy policy, you can reach us at <strong>kurtayhasan[at]gmail.com</strong>.
             </p>
           </section>
         </div>
