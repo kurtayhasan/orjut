@@ -61,7 +61,7 @@ export const db = {
   /* ── Transactions ─────────────────────── */
   getTransactions: (userId: string, limit?: number) => {
     let q = from('transactions')
-      .select('*, lands(block_no, parcel_no)')
+      .select('*, lands(block_no, parcel_no, district, city)')
       .eq('org_id', userId)
       .order('date', { ascending: false });
     if (limit) q = q.limit(limit);

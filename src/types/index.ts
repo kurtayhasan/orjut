@@ -46,7 +46,7 @@ export interface Transaction {
   unit?:                   string;
   season_id?:              string;
   /** Join result — read-only, never sent to DB */
-  lands?: { block_no: string; parcel_no: string };
+  lands?: { block_no: string; parcel_no: string; district?: string; city?: string };
   /** Optimistic UI flag */
   isPending?: boolean;
 }
