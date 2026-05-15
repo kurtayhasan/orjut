@@ -15,7 +15,7 @@ type AppContextType = {
   t: (key: keyof typeof translations['en']) => string;
   totalExpenses: number;
   totalArea: number;
-  addExpense: (amount: number, category: string, date: string, land_id: string, receipt_url?: string, receipt_thumbnail_url?: string, inventoryData?: { name: string, type: string, quantity: number, unit: string, id?: string }, season_id?: string, hybridData?: { appliedAmount: number, landId: string, type: string }) => Promise<void>;
+  addExpense: (amount: number, category: string, date: string, land_id: string, description: string, receipt_url?: string, receipt_thumbnail_url?: string, inventoryData?: { name: string, type: string, quantity: number, unit: string, id?: string }, season_id?: string, hybridData?: { appliedAmount: number, landId: string, type: string }) => Promise<void>;
   updateExpense: (id: string, updates: any) => Promise<void>;
   deleteExpense: (id: string) => Promise<void>;
   weather: { temp: number | null, windspeed: number | null, loading: boolean, error: string | null };
@@ -196,8 +196,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const savedTheme = typeof window !== 'undefined' ? localStorage.getItem('theme') : null;
     setIsDarkMode(savedTheme === 'dark');
+    
+    // PHASE 4: LOCAL CACHE SYNC / SECURITY PURGE
+    // If user_id in localStorage doesn't match current session, or data seems stale, force refresh
+    const checkCacheSync = () => {
+      const cachedId = localStorage.getItem('user_id');
+      if (cachedId && userProfile && cachedId !== userProfile.id) {
+        console.warn("Cache mismatch detected. Purging local storage...");
+        localStorage.clear();
+        window.location.reload();
+      }
+    };
+    
+    checkCacheSync();
     refreshAllData();
-  }, [refreshAllData]);
+  }, [refreshAllData, userProfile]);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -275,6 +288,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     category: string, 
     date: string, 
     land_id: string, 
+    description: string,
     receipt_url?: string, 
     receipt_thumbnail_url?: string, 
     inventoryData?: { name: string, type: string, quantity: number, unit: string, id?: string }, 
@@ -283,7 +297,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   ) => {
     if (!activeOrgId) return;
     const newTx: any = { 
-      amount, description: category, date, type: 'expense', category, land_id, org_id: activeOrgId,
+      amount, description: description || category, date, type: 'expense', category, land_id, org_id: activeOrgId,
       quantity: inventoryData?.quantity, unit: inventoryData?.unit, receipt_url, receipt_thumbnail_url,
       season_id: season_id || activeSeason?.id
     };

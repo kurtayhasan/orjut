@@ -23,6 +23,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
   } = useAppContext();
   
   const [amount, setAmount] = useState('');
+  const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [landId, setLandId] = useState('');
   const [seasonId, setSeasonId] = useState('');
@@ -57,6 +58,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
       setIsHybridApplied(false);
       setAppliedAmount('');
       setStockSelectionMode('existing');
+      setDescription('');
     }
   }, [isOpen, defaultCategory, activeSeason]);
 
@@ -75,6 +77,11 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
 
     if (!amount && !isUsingStock) {
       toast.error("Lütfen tutar giriniz.");
+      return;
+    }
+
+    if (!description) {
+      toast.error("Lütfen açıklama giriniz.");
       return;
     }
 
@@ -130,6 +137,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
           category, 
           date, 
           landId, 
+          description,
           receiptUrl, 
           receiptThumbnail, 
           inventoryData, 
@@ -242,6 +250,16 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
            </Input>
            <Input label="Harcama Tarihi" type="date" value={date} onChange={(e: any) => setDate(e.target.value)} required />
         </div>
+
+        {/* DESCRIPTION */}
+        <Input 
+          label="Açıklama" 
+          placeholder="Örn: 20 Litre Mazot - Ali'nin Traktörü İçin" 
+          value={description} 
+          onChange={(e: any) => setDescription(e.target.value)} 
+          required 
+          className="font-bold"
+        />
 
         {/* INVENTORY BRIDGE */}
         {['Gübre/İlaç', 'Tohum', 'Mazot'].includes(category) && (

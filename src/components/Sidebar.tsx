@@ -89,10 +89,11 @@ export default function Sidebar({ className }: { className?: string }) {
             
             {userRole === 'engineer' && (
               <SidebarItem 
-                href="/dashboard/clients" 
+                href="/engineer" 
                 icon={Users} 
-                label="Müşterilerim" 
-                active={pathname.includes('/clients')} 
+                label="Mühendis Paneli" 
+                active={pathname === '/engineer'} 
+                className="text-sky-400 hover:bg-sky-400/10"
                 onClick={closeSidebar}
               />
             )}
@@ -102,6 +103,7 @@ export default function Sidebar({ className }: { className?: string }) {
                 icon={Shield} 
                 label="Sistem Yönetimi" 
                 active={pathname === '/admin'} 
+                className="text-rose-400 hover:bg-rose-500/10"
                 onClick={closeSidebar}
               />
             )}
@@ -142,7 +144,7 @@ export default function Sidebar({ className }: { className?: string }) {
   );
 }
 
-function SidebarItem({ icon: Icon, label, href, active, badge, onClick }: { icon: any, label: string, href: string, active?: boolean, badge?: string, onClick?: () => void }) {
+function SidebarItem({ icon: Icon, label, href, active, badge, onClick, className }: { icon: any, label: string, href: string, active?: boolean, badge?: string, onClick?: () => void, className?: string }) {
   return (
     <Link 
       href={href} 
@@ -151,7 +153,7 @@ function SidebarItem({ icon: Icon, label, href, active, badge, onClick }: { icon
         "w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all text-sm font-bold",
         active 
           ? 'bg-primary text-white shadow-lg shadow-black/20' 
-          : 'text-white/60 hover:bg-white/5 hover:text-white'
+          : cn('text-white/60 hover:bg-white/5 hover:text-white', className)
       )}
     >
       <Icon size={20} className={active ? 'text-white' : 'text-white/40'} />

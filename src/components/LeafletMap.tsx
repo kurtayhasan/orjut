@@ -313,7 +313,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
         className="rounded-3xl overflow-hidden shadow-inner"
       >
         <LayersControl position="topright">
-          <LayersControl.BaseLayer checked name="OpenStreetMap">
+          <LayersControl.BaseLayer name="OpenStreetMap">
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
               url={isDarkMode 
@@ -322,7 +322,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
               }
             />
           </LayersControl.BaseLayer>
-          <LayersControl.BaseLayer name="Uydu Görünümü">
+          <LayersControl.BaseLayer checked name="Uydu Görünümü">
             <TileLayer
               attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EBP, and the GIS User Community'
               url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
