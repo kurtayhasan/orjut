@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation';
 import { db } from '@/lib/db';
 
 export default function SettingsPage() {
-  const { lang, setLang } = useAppContext();
+  const { lang, setLang, activeOrgId } = useAppContext();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const router = useRouter();
   const [userProfile, setUserProfile] = useState<{name: string, phone: string} | null>(null);
@@ -41,8 +41,12 @@ export default function SettingsPage() {
   }, []);
 
   const handleNotificationToggle = async () => {
+    if (!activeOrgId) {
+      toast.error("Oturum hatası. Lütfen tekrar giriş yapın.");
+      return;
+    }
     try {
-      const granted = await requestNotificationPermission();
+      const granted = await requestNotificationPermission(activeOrgId);
       if (granted) {
         setNotificationsEnabled(true);
         toast.success("Bildirimler başarıyla aktif edildi.");
