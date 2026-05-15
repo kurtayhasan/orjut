@@ -14,7 +14,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <AuthGuard>
-      <div className="flex h-screen bg-bg text-text-primary overflow-hidden">
+      <div className="flex flex-col lg:flex-row h-screen bg-bg text-text-primary overflow-hidden">
         {/* Responsive Sidebar */}
         <Sidebar />
 

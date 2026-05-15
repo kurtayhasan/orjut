@@ -52,7 +52,7 @@ export default function Sidebar({ className }: { className?: string }) {
       )}
       
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 w-60 bg-[#1B2E1C] flex flex-col shrink-0 h-full transform transition-transform duration-300 ease-out lg:relative lg:translate-x-0 lg:z-0",
+        "fixed inset-y-0 left-0 z-50 w-60 bg-[#1B2E1C] flex flex-col shrink-0 h-full transform transition-transform duration-300 ease-out lg:relative lg:translate-x-0 lg:z-0 lg:flex-shrink-0 lg:h-screen",
         isSidebarOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full",
         className
       )}>

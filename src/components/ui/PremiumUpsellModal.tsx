@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { X, Crown, Satellite, Bot, Sparkles, Check, Zap } from 'lucide-react';
+import Link from 'next/link';
 
 interface PremiumUpsellModalProps {
   isOpen: boolean;
@@ -149,6 +150,10 @@ export default function PremiumUpsellModal({ isOpen, onClose }: PremiumUpsellMod
               <Crown size={18} />
               Premium&apos;a Yükselt
             </button>
+
+            <p className="text-[10px] text-zinc-600 text-center mt-5 font-medium leading-relaxed px-4">
+              Ödeme işlemine devam ederek <Link href="/legal/terms" className="underline hover:text-zinc-400">Kullanım Koşullarını</Link> ve <Link href="/legal/distance-selling" className="underline hover:text-zinc-400">Mesafeli Satış Sözleşmesini</Link> kabul etmiş sayılırsınız.
+            </p>
 
             <p className="text-[11px] text-zinc-600 text-center mt-4 font-medium">
               İstediğiniz zaman iptal edebilirsiniz. 14 gün ücretsiz deneme.

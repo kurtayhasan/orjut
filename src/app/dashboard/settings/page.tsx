@@ -15,6 +15,7 @@ export default function SettingsPage() {
   const router = useRouter();
   const [userProfile, setUserProfile] = useState<{name: string, phone: string} | null>(null);
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
+  const [permissionStatus, setPermissionStatus] = useState<NotificationPermission | 'unsupported'>('default');
 
   const fetchRequests = async () => {
     const userId = localStorage.getItem('user_id');
@@ -30,6 +31,13 @@ export default function SettingsPage() {
     const phone = localStorage.getItem('user_phone') || '05XX XXX XX XX';
     setUserProfile({ name, phone });
     fetchRequests();
+
+    if (!('Notification' in window)) {
+      setPermissionStatus('unsupported');
+    } else {
+      setPermissionStatus(Notification.permission);
+      setNotificationsEnabled(Notification.permission === 'granted');
+    }
   }, []);
 
   const handleNotificationToggle = async () => {
@@ -109,6 +117,21 @@ export default function SettingsPage() {
                 <h4 className="font-bold text-zinc-900">Bildirim Ayarları</h4>
               </div>
             </div>
+            
+            {permissionStatus === 'denied' && (
+              <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-2xl flex gap-3 animate-in fade-in slide-in-from-top-2 duration-500">
+                <div className="p-2 bg-white rounded-xl shadow-sm text-amber-600 h-fit">
+                  <Bell size={18} />
+                </div>
+                <div>
+                  <p className="text-sm font-black text-amber-900">Bildirimler Engellendi</p>
+                  <p className="text-xs text-amber-700/80 font-bold mt-1 leading-relaxed">
+                    Tarayıcı ayarlarınızdan bildirimlere izin vermediğiniz için kritik uyarıları alamazsınız. 
+                    Lütfen adres çubuğundaki kilit simgesine tıklayarak bildirimlere izin verin.
+                  </p>
+                </div>
+              </div>
+            )}
             
             <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
               <div>
