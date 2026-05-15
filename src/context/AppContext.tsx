@@ -506,7 +506,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const res = await fetch('/api/ai/daily-insight', { method: 'POST', body: JSON.stringify({ prompt }) });
       const data = await res.json();
       if (data.success) {
-        setDailyInsight(data.insight);
+        // AI response is now JSON with insight and critical_alert
+        try {
+          // If the API returns a string that is JSON, parse it
+          const parsed = typeof data.insight === 'string' && data.insight.startsWith('{') 
+            ? JSON.parse(data.insight) 
+            : data;
+            
+          setDailyInsight(parsed.insight || data.insight);
+          setCriticalAlert(parsed.critical_alert || null);
+        } catch (err) {
+          setDailyInsight(data.insight);
+          setCriticalAlert(null);
+        }
         toast.success("Analiz tamamlandı", { id: 'ai-loading' });
       } else throw new Error(data.error);
     } catch (e: any) { 

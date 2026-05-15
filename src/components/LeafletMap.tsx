@@ -44,6 +44,7 @@ function MapController({ selectedLand }: { selectedLand: any }) {
 export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, editLand?: any }) {
   const { addLand, updateLand, lands, userProfile, isDarkMode, triggerUpsell, isPremium } = useAppContext();
   const [isNDVIActive, setIsNDVIActive] = useState(false);
+  const [activeLayer, setActiveLayer] = useState<'normal' | 'ndvi' | 'moisture'>('normal');
   const [markerPosition, setMarkerPosition] = useState<L.LatLng | null>(null);
   const [showCropSelector, setShowCropSelector] = useState(false);
   const [editingLandId, setEditingLandId] = useState<string | null>(null);
@@ -347,6 +348,44 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
         
         <MapController selectedLand={focusLand} />
         
+        {/* PHASE 3: ADVANCED AGRI-LAYERS MENU */}
+        <div className="absolute bottom-6 left-6 z-[1000] flex flex-col gap-2">
+           <div className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl p-1.5 rounded-2xl shadow-2xl border border-white/20 flex flex-col gap-1">
+              {[
+                { id: 'normal', label: 'Normal', icon: Globe },
+                { id: 'ndvi', label: 'NDVI (Sağlık)', icon: Activity, premium: true },
+                { id: 'moisture', label: 'Toprak Nemi', icon: Droplet, premium: true }
+              ].map((layer) => {
+                const Icon = layer.icon;
+                const isActive = activeLayer === layer.id;
+                return (
+                  <button
+                    key={layer.id}
+                    onClick={() => {
+                      if (layer.premium && !isPremium) {
+                        triggerUpsell();
+                        return;
+                      }
+                      setActiveLayer(layer.id as any);
+                      if (layer.id === 'ndvi') setIsNDVIActive(true);
+                      else setIsNDVIActive(false);
+                    }}
+                    className={cn(
+                      "flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest",
+                      isActive 
+                        ? "bg-primary text-white shadow-lg" 
+                        : "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    )}
+                  >
+                    <Icon size={16} className={isActive ? "text-white" : "text-zinc-400"} />
+                    <span>{layer.label}</span>
+                    {layer.premium && !isPremium && <Lock size={12} className="ml-auto text-amber-500" />}
+                  </button>
+                );
+              })}
+           </div>
+        </div>
+
         {/* Render markers for all saved lands */}
         {lands.map((land: any) => (
           <React.Fragment key={land.id}>

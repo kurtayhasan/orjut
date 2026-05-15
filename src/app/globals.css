@@ -140,9 +140,22 @@
     transform: scale(0.98);
   }
 
-  /* ─── Minimum Touch Hedefi ─── */
-  .touch-target {
-    min-height: var(--touch-target);
-    min-width:  var(--touch-target);
+  /* ─── Leaflet Draw Touch Targets ─── */
+  .leaflet-draw-toolbar a {
+    width: 44px !important;
+    height: 44px !important;
+    line-height: 44px !important;
+    background-size: 320px 44px !important;
+  }
+  .leaflet-draw-actions {
+    left: 44px !important;
+  }
+  .leaflet-draw-actions li {
+    height: 44px !important;
+    line-height: 44px !important;
+  }
+  .leaflet-draw-actions a {
+    height: 44px !important;
+    line-height: 44px !important;
   }
 }

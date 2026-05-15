@@ -161,20 +161,34 @@ export default function DashboardPage() {
                   <span className="text-xs font-black text-white uppercase tracking-[0.2em]">Akıllı Tarım Asistanı</span>
                 </div>
                 <h2 className="text-2xl md:text-4xl font-black font-heading text-white leading-tight mb-4 tracking-tight">
-                  {dailyInsight ? "Sizin için 24 saatlik arazi raporu hazır." : "Verilerinizi yapay zeka ile işleyin."}
+                  {dailyInsight ? "Sizin için 24 saatlik arazi raporu hazır." : "Verileriniz işleniyor..."}
                 </h2>
+                
+                {/* PHASE 4: PROACTIVE ALERTS */}
+                {criticalAlert && (
+                  <div className="mb-6 p-4 bg-white/20 backdrop-blur-md rounded-2xl border border-white/30 animate-pulse-subtle">
+                     <div className="flex items-start gap-3">
+                        <AlertTriangle className="text-amber-300 shrink-0 mt-0.5" size={20} />
+                        <div>
+                           <p className="text-sm font-black text-white uppercase tracking-wider mb-1">🚨 KRİTİK UYARI</p>
+                           <p className="text-base font-bold text-amber-50 leading-tight">{criticalAlert}</p>
+                        </div>
+                     </div>
+                  </div>
+                )}
+
                 {dailyInsight ? (
                   <div className="space-y-4">
-                    <p className="text-base md:text-lg font-medium text-white/90 leading-relaxed max-w-3xl">
+                    <div className="text-base md:text-lg font-medium text-white/90 leading-relaxed max-w-3xl whitespace-pre-line">
                       {dailyInsight}
-                    </p>
+                    </div>
                     <div className="flex gap-4 pt-2">
-                       <Button size="sm" variant="neutral" className="bg-white text-primary border-none hover:bg-white/90" leftIcon={<Microscope size={16} />}>Detaylı Rapor</Button>
-                       <Button size="sm" variant="outline" className="border-white/40 text-white hover:bg-white/10">Verileri Güncelle</Button>
+                       <Button size="sm" variant="neutral" className="bg-white text-primary border-none hover:bg-white/90 font-black" leftIcon={<Microscope size={16} />}>Detaylı Rapor</Button>
+                       <Button onClick={handleStartAnalysis} size="sm" variant="outline" className="border-white/40 text-white hover:bg-white/10 font-black">Yeniden Analiz Et</Button>
                     </div>
                   </div>
                 ) : (
-                   <Button onClick={handleStartAnalysis} variant="neutral" className="bg-white text-primary hover:bg-white/90" leftIcon={<Sparkles size={18} />}>Yapay Zekayı Çalıştır</Button>
+                   <Button onClick={handleStartAnalysis} variant="neutral" className="bg-white text-primary hover:bg-white/90 font-black" leftIcon={<Sparkles size={18} />}>Analizi Başlat</Button>
                 )}
               </div>
             </div>

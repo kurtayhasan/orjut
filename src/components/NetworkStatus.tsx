@@ -56,22 +56,25 @@ export default function NetworkStatus() {
   if (isOnline && !isSyncing && pendingCount === 0) return null;
 
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm">
+    <div className="flex items-center gap-3 px-4 py-2 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-xs font-black transition-all shadow-2xl animate-in slide-in-from-bottom-4">
       {!isOnline && (
-        <div className="bg-rose-100 text-rose-700 flex items-center gap-1.5 px-2 py-1 rounded-full animate-in fade-in">
-          <WifiOff size={14} /> Çevrimdışı
+        <div className="bg-amber-500/20 text-amber-100 border border-amber-500/30 flex items-center gap-2 px-3 py-1.5 rounded-xl">
+          <WifiOff size={16} className="text-amber-400" /> 
+          <span className="uppercase tracking-widest">Çevrimdışı Mod</span>
         </div>
       )}
       
       {isOnline && isSyncing && (
-        <div className="bg-indigo-100 text-indigo-700 flex items-center gap-1.5 px-2 py-1 rounded-full animate-in fade-in">
-          <RefreshCw size={14} className="animate-spin" /> Eşitleniyor
+        <div className="bg-indigo-500/20 text-indigo-100 border border-indigo-500/30 flex items-center gap-2 px-3 py-1.5 rounded-xl">
+          <RefreshCw size={16} className="animate-spin text-indigo-400" /> 
+          <span className="uppercase tracking-widest">Veriler Eşitleniyor</span>
         </div>
       )}
 
       {pendingCount > 0 && !isSyncing && (
-        <div className="bg-amber-100 text-amber-700 flex items-center gap-1.5 px-2 py-1 rounded-full animate-in fade-in">
-          {pendingCount} İşlem Bekliyor
+        <div className="bg-emerald-500/20 text-emerald-100 border border-emerald-500/30 flex items-center gap-2 px-3 py-1.5 rounded-xl">
+          <span className="w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[10px]">{pendingCount}</span>
+          <span className="uppercase tracking-widest">Bekleyen Kayıt</span>
         </div>
       )}
     </div>
