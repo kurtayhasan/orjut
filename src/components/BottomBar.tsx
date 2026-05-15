@@ -39,7 +39,7 @@ export default function BottomBar({ className }: { className?: string }) {
   return (
     <>
       <div className={cn(
-        "fixed bottom-0 left-0 right-0 z-[var(--z-sticky)] bg-surface border-t border-border shadow-lg lg:hidden pb-safe",
+        "fixed bottom-0 left-0 right-0 z-50 bg-surface border-t border-border shadow-lg lg:hidden pb-safe",
         className
       )}>
         <div className="h-[64px] flex items-center justify-around px-2 relative">
@@ -110,7 +110,7 @@ export default function BottomBar({ className }: { className?: string }) {
             size="lg"
             className="justify-start px-6"
             leftIcon={<div className="p-2 bg-blue-100 text-blue-600 rounded-lg"><Tractor size={20} /></div>}
-            onClick={() => { setIsActionSheetOpen(false); router.push('/dashboard/operations'); }}
+            onClick={() => { setIsActionSheetOpen(false); router.push('/dashboard/operations?new=true'); }}
           >
              <div className="flex flex-col items-start">
               <span className="font-bold">Zirai İşlem Ekle</span>

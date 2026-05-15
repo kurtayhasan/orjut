@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useAppContext } from '@/context/AppContext';
 import { 
   Droplet, Plus, Trash2, Calendar, MapPin, 
@@ -18,6 +19,7 @@ import { cn, formatDateShort } from '@/lib/utils';
 
 export default function OperationsPage() {
   const { lands, fieldOperations, addFieldOperation, deleteFieldOperation, inventory } = useAppContext();
+  const searchParams = useSearchParams();
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedLandId, setSelectedLandId] = useState('');
@@ -31,6 +33,13 @@ export default function OperationsPage() {
   
   const [filter, setFilter] = useState<'all' | 'su' | 'gubre' | 'ilac'>('all');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Check for 'new=true' query param to auto-open modal
+  useEffect(() => {
+    if (searchParams.get('new') === 'true') {
+      setIsAddModalOpen(true);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -11,11 +11,13 @@ import { cn } from '@/lib/utils';
 import { 
   Wallet, Fuel, Sprout, 
   Users, Package, Calendar, 
-  MapPin, Archive, Tag, Camera
+  MapPin, Archive, Tag, Camera,
+  Box, RefreshCcw
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function ExpenseModal({ isOpen, onClose, defaultCategory }: ExpenseModalProps) {
-  const { addExpense, lands, seasons, activeSeason } = useAppContext();
+  const { addExpense, lands, seasons, activeSeason, inventory, updateInventoryItem } = useAppContext();
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [landId, setLandId] = useState('');
@@ -23,8 +25,15 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
   const [category, setCategory] = useState(defaultCategory);
   const [receiptUrl, setReceiptUrl] = useState('');
   const [receiptThumbnail, setReceiptThumbnail] = useState('');
+  
+  // Stock adding
   const [addToInventory, setAddToInventory] = useState(false);
   const [invName, setInvName] = useState('');
+  
+  // Stock using
+  const [isUsingStock, setIsUsingStock] = useState(false);
+  const [selectedInventoryId, setSelectedInventoryId] = useState('');
+  
   const [quantity, setQuantity] = useState('');
   const [unit, setUnit] = useState('kg');
 
@@ -32,12 +41,30 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
     if (isOpen) {
       setCategory(defaultCategory);
       if (activeSeason) setSeasonId(activeSeason.id);
+      setIsUsingStock(false);
+      setAddToInventory(false);
     }
   }, [isOpen, defaultCategory, activeSeason]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (amount && !isNaN(Number(amount)) && landId) {
+    
+    if (!landId) {
+      toast.error("Lütfen arazi seçiniz.");
+      return;
+    }
+
+    if (isUsingStock && !selectedInventoryId) {
+      toast.error("Lütfen stoktan bir ürün seçiniz.");
+      return;
+    }
+
+    if (!amount && !isUsingStock) {
+      toast.error("Lütfen tutar giriniz.");
+      return;
+    }
+
+    try {
       const inventoryData = addToInventory ? {
         name: invName || category,
         type: category === 'Gübre/İlaç' ? 'fertilizer' : category === 'Tohum' ? 'seed' : category === 'Mazot' ? 'fuel' : 'other',
@@ -45,11 +72,27 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
         unit: unit
       } : undefined;
 
-      await addExpense(Number(amount), category, date, landId, receiptUrl, receiptThumbnail, inventoryData, seasonId);
+      // If using stock, we might want to update inventory quantity
+      if (isUsingStock && selectedInventoryId && quantity) {
+        const item = inventory.find(i => i.id === selectedInventoryId);
+        if (item) {
+          const newQty = item.quantity - Number(quantity);
+          if (newQty < 0) {
+            toast.warning("Stok miktarı sıfırın altına düşecek!");
+          }
+          await updateInventoryItem(selectedInventoryId, { quantity: newQty });
+        }
+      }
+
+      await addExpense(Number(amount || 0), category, date, landId, receiptUrl, receiptThumbnail, inventoryData, seasonId);
       
+      toast.success("Kayıt başarıyla oluşturuldu.");
       // Reset form
-      setAmount(''); setQuantity(''); setUnit('kg'); setAddToInventory(false); setInvName(''); setReceiptUrl(''); setReceiptThumbnail('');
+      setAmount(''); setQuantity(''); setUnit('kg'); setAddToInventory(false); setIsUsingStock(false); 
+      setInvName(''); setReceiptUrl(''); setReceiptThumbnail(''); setSelectedInventoryId('');
       onClose();
+    } catch (err) {
+      toast.error("Kayıt oluşturulurken bir hata oluştu.");
     }
   };
 
@@ -60,6 +103,14 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
     { id: 'İşçilik', label: 'İşçilik', icon: Users, color: 'text-blue-500' },
     { id: 'Diğer', label: 'Diğer', icon: Package, color: 'text-zinc-500' }
   ];
+
+  // Filter inventory based on category
+  const filteredInventory = inventory.filter(item => {
+    if (category === 'Mazot') return item.type === 'fuel';
+    if (category === 'Gübre/İlaç') return item.type === 'fertilizer';
+    if (category === 'Tohum') return item.type === 'seed';
+    return true;
+  });
 
   return (
     <BaseModal isOpen={isOpen} onClose={onClose} title="Harcama Kaydı Oluştur">
@@ -76,7 +127,11 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
                   <button
                     key={cat.id}
                     type="button"
-                    onClick={() => setCategory(cat.id)}
+                    onClick={() => {
+                      setCategory(cat.id);
+                      setIsUsingStock(false);
+                      setAddToInventory(false);
+                    }}
                     className={cn(
                       "flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all gap-2",
                       isActive ? "bg-primary-50 border-primary text-primary shadow-sm" : "bg-surface-2 border-border text-text-muted"
@@ -93,23 +148,24 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
         {/* AMOUNT & QUANTITY */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
            <Input 
-             label="Toplam Tutar (₺)" 
+             label={isUsingStock ? "Tahmini Değer (Ops. ₺)" : "Toplam Tutar (₺)"} 
              type="number" 
              placeholder="0.00" 
              value={amount} 
              onChange={(e: any) => setAmount(e.target.value)} 
-             required 
-             autoFocus
+             required={!isUsingStock}
+             autoFocus={!isUsingStock}
              className="text-2xl font-black text-primary"
            />
            <div className="flex gap-2">
               <Input 
-                label="Miktar (Ops.)" 
+                label="Miktar" 
                 type="number" 
                 placeholder="0" 
                 value={quantity} 
                 onChange={(e: any) => setQuantity(e.target.value)} 
                 className="flex-1 font-bold"
+                required={isUsingStock}
               />
               <Input 
                 as="select" 
@@ -139,33 +195,69 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
            <Input label="Tarih" type="date" value={date} onChange={(e: any) => setDate(e.target.value)} required />
         </div>
 
-        {/* INVENTORY LINKAGE */}
+        {/* INVENTORY BRIDGE (Phase 4) */}
         {['Gübre/İlaç', 'Tohum', 'Mazot'].includes(category) && (
-          <div className={cn(
-            "p-4 rounded-xl border transition-all",
-            addToInventory ? "bg-primary-50 border-primary/20" : "bg-surface-2 border-border"
-          )}>
-             <label className="flex items-center gap-3 cursor-pointer group">
-                <input 
-                  type="checkbox" 
-                  className="w-5 h-5 rounded border-border text-primary focus:ring-primary"
-                  checked={addToInventory}
-                  onChange={e => setAddToInventory(e.target.checked)}
-                />
-                <div>
-                   <p className="text-sm font-black text-text-primary">Bu ürünü stoka ekle</p>
-                   <p className="text-[10px] font-bold text-text-muted uppercase">Gelecekteki zirai işlemler için envantere kaydedilir.</p>
-                </div>
-             </label>
+          <div className="space-y-3">
+             <div className="grid grid-cols-2 gap-3">
+                {/* Option 1: Add to stock */}
+                <button
+                  type="button"
+                  onClick={() => { setAddToInventory(!addToInventory); setIsUsingStock(false); }}
+                  className={cn(
+                    "p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all",
+                    addToInventory ? "bg-primary-50 border-primary text-primary shadow-sm" : "bg-surface-2 border-border text-text-muted"
+                  )}
+                >
+                  <Box size={20} />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-center">Stoka Ekle</span>
+                </button>
+
+                {/* Option 2: Use from stock */}
+                <button
+                  type="button"
+                  onClick={() => { setIsUsingStock(!isUsingStock); setAddToInventory(false); setAmount('0'); }}
+                  className={cn(
+                    "p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all",
+                    isUsingStock ? "bg-primary-50 border-primary text-primary shadow-sm" : "bg-surface-2 border-border text-text-muted"
+                  )}
+                >
+                  <RefreshCcw size={20} />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-center">Stoktan Kullan</span>
+                </button>
+             </div>
+
+             {/* Add to inventory extra fields */}
              {addToInventory && (
-               <div className="mt-4 animate-scale-in">
+               <div className="p-4 bg-primary-50 border border-primary/20 rounded-xl animate-scale-in">
                   <Input 
+                    label="Stok Kayıt Adı"
                     placeholder="Ürün/Marka Adı (Örn: Üre 46)" 
                     value={invName} 
                     onChange={(e: any) => setInvName(e.target.value)} 
                     required={addToInventory}
                     className="bg-white"
                   />
+                  <p className="text-[10px] font-bold text-primary uppercase mt-2">Bu harcama envanterinize yeni bir giriş olarak kaydedilecek.</p>
+               </div>
+             )}
+
+             {/* Use from inventory extra fields */}
+             {isUsingStock && (
+               <div className="p-4 bg-primary-50 border border-primary/20 rounded-xl animate-scale-in space-y-3">
+                  <Input 
+                    as="select" 
+                    label="Stoktaki Ürün"
+                    value={selectedInventoryId}
+                    onChange={(e: any) => setSelectedInventoryId(e.target.value)}
+                    required={isUsingStock}
+                    className="bg-white"
+                  >
+                    <option value="" disabled>Ürün seçin...</option>
+                    {filteredInventory.map(item => (
+                      <option key={item.id} value={item.id}>{item.item_name} ({item.quantity} {item.unit} mevcut)</option>
+                    ))}
+                  </Input>
+                  <p className="text-[10px] font-bold text-primary uppercase">Bu işlem seçilen stok miktarını otomatik olarak azaltacaktır.</p>
                </div>
              )}
           </div>
@@ -185,7 +277,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
         {/* FOOTER */}
         <div className="flex gap-3 pt-4 border-t border-border">
            <Button variant="ghost" fullWidth onClick={onClose} type="button">Vazgeç</Button>
-           <Button fullWidth type="submit" size="lg">Harcamayı Kaydet</Button>
+           <Button fullWidth type="submit" size="lg">Kayıt İşlemini Tamamla</Button>
         </div>
       </form>
     </BaseModal>

@@ -1,18 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { Nunito, Nunito_Sans } from "next/font/google";
+import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import "./globals.css";
 
-const nunito = Nunito({ 
+const jakarta = Plus_Jakarta_Sans({ 
   subsets: ["latin"], 
   variable: '--font-heading',
-  weight: ['400', '600', '700', '800', '900'],
+  weight: ['400', '500', '600', '700', '800'],
   display: 'swap',
 });
 
-const nunitoSans = Nunito_Sans({ 
+const inter = Inter({ 
   subsets: ["latin"], 
   variable: '--font-body',
-  weight: ['400', '600', '700'],
+  weight: ['400', '500', '600', '700'],
   display: 'swap',
 });
 
@@ -67,14 +67,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="tr" className={`${nunito.variable} ${nunitoSans.variable}`}>
+    <html lang="tr" className={`${jakarta.variable} ${inter.variable}`}>
       <head>
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
-      <body className="antialiased font-body">
+      <body className="antialiased font-body bg-[#050505]">
         <ServiceWorkerRegister />
         <AppProvider>
-          <Toaster position="top-center" richColors theme="light" closeButton />
+          <Toaster position="top-center" richColors theme="dark" closeButton />
           {children}
           <CookieConsent />
         </AppProvider>
