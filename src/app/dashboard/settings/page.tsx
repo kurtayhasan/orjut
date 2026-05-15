@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '@/context/AppContext';
 import Link from 'next/link';
-import { Settings as SettingsIcon, Bell, Shield, User, Smartphone, LogOut, ChevronRight, Check, Globe, Moon, Trash2 } from 'lucide-react';
+import { Settings as SettingsIcon, Bell, Shield, User, Smartphone, LogOut, ChevronRight, Check, Globe, Moon, Trash2, RefreshCcw } from 'lucide-react';
 import { requestNotificationPermission } from '@/lib/notifications';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -90,6 +90,31 @@ export default function SettingsPage() {
       fetchRequests();
     } catch (err) {
       toast.error("İşlem başarısız.");
+    }
+  };
+
+  const handleSync = async () => {
+    toast.loading("Sistem senkronize ediliyor...", { id: "sync-toast" });
+    try {
+      // Clear Service Worker Caches
+      if ('caches' in window) {
+        const names = await caches.keys();
+        for (let name of names) {
+          await caches.delete(name);
+        }
+      }
+      
+      // Refresh Next.js Router Cache
+      router.refresh();
+      
+      // Force reload to get fresh data
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+      
+      toast.success("Sistem başarıyla tazelendi!", { id: "sync-toast" });
+    } catch (err) {
+      toast.error("Senkronizasyon hatası.", { id: "sync-toast" });
     }
   };
 
@@ -203,6 +228,19 @@ export default function SettingsPage() {
                   <p className="text-xs text-zinc-400 font-medium">Gece modu deneyimi</p>
                 </div>
                 <Moon size={20} className="text-zinc-300" />
+              </div>
+
+              <div className="flex items-center justify-between p-4 bg-primary/5 rounded-2xl border border-primary/10">
+                <div>
+                  <p className="font-bold text-sm text-primary">Sistemi Senkronize Et</p>
+                  <p className="text-xs text-primary/60 font-medium">Önbelleği temizle ve verileri tazele</p>
+                </div>
+                <button 
+                  onClick={handleSync}
+                  className="p-3 bg-primary text-white rounded-2xl shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
+                >
+                  <RefreshCcw size={18} />
+                </button>
               </div>
             </div>
           </div>

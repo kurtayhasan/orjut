@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ziraiasistan-cache-v1';
+const CACHE_NAME = 'ziraiasistan-cache-v2';
 const OFFLINE_URL = '/';
 
 const CACHED_URLS = [

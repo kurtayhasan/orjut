@@ -159,23 +159,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         db.getInventory(activeOrgId)
       ]);
 
+      // PHASE 3: STRICT STATE RESET - If data is null/empty, state must be []
       if (p.data) {
         setUserProfile(p.data);
         setUserRole((p.data.role as any) || 'farmer');
       }
+      setLands(l.data || []);
       if (l.data) {
-        setLands(l.data);
         setTotalArea(l.data.reduce((sum, land) => sum + Number(land.size_decare || 0), 0));
+      } else {
+        setTotalArea(0);
       }
-      if (t.data) setTransactions(t.data);
+
+      setTransactions(t.data || []);
       if (s.data) {
         setSeasons(s.data);
         setActiveSeason(s.data.find((ss: any) => ss.is_active) || s.data[0] || null);
+      } else {
+        setSeasons([]);
+        setActiveSeason(null);
       }
-      if (i.data) setIrrigationLogs(i.data);
-      if (fo.data) setFieldOperations(fo.data);
-      if (sl.data) setScoutingLogs(sl.data);
-      if (inv.data) setInventory(inv.data);
+      setIrrigationLogs(i.data || []);
+      setFieldOperations(fo.data || []);
+      setScoutingLogs(sl.data || []);
+      setInventory(inv.data || []);
 
       const { data: allTx } = await db.getTransactions(activeOrgId);
       if (allTx) {
