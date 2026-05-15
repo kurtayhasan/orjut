@@ -42,7 +42,7 @@ const ListSkeleton = ({ count = 3 }: { count?: number }) => (
 export default function DashboardPage() {
   const { 
     lands, transactions, isLoadingTransactions, 
-    userProfile, weather, dailyInsight, 
+    userProfile, weather, dailyInsight, criticalAlert,
     requestWeatherAndInsight, inventory, setIsExpenseModalOpen,
     fieldOperations, scoutingLogs, userRole 
   } = useAppContext();
