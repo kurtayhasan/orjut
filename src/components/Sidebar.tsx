@@ -16,14 +16,15 @@ import { cn } from '@/lib/utils';
 export default function Sidebar({ className }: { className?: string }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { isSidebarOpen, setIsSidebarOpen, userRole, isPremium, userProfile } = useAppContext();
+  const { isSidebarOpen, setIsSidebarOpen, userRole, isPremium, userProfile, clearAllData } = useAppContext();
 
   const handleLogout = async () => {
     const { supabase } = await import('@/lib/supabase');
     await supabase.auth.signOut();
     localStorage.clear();
+    clearAllData();
+    window.location.href = '/'; 
     toast.success("Başarıyla çıkış yapıldı.");
-    router.push('/');
   };
 
   const closeSidebar = () => setIsSidebarOpen(false);
@@ -45,13 +46,13 @@ export default function Sidebar({ className }: { className?: string }) {
       {/* Mobile Overlay */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] lg:hidden animate-fade-in" 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden animate-fade-in" 
           onClick={closeSidebar}
         />
       )}
       
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-[101] w-72 bg-[#1B2E1C] flex flex-col shrink-0 h-full transform transition-transform duration-300 ease-out lg:relative lg:translate-x-0 lg:z-0",
+        "fixed inset-y-0 left-0 z-50 w-60 bg-[#1B2E1C] flex flex-col shrink-0 h-full transform transition-transform duration-300 ease-out lg:relative lg:translate-x-0 lg:z-0",
         isSidebarOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full",
         className
       )}>

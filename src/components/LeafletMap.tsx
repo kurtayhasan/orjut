@@ -350,7 +350,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
         <MapController selectedLand={focusLand} />
         
         {/* PHASE 3: ADVANCED AGRI-LAYERS MENU */}
-        <div className="absolute bottom-6 left-6 z-[1000] flex flex-col gap-2">
+        <div className="absolute bottom-6 left-6 z-10 flex flex-col gap-2">
            <div className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl p-1.5 rounded-2xl shadow-2xl border border-white/20 flex flex-col gap-1">
               {[
                 { id: 'normal', label: 'Normal', icon: Globe },

@@ -73,6 +73,7 @@ type AppContextType = {
   closeUpsell: () => void;
   isExpenseModalOpen: boolean;
   setIsExpenseModalOpen: (isOpen: boolean) => void;
+  clearAllData: () => void;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -109,6 +110,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const triggerUpsell = useCallback(() => setShowUpsell(true), []);
   const closeUpsell = useCallback(() => setShowUpsell(false), []);
+
+  const clearAllData = useCallback(() => {
+    setLands([]);
+    setTransactions([]);
+    setInventory([]);
+    setFieldOperations([]);
+    setScoutingLogs([]);
+    setIrrigationLogs([]);
+    setSeasons([]);
+    setActiveSeason(null);
+    setTotalExpenses(0);
+    setTotalArea(0);
+    setTotalSavings(0);
+    setDailySpent(0);
+    setDailyActions(0);
+    setDailyInsight(null);
+    setCriticalAlert(null);
+    setUserProfile(null);
+  }, []);
 
   const t = (key: keyof typeof translations['en']) => translations[lang][key] || key;
 
@@ -565,7 +585,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     isPremium: !!userProfile?.is_premium,
     isDemo: false,
     showUpsell, triggerUpsell, closeUpsell,
-    isExpenseModalOpen, setIsExpenseModalOpen
+    isExpenseModalOpen, setIsExpenseModalOpen, clearAllData
   };
 
   return (
