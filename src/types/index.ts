@@ -75,6 +75,8 @@ export interface ScoutingLog {
   // Phase 3: Diagnosis & Prescription Loop
   prescription_action?: string;
   prescription_notes?:  string;
+  prescription_text?:   string;
+  is_prescription_applied?: boolean;
 }
 
 export interface FieldOperation {

@@ -19,7 +19,7 @@ import { cn, formatDateShort } from '@/lib/utils';
 import { operationSchema } from '@/lib/schemas/operation.schema';
 
 export default function OperationsPage() {
-  const { lands, fieldOperations, addFieldOperation, deleteFieldOperation, inventory } = useAppContext();
+  const { lands, fieldOperations, addFieldOperation, deleteFieldOperation, inventory, updateScoutingPrescription } = useAppContext();
   const searchParams = useSearchParams();
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -98,6 +98,14 @@ export default function OperationsPage() {
     setIsSubmitting(true);
     try {
       await addFieldOperation(opData);
+      
+      // Phase 3: Completion Loop update
+      const scoutingId = searchParams.get('scouting_id');
+      if (scoutingId) {
+        await updateScoutingPrescription(scoutingId, true);
+        toast.info("Zirai reçete 'Uygulandı' olarak mühürlendi.");
+      }
+
       toast.success("İşlem başarıyla kaydedildi ve stok güncellendi.");
       setIsAddModalOpen(false);
       // Reset

@@ -53,6 +53,7 @@ type AppContextType = {
   deleteFieldOperation: (id: string) => Promise<void>;
   addScoutingLog: (log: any) => Promise<void>;
   updateScoutingLog: (id: string, updates: Partial<ScoutingLog>) => Promise<void>;
+  updateScoutingPrescription: (id: string, isApplied: boolean, text?: string) => Promise<void>;
   deleteScoutingLog: (id: string) => Promise<void>;
   inventory: InventoryItem[];
   isLoadingInventory: boolean;
@@ -498,6 +499,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         toast.success("Tavsiye kaydedildi");
       } catch (err) {
         toast.error("Kaydedilemedi");
+      }
+    },
+    updateScoutingPrescription: async (id: string, isApplied: boolean, text?: string) => {
+      try {
+        const updates: Partial<ScoutingLog> = { is_prescription_applied: isApplied };
+        if (text) updates.prescription_text = text;
+        const { error } = await db.updateScoutingLog(id, updates);
+        if (error) throw error;
+        setScoutingLogs(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
+      } catch (err) {
+        console.error("Prescription update error:", err);
       }
     },
     deleteScoutingLog: async (id: string) => { setScoutingLogs(prev => prev.filter(s => s.id !== id)); db.deleteScoutingLog(id); },

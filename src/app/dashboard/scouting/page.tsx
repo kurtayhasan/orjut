@@ -20,7 +20,7 @@ import { cn, formatDateShort } from '@/lib/utils';
 import { ScoutingLog } from '@/types';
 
 export default function ScoutingPage() {
-  const { lands, scoutingLogs, addScoutingLog, deleteScoutingLog, userRole, updateScoutingLog } = useAppContext();
+  const { lands, scoutingLogs, addScoutingLog, deleteScoutingLog, userRole, updateScoutingLog, updateScoutingPrescription } = useAppContext();
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isPrescriptionModalOpen, setIsPrescriptionModalOpen] = useState(false);
@@ -69,10 +69,17 @@ export default function ScoutingPage() {
 
     setIsSubmitting(true);
     try {
+      // Consolidate into prescription_text as requested in Phase 3
+      const combinedText = `${prescriptionAction}${prescriptionNotes ? ': ' + prescriptionNotes : ''}`;
+      
       await updateScoutingLog(selectedLog.id, {
         prescription_action: prescriptionAction,
-        prescription_notes: prescriptionNotes
+        prescription_notes: prescriptionNotes,
+        prescription_text: combinedText,
+        is_prescription_applied: false
       });
+
+      toast.success("Tavsiye başarıyla gönderildi.");
       setIsPrescriptionModalOpen(false);
       setSelectedLog(null);
       setPrescriptionAction('');
@@ -182,20 +189,27 @@ export default function ScoutingPage() {
                                   <ShieldCheck size={10} /> Mühendis Tavsiyesi
                                 </span>
                               </div>
-                              <h5 className="font-black text-amber-900 text-sm">{log.prescription_action}</h5>
-                              {log.prescription_notes && <p className="text-xs font-bold text-amber-800/80 mt-1">{log.prescription_notes}</p>}
+                              <h5 className="font-black text-amber-900 text-sm">{log.prescription_text || log.prescription_action}</h5>
+                              {log.prescription_notes && !log.prescription_text && <p className="text-xs font-bold text-amber-800/80 mt-1">{log.prescription_notes}</p>}
                               
-                              {userRole === 'farmer' && (
-                                <Link 
-                                  href={`/dashboard/operations?new=true&land_id=${log.land_id}&type=${
-                                    log.prescription_action.includes('İlaçlama') ? 'ilac' : 
-                                    log.prescription_action.includes('Gübre') ? 'gubre' : 'su'
-                                  }&notes=${encodeURIComponent('Mühendis Tavsiyesi: ' + log.prescription_action)}`}
-                                >
-                                  <Button size="sm" className="mt-4 bg-amber-600 hover:bg-amber-700 shadow-lg shadow-amber-200" leftIcon={<Tractor size={16} />}>
-                                    Tavsiyeyi Uygula
-                                  </Button>
-                                </Link>
+                              {log.is_prescription_applied ? (
+                                <div className="mt-4 flex items-center gap-2 px-3 py-2 bg-emerald-100 border border-emerald-200 rounded-lg text-emerald-700">
+                                  <CheckCircle2 size={16} />
+                                  <span className="text-xs font-black uppercase tracking-wider">✅ Tamamlandı / Uygulandı</span>
+                                </div>
+                              ) : (
+                                userRole === 'farmer' && (
+                                  <Link 
+                                    href={`/dashboard/operations?new=true&land_id=${log.land_id}&scouting_id=${log.id}&type=${
+                                      (log.prescription_text || log.prescription_action || '').includes('İlaçlama') ? 'ilac' : 
+                                      (log.prescription_text || log.prescription_action || '').includes('Gübre') ? 'gubre' : 'su'
+                                    }&notes=${encodeURIComponent('Reçete Uygulaması: ' + (log.prescription_text || log.prescription_action))}`}
+                                  >
+                                    <Button size="sm" className="mt-4 bg-amber-600 hover:bg-amber-700 shadow-lg shadow-amber-200" leftIcon={<Tractor size={16} />}>
+                                      Reçeteyi Uygula
+                                    </Button>
+                                  </Link>
+                                )
                               )}
                            </div>
                          ) : (

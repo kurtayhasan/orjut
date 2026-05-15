@@ -43,7 +43,7 @@ export default function DashboardPage() {
     lands, transactions, isLoadingTransactions, 
     userProfile, weather, dailyInsight, 
     requestWeatherAndInsight, inventory, setIsExpenseModalOpen,
-    fieldOperations, scoutingLogs
+    fieldOperations, scoutingLogs, userRole 
   } = useAppContext();
 
   const [activeTab, setActiveTab] = useState<'all' | 'expense' | 'income'>('all');
@@ -60,6 +60,11 @@ export default function DashboardPage() {
     requestWeatherAndInsight();
   };
 
+  const unappliedPrescriptions = useMemo(() => 
+    scoutingLogs.filter(log => (log.prescription_text || log.prescription_action) && !log.is_prescription_applied), 
+    [scoutingLogs]
+  );
+
   const categories = ['Mazot', 'Gübre', 'İlaç', 'Tohum', 'İşçilik'];
 
   // Helper to get last activity for a land
@@ -75,6 +80,28 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8 animate-fade-in pb-10">
+      {/* PHASE 2: PRESCRIPTION ALERT BANNER */}
+      {userRole !== 'engineer' && unappliedPrescriptions.length > 0 && (
+        <Card className="bg-gradient-to-r from-amber-500 to-amber-600 border-none shadow-lg animate-bounce-subtle" padding="lg">
+           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                 <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-white shrink-0">
+                    <GraduationCap size={28} />
+                 </div>
+                 <div className="text-white">
+                    <h3 className="text-lg font-black font-heading tracking-tight">Zirai Reçete Bildirimi</h3>
+                    <p className="text-sm font-bold text-amber-50/90">Ziraat Mühendisinizden {unappliedPrescriptions.length} adet yeni zirai tavsiye/reçete var.</p>
+                 </div>
+              </div>
+              <Link href="/dashboard/scouting">
+                 <Button className="bg-white text-amber-600 hover:bg-amber-50 border-none font-black shadow-md" size="md" rightIcon={<ArrowRight size={18} />}>
+                   Reçeteleri Gör
+                 </Button>
+              </Link>
+           </div>
+        </Card>
+      )}
+
       {/* BÖLÜM 1 — KARŞILAMA VE HIZLI AKSİYONLAR */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
