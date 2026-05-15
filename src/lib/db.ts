@@ -184,4 +184,12 @@ export const db = {
 
   deleteFieldOperationsByLand: (landId: string) =>
     from('field_operations').delete().eq('land_id', landId),
+
+  /* ── RPC — Atomic Operations ──────────── */
+  applyExpenseAtomic: (txData: any, inventoryId: string, quantity: number) =>
+    supabase.rpc('apply_expense_atomic', {
+      p_tx_data: txData,
+      p_inventory_id: inventoryId,
+      p_quantity: quantity
+    }),
 };

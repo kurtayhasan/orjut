@@ -90,8 +90,15 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
       const decares = (areaSqm / 1000).toFixed(2);
       
       const centroid = turf.centroid(geojson);
-      const lng = centroid.geometry.coordinates[0];
-      const lat = centroid.geometry.coordinates[1];
+      const lng = Number(centroid.geometry.coordinates[0].toFixed(6));
+      const lat = Number(centroid.geometry.coordinates[1].toFixed(6));
+
+      // Coordinate truncation for polygon vertices (Phase 3 Optimization)
+      if (geojson.geometry.type === 'Polygon') {
+        geojson.geometry.coordinates = geojson.geometry.coordinates.map((ring: any) =>
+          ring.map((coord: any) => [Number(coord[0].toFixed(6)), Number(coord[1].toFixed(6))])
+        );
+      }
 
       setEditingLandId(null);
       resetForm();

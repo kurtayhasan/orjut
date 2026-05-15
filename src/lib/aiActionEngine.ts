@@ -6,6 +6,9 @@ export interface LandContext {
   sowingDate: string;       // "2025-04-15"
   currentDay: number;       // ekim tarihinden bu yana gün sayısı
   totalArea: number;        // dönüm
+  soilType?: string;        // "Kumlu", "Killi" vs.
+  lat: number;              // Centroid latitude
+  lng: number;              // Centroid longitude
   lastOperations: string[]; // Son 3 işlem özeti
   scoutingNotes: string[];  // Son 3 gözlem/sağlık durumu özeti
 }
@@ -22,7 +25,8 @@ export function buildAIPrompt(data: AIActionPrompt): string {
     ? data.lands.map(l => {
         const opsText = l.lastOperations.length > 0 ? l.lastOperations.join(', ') : "Son zamanlarda işlem yapılmamış";
         const scsText = l.scoutingNotes.length > 0 ? l.scoutingNotes.join(', ') : "Gözlem kaydı bulunmuyor";
-        return `- ${l.totalArea} dönüm ${l.cropName}: Ekimin üzerinden ${l.currentDay} gün geçmiş. \n  * Son İşlemler: ${opsText} \n  * Sağlık Durumu: ${scsText}`;
+        const soilText = l.soilType ? `Toprak Tipi: ${l.soilType}, ` : "";
+        return `- ${l.totalArea} dönüm ${l.cropName} (${soilText}Konum: ${l.lat}, ${l.lng}): Ekimin üzerinden ${l.currentDay} gün geçmiş. \n  * Son İşlemler: ${opsText} \n  * Sağlık Durumu: ${scsText}`;
       }).join('\n\n')
     : "Kayıtlı aktif arazi bulunmamaktadır.";
 

@@ -7,6 +7,7 @@ import { db } from '@/lib/db';
 import { Users, Map, Star, Shield, ArrowLeft } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
+import { toast } from 'sonner';
 
 export default function AdminDashboard() {
   const { userRole, isLoadingLands } = useAppContext();
@@ -46,7 +47,7 @@ export default function AdminDashboard() {
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="ghost" onClick={() => router.push('/dashboard')} leftIcon={<ArrowLeft size={18} />}>
-            Panel'e Dön
+            Panel&apos;e Dön
           </Button>
           <h1 className="text-3xl font-black text-zinc-900 dark:text-white flex items-center gap-2">
             <Shield className="text-emerald-500" /> Sistem Yönetimi
@@ -80,53 +81,114 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      <Card className="overflow-hidden border-none shadow-xl">
-        <div className="p-6 border-b border-zinc-100 dark:border-zinc-800">
-          <h2 className="text-lg font-bold">Kullanıcı Listesi</h2>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-zinc-50 dark:bg-zinc-900 text-[10px] font-black uppercase tracking-widest text-zinc-500">
-              <tr>
-                <th className="px-6 py-4">İsim</th>
-                <th className="px-6 py-4">Telefon</th>
-                <th className="px-6 py-4">Rol</th>
-                <th className="px-6 py-4">Durum</th>
-                <th className="px-6 py-4">Kayıt Tarihi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-              {users.map(u => (
-                <tr key={u.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
-                  <td className="px-6 py-4 font-bold">{u.first_name} {u.last_name}</td>
-                  <td className="px-6 py-4 text-zinc-500">{u.phone}</td>
+        <Card className="overflow-hidden border-none shadow-xl">
+          <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center">
+            <h2 className="text-lg font-bold flex items-center gap-2">
+              <Star className="text-amber-500" size={20} /> Bekleyen Hasat Pro Onayları
+            </h2>
+            <span className="px-3 py-1 bg-amber-100 text-amber-700 text-[10px] font-black uppercase tracking-widest rounded-full">2 Bekleyen</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="bg-zinc-50 dark:bg-zinc-900 text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                <tr>
+                  <th className="px-6 py-4">Kullanıcı</th>
+                  <th className="px-6 py-4">Tutar / Plan</th>
+                  <th className="px-6 py-4">Durum</th>
+                  <th className="px-6 py-4 text-right">İşlem</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                {/* Mock Pending Request 1 */}
+                <tr className="hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
                   <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded text-[10px] font-black uppercase ${
-                      u.role === 'admin' ? 'bg-rose-100 text-rose-600' : 
-                      u.role === 'engineer' ? 'bg-indigo-100 text-indigo-600' : 
-                      'bg-emerald-100 text-emerald-600'
-                    }`}>
-                      {u.role}
-                    </span>
+                    <p className="font-bold">Ahmet Yılmaz</p>
+                    <p className="text-xs text-zinc-500">0532 111 22 33</p>
                   </td>
                   <td className="px-6 py-4">
-                    {u.is_premium ? (
-                      <span className="flex items-center gap-1 text-amber-600 text-xs font-bold">
-                        <Star size={12} /> PRO
-                      </span>
-                    ) : (
-                      <span className="text-zinc-400 text-xs font-bold">Free</span>
-                    )}
+                    <p className="font-bold text-zinc-900 dark:text-zinc-100">1.000 ₺</p>
+                    <p className="text-xs text-zinc-500">Yıllık Plan (EFT/Havale)</p>
                   </td>
-                  <td className="px-6 py-4 text-xs text-zinc-400">
-                    {new Date(u.created_at).toLocaleDateString('tr-TR')}
+                  <td className="px-6 py-4">
+                    <span className="px-3 py-1 bg-amber-100 text-amber-700 text-[10px] font-black uppercase tracking-widest rounded-full">Onay Bekliyor</span>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <Button size="sm" onClick={() => toast.success("Ahmet Yılmaz kullanıcısının Hasat Pro aboneliği onaylandı!")}>
+                      Onayla
+                    </Button>
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-    </div>
+                {/* Mock Pending Request 2 */}
+                <tr className="hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
+                  <td className="px-6 py-4">
+                    <p className="font-bold">Mehmet Kaya</p>
+                    <p className="text-xs text-zinc-500">0544 555 66 77</p>
+                  </td>
+                  <td className="px-6 py-4">
+                    <p className="font-bold text-zinc-900 dark:text-zinc-100">99 ₺</p>
+                    <p className="text-xs text-zinc-500">Aylık Plan (EFT/Havale)</p>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="px-3 py-1 bg-amber-100 text-amber-700 text-[10px] font-black uppercase tracking-widest rounded-full">Onay Bekliyor</span>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <Button size="sm" onClick={() => toast.success("Mehmet Kaya kullanıcısının Hasat Pro aboneliği onaylandı!")}>
+                      Onayla
+                    </Button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </Card>
+
+        <Card className="overflow-hidden border-none shadow-xl">
+          <div className="p-6 border-b border-zinc-100 dark:border-zinc-800">
+            <h2 className="text-lg font-bold">Tüm Kullanıcılar</h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="bg-zinc-50 dark:bg-zinc-900 text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                <tr>
+                  <th className="px-6 py-4">İsim</th>
+                  <th className="px-6 py-4">Telefon</th>
+                  <th className="px-6 py-4">Rol</th>
+                  <th className="px-6 py-4">Durum</th>
+                  <th className="px-6 py-4">Kayıt Tarihi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                {users.map(u => (
+                  <tr key={u.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
+                    <td className="px-6 py-4 font-bold">{u.first_name} {u.last_name}</td>
+                    <td className="px-6 py-4 text-zinc-500">{u.phone}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 rounded text-[10px] font-black uppercase ${
+                        u.role === 'admin' ? 'bg-rose-100 text-rose-600' : 
+                        u.role === 'engineer' ? 'bg-indigo-100 text-indigo-600' : 
+                        'bg-emerald-100 text-emerald-600'
+                      }`}>
+                        {u.role}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      {u.is_premium ? (
+                        <span className="flex items-center gap-1 text-amber-600 text-xs font-bold">
+                          <Star size={12} /> PRO
+                        </span>
+                      ) : (
+                        <span className="text-zinc-400 text-xs font-bold">Free</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-xs text-zinc-400">
+                      {new Date(u.created_at).toLocaleDateString('tr-TR')}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      </div>
   );
 }

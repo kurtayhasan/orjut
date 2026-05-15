@@ -102,3 +102,25 @@ PayTR ve yasal otoriteler için Footer'da 4 temel yasal sayfa zorunludur:
 
 ---
 *Bu doküman Orjut AgTech OS projesinin gelişim mirasıdır.*
+CRITICAL MASTER TASK: DATA FLOW, UX PHILOSOPHY & SYSTEM INTEGRITY DIRECTIVES
+Sen bir Lead UX/UI Mühendisi ve Veri Akışı (Data Flow) Mimarı'sın. Projenin teknik altyapısını kurduk ancak sistemin "Genel Kullanım Felsefesini" ve "Veri Yaşam Döngüsünü" standartlaştırmamız gerekiyor. Sistemin ana mottosu şudur: "Mükemmel derecede basit, ama maksimum düzeyde bilgi verici."
+
+
+7. DATA FLOW & STATE SYNCHRONIZATION (VERİ AKIŞI)
+- Single Source of Truth (Tek Gerçeklik Kaynağı): Supabase'dir.
+- Local State (Yerel Durum): `AppContext.tsx`, Supabase'den gelen veriyi React bileşenleri için önbellekler (cache).
+- Veri Akış Kuralı: Asla doğrudan UI üzerinden veri manipüle etme (Optimistic UI kullanırken dikkatli ol). İşlem sırası her zaman şu olmalıdır: 
+  1) Supabase'e yaz (örn: RPC veya Insert).
+  2) Başarılı dönerse, `AppContext` içindeki veriyi güncelle.
+  3) UI otomatik olarak yeni veriyi yansıtsın.
+- Çevrimdışı (Offline) Mantığı: Eğer ağ yoksa, kritik veriler LocalStorage/IndexedDB'de tutulmalı ve internet geldiğinde background sync (arka plan eşitlemesi) yapılmalıdır.
+
+8. UX/UI PHILOSOPHY (SADELİK VE BİLGİ YOĞUNLUĞU)
+- Apple/Enterprise Prensibi: Ekranı buton ve yazılarla boğma. Ancak kullanıcı bir verinin üstüne geldiğinde veya detayına tıkladığında (Progressive Disclosure) ihtiyacı olan tüm zirai/finansal detayı görebilmeli.
+- Veri Görselleştirme: Kuru rakamlar yerine rozetler (badges), renkli statüsler (Örn: Bekliyor = Sarı, Tamamlandı = Yeşil) ve mini grafikler/barlar kullan.
+- Empty States (Boş Durumlar): Bir tabloda veri yoksa sadece boş beyaz bir ekran bırakma. "Henüz masraf girmediniz, ilk masrafınızı eklemek için buraya tıklayın" gibi yönlendirici illüstrasyonlar/metinler kullan.
+
+9. ERROR HANDLING & USER FEEDBACK (HATA YÖNETİMİ)
+- Sessiz Hatalar (Silent Failures) Yasaktır: Bir form gönderilemediyse veya veri çekilemediyse kullanıcı ASLA boş ekrana bakmamalı.
+- Toast Bildirimleri: Başarılı işlemlerde (z-index 9999) sağ alttan çıkan kısa, yeşil toast mesajları kullan ("Reçete başarıyla eklendi").
+- Hata Yakalama: API veya Supabase isteklerini daima `try/catch` blokları içine al. Kritik hatalarda log tut, kullanıcıya ise "Bir şeyler ters gitti, lütfen tekrar deneyin" gibi medeni bir mesaj göster (Stack trace gösterme).

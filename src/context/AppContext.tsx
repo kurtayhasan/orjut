@@ -503,6 +503,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         sowingDate: land.planting_date || new Date().toISOString(),
         currentDay: land.planting_date ? Math.floor((Date.now() - new Date(land.planting_date).getTime()) / 86400000) : 0,
         totalArea: land.size_decare || 0,
+        lat: land.lat || 37.0,
+        lng: land.lng || 35.0,
+        soilType: (land as any).soil_type,
         lastOperations: fieldOperations
           .filter(o => o.land_id === land.id)
           .slice(0, 3)

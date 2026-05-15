@@ -190,6 +190,36 @@ export default function LandsPage() {
                   </div>
                 </Card>
 
+                {/* PHASE 4: NDVI & Soil Moisture Widget (UX Rule 8) */}
+                <Card className="bg-surface-2 border-border" padding="md">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-bold text-text-primary flex items-center gap-2 text-sm">
+                      <Activity size={16} className="text-emerald-500" /> Sağlık ve Nem Analizi
+                    </h4>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-primary bg-primary-50 border border-primary-100 px-2 py-0.5 rounded-md">Proaktif AI</span>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between items-center mb-1.5">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-text-muted">Bitki Sağlığı (NDVI)</span>
+                        <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full">%85 (İyi Durumda)</span>
+                      </div>
+                      <div className="h-2 w-full bg-surface rounded-full overflow-hidden shadow-inner">
+                        <div className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full" style={{ width: '85%' }} />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between items-center mb-1.5">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-text-muted">Toprak Nemi</span>
+                        <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-full">%42 (Sınırda)</span>
+                      </div>
+                      <div className="h-2 w-full bg-surface rounded-full overflow-hidden shadow-inner">
+                        <div className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full" style={{ width: '42%' }} />
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+
                 <div>
                    <h4 className="font-black text-[10px] text-text-muted uppercase tracking-widest mb-3">Arazi Notları</h4>
                    <p className="text-sm text-text-secondary italic">Bu arazi için henüz bir gözlem kaydı bulunmuyor.</p>
