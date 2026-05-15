@@ -216,7 +216,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((f, i) => (
-              <Card key={i} interactive padding="lg" className="flex flex-col items-center text-center">
+              <Card key={i} hoverable padding="lg" className="flex flex-col items-center text-center">
                 <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mb-6", f.bg)}>
                   <f.icon className={f.color} size={32} />
                 </div>
@@ -371,7 +371,8 @@ export default function LandingPage() {
             <ul className="space-y-4">
               <li><Link href="/legal/terms" className="text-text-muted hover:text-white transition-colors text-sm font-bold">Kullanım Koşulları</Link></li>
               <li><Link href="/legal/privacy" className="text-text-muted hover:text-white transition-colors text-sm font-bold">Gizlilik Politikası</Link></li>
-              <li><Link href="/legal/cookies" className="text-text-muted hover:text-white transition-colors text-sm font-bold">Çerez Politikası</Link></li>
+              <li><Link href="/legal/refund" className="text-text-muted hover:text-white transition-colors text-sm font-bold">İptal ve İade Koşulları</Link></li>
+              <li><Link href="/legal/distance-selling" className="text-text-muted hover:text-white transition-colors text-sm font-bold">Mesafeli Satış Sözleşmesi</Link></li>
             </ul>
           </div>
         </div>
