@@ -56,3 +56,38 @@ export async function buildLandContext(landId: string) {
     return null;
   }
 }
+
+export async function buildMinifiedRAGContext(landId: string) {
+  try {
+    const { data: land } = await supabase.from('lands').select('*').eq('id', landId).single();
+    if (!land) throw new Error("Land not found");
+
+    // Fetch last 3 history records for context
+    const { data: history } = await supabase
+      .from('ai_insights_history')
+      .select('*')
+      .eq('land_id', landId)
+      .order('timestamp', { ascending: false })
+      .limit(3);
+
+    const weather = await fetchWeather(land.lat, land.lng);
+
+    // Minified format: CTX:[{D:"MM-DD", T:temp, H:hum, ACT:"recommendation"}], CURR:{T:temp, H:hum}
+    const minifiedHistory = history?.map(h => ({
+      D: h.timestamp ? h.timestamp.split('T')[0].slice(5) : '',
+      T: h.weather_snapshot?.temp,
+      H: h.weather_snapshot?.humidity,
+      ACT: h.ai_recommendation?.slice(0, 30) // Limit recommendation length in context
+    })) || [];
+
+    return {
+      LAND: { C: land.crop_type, S: land.size_decare, E: land.environment_type === 'sera' ? 'S' : 'A' },
+      CTX: minifiedHistory,
+      CURR: { T: weather.temperature, H: weather.humidity, C: weather.condition },
+      RAW_WEATHER: weather // Keep for insertion into history
+    };
+  } catch (error) {
+    console.error("Minified RAG Error:", error);
+    return null;
+  }
+}

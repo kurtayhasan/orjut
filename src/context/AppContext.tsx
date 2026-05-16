@@ -70,6 +70,7 @@ type AppContextType = {
   showUpsell: boolean;
   triggerUpsell: () => void;
   closeUpsell: () => void;
+  getAiHistory: (landId: string) => Promise<any[]>;
   isExpenseModalOpen: boolean;
   setIsExpenseModalOpen: (isOpen: boolean) => void;
   clearAllData: () => void;
@@ -162,7 +163,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // PHASE 3: STRICT STATE RESET - If data is null/empty, state must be []
       if (p.data) {
         setUserProfile(p.data);
-        setUserRole((p.data.role as any) || 'farmer');
+        const overrideRole = localStorage.getItem('user_role_override');
+        const finalRole = (overrideRole || p.data.role || 'farmer') as 'farmer' | 'engineer' | 'admin';
+        setUserRole(finalRole);
+
+        // Phase 6: Admin Auto-Redirect
+        if (finalRole === 'admin' && window.location.pathname === '/dashboard') {
+          window.location.href = '/admin';
+        }
       }
       setLands(l.data || []);
       if (l.data) {
@@ -610,6 +618,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     isPremium: !!userProfile?.is_premium,
     isDemo: false,
     showUpsell, triggerUpsell, closeUpsell,
+    getAiHistory: async (landId: string) => {
+      const { data, error } = await db.getAiInsightsHistory(landId);
+      if (error) return [];
+      return data || [];
+    },
     isExpenseModalOpen, setIsExpenseModalOpen, clearAllData
   };
 

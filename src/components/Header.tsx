@@ -50,7 +50,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="h-[60px] md:h-[72px] bg-surface border-b border-border px-4 md:px-8 flex items-center justify-between sticky top-0 z-[var(--z-sticky)]">
+      <header className="h-[60px] md:h-[72px] bg-surface border-b border-border px-4 md:px-8 flex items-center justify-between sticky top-0 z-30">
         {/* LEFT: BACK BUTTON OR GREETING */}
         <div className="flex items-center gap-3">
           {isSubPage ? (

@@ -172,6 +172,16 @@ export const db = {
       .eq('farmer_id', farmerId)
       .eq('status', 'pending'),
 
+  /* ── AI Insights History ──────────────── */
+  getAiInsightsHistory: (landId: string) =>
+    from('ai_insights_history')
+      .select('*')
+      .eq('land_id', landId)
+      .order('timestamp', { ascending: false }),
+
+  insertAiInsightHistory: (history: { land_id: string, weather_snapshot: any, ai_recommendation: string }) =>
+    from('ai_insights_history').insert([history]),
+
   /* ── Bulk Deletes (Orphan Prevention) ──── */
   deleteTransactionsByLand: (landId: string) =>
     from('transactions').delete().eq('land_id', landId),

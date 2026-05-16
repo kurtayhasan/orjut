@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
-import { X, Crown, Satellite, Bot, Sparkles, Check, Zap } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Crown, Satellite, Bot, Sparkles, Zap } from 'lucide-react';
 import Link from 'next/link';
+import { createPortal } from 'react-dom';
 
 interface PremiumUpsellModalProps {
   isOpen: boolean;
@@ -11,10 +12,15 @@ interface PremiumUpsellModalProps {
 
 export default function PremiumUpsellModal({ isOpen, onClose }: PremiumUpsellModalProps) {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
+  const [mounted, setMounted] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  return (
+  if (!mounted || !isOpen) return null;
+
+  return createPortal(
     <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div 
@@ -161,6 +167,7 @@ export default function PremiumUpsellModal({ isOpen, onClose }: PremiumUpsellMod
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

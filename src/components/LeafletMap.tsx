@@ -32,13 +32,21 @@ const CROP_TYPES = [
 
 // MapClickHandler removed in favor of EditControl
 
-function MapController({ selectedLand }: { selectedLand: any }) {
+function MapController({ selectedLand, searchResult }: { selectedLand: any, searchResult: L.LatLng | null }) {
   const map = useMap();
+  
   useEffect(() => {
     if (selectedLand && selectedLand.lat && selectedLand.lng) {
-      map.flyTo([selectedLand.lat, selectedLand.lng], 15, { animate: true });
+      map.flyTo([selectedLand.lat, selectedLand.lng], 16, { animate: true, duration: 1.5 });
     }
   }, [selectedLand, map]);
+
+  useEffect(() => {
+    if (searchResult) {
+      map.flyTo([searchResult.lat, searchResult.lng], 14, { animate: true, duration: 2 });
+    }
+  }, [searchResult, map]);
+
   return null;
 }
 
@@ -69,6 +77,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
   const [isSearching, setIsSearching] = useState(false);
   const [environmentType, setEnvironmentType] = useState<'acik_tarla' | 'sera'>('acik_tarla');
   const [sizeSqm, setSizeSqm] = useState<number>(0);
+  const [searchQueryResult, setSearchQueryResult] = useState<L.LatLng | null>(null);
 
   // Country/State/City data from country-state-city
   const countries = useMemo(() => Country.getAllCountries(), []);
@@ -241,9 +250,11 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
       const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`);
       const data = await res.json();
       if (data && data.length > 0) {
-        const { lat, lon } = data[0];
-        setMarkerPosition(new L.LatLng(parseFloat(lat), parseFloat(lon)));
-        setShowCropSelector(true);
+        const { lat, lon, display_name } = data[0];
+        const newPos = new L.LatLng(parseFloat(lat), parseFloat(lon));
+        setMarkerPosition(newPos);
+        setSearchQueryResult(newPos);
+        toast.success(`${display_name.split(',')[0]} konumuna gidiliyor...`);
       } else {
         toast.error("Konum bulunamadı.");
       }
@@ -354,7 +365,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
           />
         </FeatureGroup>
         
-        <MapController selectedLand={focusLand} />
+        <MapController selectedLand={focusLand} searchResult={searchQueryResult} />
         
         {/* PHASE 3: ADVANCED AGRI-LAYERS MENU */}
         <div className="absolute bottom-6 left-6 z-10 flex flex-col gap-2">

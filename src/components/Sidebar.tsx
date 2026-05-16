@@ -131,6 +131,36 @@ export default function Sidebar({ className }: { className?: string }) {
           </div>
 
           <SidebarItem href="/dashboard/settings" icon={Settings} label="Ayarlar" active={pathname.includes('/settings')} onClick={closeSidebar} />
+          
+          {/* ROLE SWITCHER (Phase 6) */}
+          {(userRole === 'admin' || userRole === 'engineer') && (
+            <div className="pt-2">
+              <div className="flex p-1 bg-white/5 rounded-lg border border-white/5">
+                {(['farmer', 'engineer', 'admin'] as const).map((r) => {
+                  const baseRole = userProfile?.role || 'farmer';
+                  if (r === 'admin' && baseRole !== 'admin') return null;
+                  if (r === 'engineer' && baseRole === 'farmer') return null;
+                  
+                  return (
+                    <button
+                      key={r}
+                      onClick={() => {
+                        localStorage.setItem('user_role_override', r);
+                        window.location.reload();
+                      }}
+                      className={cn(
+                        "flex-1 py-1.5 text-[8px] font-black uppercase tracking-widest rounded transition-all",
+                        userRole === r ? "bg-primary text-white" : "text-white/40 hover:text-white"
+                      )}
+                    >
+                      {r === 'farmer' ? 'Çiftçi' : r === 'engineer' ? 'Müh.' : 'Admin'}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-bold text-rose-400 hover:bg-rose-500/10 group"

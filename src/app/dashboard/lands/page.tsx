@@ -18,6 +18,7 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import BaseModal from '@/components/ui/BaseModal';
 import LandMovementsModal from '@/components/lands/LandMovementsModal';
+import LandTimeline from '@/components/lands/LandTimeline';
 import { formatArea, cn } from '@/lib/utils';
 
 const DynamicLeafletMap = dynamic(() => import('@/components/LeafletMap'), { 
@@ -28,6 +29,38 @@ const DynamicLeafletMap = dynamic(() => import('@/components/LeafletMap'), {
     </div>
   )
 });
+
+function LandTimelineContainer({ landId }: { landId: string }) {
+  const { getAiHistory } = useAppContext();
+  const [history, setHistory] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      setLoading(true);
+      const data = await getAiHistory(landId);
+      setHistory(data);
+      setLoading(false);
+    }
+    load();
+  }, [landId, getAiHistory]);
+
+  return (
+    <div className="space-y-4">
+      <h4 className="font-black text-[10px] text-text-muted uppercase tracking-widest mb-3 flex items-center gap-2">
+        <Activity size={14} className="text-primary" /> Analiz Geçmişi
+      </h4>
+      {loading ? (
+        <div className="animate-pulse space-y-3">
+          <div className="h-20 bg-surface-2 rounded-xl" />
+          <div className="h-20 bg-surface-2 rounded-xl" />
+        </div>
+      ) : (
+        <LandTimeline history={history} />
+      )}
+    </div>
+  );
+}
 
 export default function LandsPage() {
   const { lands, totalArea, deleteLand, updateLand, isLoadingLands, transactions, currentUserRole } = useAppContext();
@@ -219,6 +252,8 @@ export default function LandsPage() {
                     </div>
                   </div>
                 </Card>
+
+                <LandTimelineContainer landId={selectedLand.id} />
 
                 <div>
                    <h4 className="font-black text-[10px] text-text-muted uppercase tracking-widest mb-3">Arazi Notları</h4>

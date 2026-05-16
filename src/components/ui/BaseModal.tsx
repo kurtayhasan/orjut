@@ -46,7 +46,6 @@ export default function BaseModal({
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
-  if (!isOpen || !mounted) return null;
 
   const maxWidthClass = { sm: 'md:max-w-sm', md: 'md:max-w-md', lg: 'md:max-w-lg' }[size];
 
@@ -110,6 +109,8 @@ export default function BaseModal({
       </div>
     </div>
   );
+
+  if (!mounted || !isOpen) return null;
 
   return createPortal(modalContent, document.body);
 }

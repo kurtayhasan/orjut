@@ -40,7 +40,7 @@ export async function requestNotificationPermission(orgId: string): Promise<bool
     if (!subscription) {
       subscription = await registration.pushManager.subscribe({
         userVisibleOnly:      true,
-        applicationServerKey: urlBase64ToUint8Array(publicVapidKey),
+        applicationServerKey: urlBase64ToUint8Array(publicVapidKey) as any,
       });
     }
 
