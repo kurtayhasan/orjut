@@ -74,6 +74,8 @@ type AppContextType = {
   isExpenseModalOpen: boolean;
   setIsExpenseModalOpen: (isOpen: boolean) => void;
   clearAllData: () => void;
+  refreshProfile: () => Promise<void>;
+  syncNow: () => Promise<void>;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -139,6 +141,43 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (userRole === 'engineer' && selectedClientId) return selectedClientId;
     return myId;
   }, [userRole, selectedClientId, userProfile?.id]);
+
+  const refreshProfile = useCallback(async () => {
+    const userId = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
+    if (!userId) return;
+
+    try {
+      const { data, error } = await db.getProfile(userId);
+      if (error) throw error;
+      if (data) {
+        setUserProfile(data);
+        const overrideRole = localStorage.getItem('user_role_override');
+        const finalRole = (overrideRole || data.role || 'farmer') as 'farmer' | 'engineer' | 'admin';
+        setUserRole(finalRole);
+        
+        // Auto-redirect if on wrong dashboard
+        if (finalRole === 'admin' && window.location.pathname === '/dashboard') {
+          window.location.href = '/admin';
+        } else if (finalRole === 'engineer' && window.location.pathname === '/dashboard') {
+          window.location.href = '/engineer';
+        }
+      }
+    } catch (err) {
+      console.error("Profile refresh error:", err);
+    }
+  }, []);
+
+  const syncNow = useCallback(async () => {
+    toast.loading("Veriler senkronize ediliyor...", { id: 'sync-now' });
+    try {
+      await refreshProfile();
+      // We don't use refreshAllData directly here because we want a clean state
+      window.location.reload(); 
+      toast.success("Senkronizasyon tamamlandı", { id: 'sync-now' });
+    } catch (err) {
+      toast.error("Senkronizasyon başarısız", { id: 'sync-now' });
+    }
+  }, [refreshProfile]);
 
   const refreshAllData = useCallback(async () => {
     const userId = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
@@ -209,6 +248,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setIsLoadingInventory(false);
     }
   }, [activeOrgId]);
+
+  useEffect(() => {
+    refreshProfile();
+  }, [refreshProfile]);
 
   useEffect(() => {
     const savedTheme = typeof window !== 'undefined' ? localStorage.getItem('theme') : null;
@@ -625,7 +668,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (error) return [];
       return data || [];
     },
-    isExpenseModalOpen, setIsExpenseModalOpen, clearAllData
+    isExpenseModalOpen, setIsExpenseModalOpen, clearAllData,
+    refreshProfile, syncNow
   };
 
   return (

@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation';
 import { db } from '@/lib/db';
 
 export default function SettingsPage() {
-  const { lang, setLang, activeOrgId } = useAppContext();
+  const { lang, setLang, activeOrgId, syncNow, isPremium } = useAppContext();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const router = useRouter();
   const [userProfile, setUserProfile] = useState<{name: string, phone: string} | null>(null);
@@ -94,28 +94,7 @@ export default function SettingsPage() {
   };
 
   const handleSync = async () => {
-    toast.loading("Sistem senkronize ediliyor...", { id: "sync-toast" });
-    try {
-      // Clear Service Worker Caches
-      if ('caches' in window) {
-        const names = await caches.keys();
-        for (let name of names) {
-          await caches.delete(name);
-        }
-      }
-      
-      // Refresh Next.js Router Cache
-      router.refresh();
-      
-      // Force reload to get fresh data
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-      
-      toast.success("Sistem başarıyla tazelendi!", { id: "sync-toast" });
-    } catch (err) {
-      toast.error("Senkronizasyon hatası.", { id: "sync-toast" });
-    }
+    await syncNow();
   };
 
   return (
@@ -141,7 +120,9 @@ export default function SettingsPage() {
             <h3 className="text-lg font-black text-zinc-900">{userProfile?.name}</h3>
             <p className="text-sm text-zinc-500 font-medium mb-6">{userProfile?.phone}</p>
             <div className="pt-6 border-t border-zinc-100">
-              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full">Hasat Pro Üyelik</span>
+              <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full ${isPremium ? 'text-emerald-600 bg-emerald-50' : 'text-zinc-400 bg-zinc-50'}`}>
+                {isPremium ? 'Hasat Pro Üyelik' : 'Ücretsiz Üyelik'}
+              </span>
             </div>
           </div>
 

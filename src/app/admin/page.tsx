@@ -35,12 +35,14 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    if (!isLoadingLands && userRole !== 'admin') {
+    if (isLoadingLands) return; // Wait for loading to complete
+
+    if (userRole !== 'admin') {
       router.push('/dashboard');
       return;
     }
 
-    if (userRole === 'admin') fetchAdminData();
+    fetchAdminData();
   }, [userRole, isLoadingLands, router]);
 
   const handleApprove = async (userId: string) => {
@@ -58,6 +60,14 @@ export default function AdminDashboard() {
       toast.error("Hata: " + err.message, { id: 'approve-premium' });
     }
   };
+
+  if (isLoadingLands) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-black">
+        <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (userRole !== 'admin') return null;
 

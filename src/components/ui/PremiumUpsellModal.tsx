@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Crown, Satellite, Bot, Sparkles, Zap } from 'lucide-react';
 import Link from 'next/link';
+import { useAppContext } from '@/context/AppContext';
 import { createPortal } from 'react-dom';
 
 interface PremiumUpsellModalProps {
@@ -11,12 +12,20 @@ interface PremiumUpsellModalProps {
 }
 
 export default function PremiumUpsellModal({ isOpen, onClose }: PremiumUpsellModalProps) {
+  const { isPremium } = useAppContext();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Auto-close if premium is activated in background
+  useEffect(() => {
+    if (isPremium && isOpen) {
+      onClose();
+    }
+  }, [isPremium, isOpen, onClose]);
 
   if (!mounted || !isOpen) return null;
 
