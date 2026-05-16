@@ -45,6 +45,12 @@ export const db = {
   getAllProfiles: () =>
     from('profiles').select('*').order('created_at', { ascending: false }),
 
+  updateProfile: (id: string, updates: Partial<Profile>) =>
+    from('profiles').update(updates).eq('id', id),
+
+  getPendingPremiumApprovals: () =>
+    from('profiles').select('*').eq('payment_status', 'pending_approval'),
+
   /* ── Lands ────────────────────────────── */
   getLands: (userId: string) =>
     from('lands').select('*').eq('org_id', userId),

@@ -52,8 +52,8 @@ export default function EnglishLandingPage() {
               <span className="text-white font-black text-xl">O</span>
             </div>
             <div className="flex flex-col -space-y-1">
-              <span className="text-xl font-black tracking-tighter">Orjut</span>
-              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">AgTech OS</span>
+              <span className="text-xl font-black tracking-tighter">Kurtay</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">ZiraiAsistan OS</span>
             </div>
           </div>
           
@@ -200,7 +200,7 @@ export default function EnglishLandingPage() {
                 <div className="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center">
                   <span className="text-white font-black text-2xl">O</span>
                 </div>
-                <span className="text-2xl font-black tracking-tighter">Orjut <span className="text-emerald-500">AgTech</span></span>
+                <span className="text-2xl font-black tracking-tighter">Kurtay <span className="text-emerald-500">ZiraiAsistan</span></span>
               </div>
               <p className="text-zinc-500 font-medium max-w-sm text-lg leading-relaxed">
                 {t.footerSub}
@@ -227,7 +227,7 @@ export default function EnglishLandingPage() {
           </div>
           
           <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
-            <p className="text-xs font-black text-zinc-600 uppercase tracking-widest">© 2026 ORJUT AGTECH OS. ALL RIGHTS RESERVED.</p>
+            <p className="text-xs font-black text-zinc-600 uppercase tracking-widest">© 2026 KURTAY BILIŞIM. ALL RIGHTS RESERVED.</p>
           </div>
         </div>
       </footer>

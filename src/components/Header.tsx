@@ -45,7 +45,7 @@ export default function Header() {
     if (pathname.includes('/seasons')) return 'Sezonlar';
     if (pathname.includes('/ai')) return 'AI Asistan';
     if (pathname.includes('/settings')) return 'Ayarlar';
-    return 'Orjut';
+    return 'ZiraiAsistan';
   };
 
   return (

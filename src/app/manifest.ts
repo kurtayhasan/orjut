@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'ZiraiAsistan by Orjut',
+    name: 'ZiraiAsistan Kurtay Bilişim',
     short_name: 'ZiraiAsistan',
     description: 'Gerçek Verilerle Sıfır Kayıp, Maksimum Hasat.',
     start_url: '/',

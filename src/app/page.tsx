@@ -81,7 +81,7 @@ export default function LandingPage() {
               <span className="font-heading font-black text-xl">O</span>
             </div>
             <span className="text-xl font-heading font-extrabold text-text-primary tracking-tight">
-              Orjut <span className="text-primary font-bold">ZiraiAsistan</span>
+              Kurtay <span className="text-primary font-bold">ZiraiAsistan</span>
             </span>
           </div>
 
@@ -111,7 +111,7 @@ export default function LandingPage() {
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white">
                 <span className="font-heading font-black">O</span>
               </div>
-              <span className="font-heading font-bold">Orjut</span>
+              <span className="font-heading font-bold">ZiraiAsistan</span>
             </div>
             <button onClick={() => setMobileMenuOpen(false)}>
               <X size={28} className="text-text-primary" />
@@ -352,7 +352,7 @@ export default function LandingPage() {
                 <span className="font-heading font-black text-xl">O</span>
               </div>
               <span className="text-xl font-heading font-extrabold tracking-tight">
-                Orjut <span className="text-primary">ZiraiAsistan</span>
+                Kurtay <span className="text-primary">ZiraiAsistan</span>
               </span>
             </div>
             <p className="text-text-muted text-sm max-w-sm leading-relaxed font-medium">
@@ -380,7 +380,7 @@ export default function LandingPage() {
           </div>
         </div>
         <div className="max-w-7xl mx-auto pt-12 mt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-text-muted text-sm font-medium">
-           <p>© 2026 Orjut AgTech. Tüm hakları saklıdır.</p>
+           <p>© 2026 Kurtay Bilişim. Tüm hakları saklıdır.</p>
            <div className="flex gap-6">
               <Link href="/" className="hover:text-white transition-colors">Twitter</Link>
               <Link href="/" className="hover:text-white transition-colors">Instagram</Link>
