@@ -31,10 +31,10 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "ZiraiAsistan | Profesyonel Tarım Yönetim Sistemi",
-  description: "Kurtay Bilişim tarafından Türk çiftçisi için geliştirilmiş en gelişmiş tarım takip platformu. Arazi yönetimi, masraf takibi ve yapay zeka destekli zirai danışmanlık.",
+  title: "Orjut ZiraiAsistan | Profesyonel Tarım Yönetim Sistemi",
+  description: "Türk çiftçisi için geliştirilmiş en gelişmiş tarım takip platformu. Arazi yönetimi, masraf takibi ve yapay zeka destekli zirai danışmanlık.",
   keywords: ["Tarım yazılımı", "Zirai Takip", "Çiftçi Uygulaması", "Tarım ERP", "Akıllı Tarım", "Arazi Yönetimi", "Masraf Takibi"],
-  metadataBase: new URL('https://ziraiasistan.com'),
+  metadataBase: new URL('https://orjut.com'),
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -45,20 +45,20 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'ZiraiAsistan',
+    title: 'Orjut ZiraiAsistan',
   },
   openGraph: {
-    title: "ZiraiAsistan | Profesyonel Tarım Yönetim Sistemi",
-    description: "Tarlanızdan kazancınıza kadar her şey kontrolünüzde. Kurtay Bilişim'in dijital iş ortağı.",
+    title: "Orjut ZiraiAsistan | Profesyonel Tarım Yönetim Sistemi",
+    description: "Tarlanızdan kazancınıza kadar her şey kontrolünüzde. Türk çiftçisinin dijital iş ortağı.",
     type: "website",
     locale: "tr_TR",
-    siteName: "ZiraiAsistan",
+    siteName: "Orjut ZiraiAsistan",
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'ZiraiAsistan Dashboard'
+        alt: 'Orjut ZiraiAsistan Dashboard'
       }
     ]
   },

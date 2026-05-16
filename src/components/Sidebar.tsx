@@ -63,7 +63,7 @@ export default function Sidebar({ className }: { className?: string }) {
               <span className="font-black text-xl">O</span>
             </div>
             <div className="flex flex-col -space-y-1">
-              <span className="text-lg font-black text-white tracking-tight">Kurtay</span>
+              <span className="text-lg font-black text-white tracking-tight">ORJUT</span>
               <span className="text-[9px] font-bold text-primary-light uppercase tracking-widest">ZiraiAsistan</span>
             </div>
           </div>

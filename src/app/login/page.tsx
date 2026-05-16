@@ -310,7 +310,7 @@ export default function LoginPage() {
           </Card>
           
           <p className="mt-12 text-center text-[10px] font-bold text-text-muted uppercase tracking-[0.2em]">
-            © 2026 ZiraiAsistan — Güvenli Erişim
+            © 2026 Orjut ZiraiAsistan — Güvenli Erişim
           </p>
         </div>
       </div>

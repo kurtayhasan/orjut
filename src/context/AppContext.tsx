@@ -167,9 +167,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const finalRole = (overrideRole || p.data.role || 'farmer') as 'farmer' | 'engineer' | 'admin';
         setUserRole(finalRole);
 
-        // Phase 6: Admin Auto-Redirect
+        // Phase 6: Admin/Engineer Auto-Redirect
         if (finalRole === 'admin' && window.location.pathname === '/dashboard') {
           window.location.href = '/admin';
+        } else if (finalRole === 'engineer' && window.location.pathname === '/dashboard') {
+          window.location.href = '/engineer';
         }
       }
       setLands(l.data || []);
