@@ -208,4 +208,8 @@ export const db = {
       p_inventory_id: inventoryId,
       p_quantity: quantity
     }),
+
+  /* ── Auth ─────────────────────────────── */
+  onAuthStateChange: (callback: (event: any, session: any) => void) =>
+    supabase.auth.onAuthStateChange(callback),
 };

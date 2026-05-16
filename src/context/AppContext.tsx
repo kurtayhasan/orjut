@@ -28,6 +28,7 @@ type AppContextType = {
   irrigationLogs: IrrigationLog[];
   isLoadingLands: boolean;
   isLoadingTransactions: boolean;
+  isLoadingProfile: boolean;
   addLand: (land: any) => Promise<void>;
   updateLand: (land: any) => Promise<void>;
   deleteLand: (id: string) => Promise<void>;
@@ -97,6 +98,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isLoadingLands, setIsLoadingLands] = useState(true);
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
   const [isLoadingInventory, setIsLoadingInventory] = useState(true);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
@@ -144,9 +146,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const refreshProfile = useCallback(async () => {
     const userId = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
-    if (!userId) return;
+    if (!userId) {
+      setIsLoadingProfile(false);
+      return;
+    }
 
+    setIsLoadingProfile(true);
     try {
+      // HARD RE-FETCH: Bypassing session claims, querying DB directly
       const { data, error } = await db.getProfile(userId);
       if (error) throw error;
       if (data) {
@@ -155,7 +162,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const finalRole = (overrideRole || data.role || 'farmer') as 'farmer' | 'engineer' | 'admin';
         setUserRole(finalRole);
         
-        // Auto-redirect if on wrong dashboard
+        // Auto-redirect logic
         if (finalRole === 'admin' && window.location.pathname === '/dashboard') {
           window.location.href = '/admin';
         } else if (finalRole === 'engineer' && window.location.pathname === '/dashboard') {
@@ -163,7 +170,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } catch (err) {
-      console.error("Profile refresh error:", err);
+      console.error("Hard Profile Re-fetch error:", err);
+    } finally {
+      setIsLoadingProfile(false);
     }
   }, []);
 
@@ -250,7 +259,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [activeOrgId]);
 
   useEffect(() => {
-    refreshProfile();
+    // HARD RE-FETCH: Subscribe to auth changes and fetch fresh profile
+    const { data: { subscription } } = db.onAuthStateChange(async (event, session) => {
+      if (session?.user?.id || localStorage.getItem('user_id')) {
+        await refreshProfile();
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, [refreshProfile]);
 
   useEffect(() => {
@@ -258,11 +274,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setIsDarkMode(savedTheme === 'dark');
     
     // PHASE 4: LOCAL CACHE SYNC / SECURITY PURGE
-    // If user_id in localStorage doesn't match current session, or data seems stale, force refresh
     const checkCacheSync = () => {
       const cachedId = localStorage.getItem('user_id');
       if (cachedId && userProfile && cachedId !== userProfile.id) {
-        console.warn("Cache mismatch detected. Purging local storage...");
         localStorage.clear();
         window.location.reload();
       }
@@ -669,7 +683,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return data || [];
     },
     isExpenseModalOpen, setIsExpenseModalOpen, clearAllData,
-    refreshProfile, syncNow
+    refreshProfile, syncNow, isLoadingProfile
   };
 
   return (

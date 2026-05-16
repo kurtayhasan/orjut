@@ -10,7 +10,7 @@ import Button from '@/components/ui/Button';
 import { toast } from 'sonner';
 
 export default function AdminDashboard() {
-  const { userRole, isLoadingLands } = useAppContext();
+  const { userRole, isLoadingProfile } = useAppContext();
   const router = useRouter();
   const [metrics, setMetrics] = useState({ totalUsers: 0, totalLands: 0, totalPremium: 0 });
   const [users, setUsers] = useState<any[]>([]);
@@ -35,7 +35,7 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    if (isLoadingLands) return; // Wait for loading to complete
+    if (isLoadingProfile) return; // Wait for profile fetch to complete
 
     if (userRole !== 'admin') {
       router.push('/dashboard');
@@ -43,7 +43,7 @@ export default function AdminDashboard() {
     }
 
     fetchAdminData();
-  }, [userRole, isLoadingLands, router]);
+  }, [userRole, isLoadingProfile, router]);
 
   const handleApprove = async (userId: string) => {
     try {
@@ -61,7 +61,7 @@ export default function AdminDashboard() {
     }
   };
 
-  if (isLoadingLands) {
+  if (isLoadingProfile) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-black">
         <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />

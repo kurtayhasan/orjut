@@ -12,7 +12,7 @@ import EmptyState from '@/components/EmptyState';
 import { toast } from 'sonner';
 
 export default function EngineerDashboard() {
-  const { userRole, isLoadingLands, setSelectedClientId, userProfile } = useAppContext();
+  const { userRole, isLoadingProfile, setSelectedClientId, userProfile } = useAppContext();
   const router = useRouter();
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,7 +34,7 @@ export default function EngineerDashboard() {
   };
 
   useEffect(() => {
-    if (isLoadingLands) return; // Wait for loading to complete
+    if (isLoadingProfile) return; // Wait for profile fetch to complete
 
     if (userRole !== 'engineer') {
       router.push('/dashboard');
@@ -42,9 +42,9 @@ export default function EngineerDashboard() {
     }
 
     fetchClients();
-  }, [userRole, isLoadingLands, router, userProfile?.id]);
+  }, [userRole, isLoadingProfile, router, userProfile?.id]);
 
-  if (isLoadingLands) {
+  if (isLoadingProfile) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-black">
         <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
