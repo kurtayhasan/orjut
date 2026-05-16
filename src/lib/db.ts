@@ -1,12 +1,12 @@
 import { supabase } from './supabase';
-import type { Land, Transaction, Season, InventoryItem, ScoutingLog } from '@/types';
+import type { Land, Transaction, Season, InventoryItem, ScoutingLog, Profile } from '@/types';
 
 // ─────────────────────────────────────────────
 // Generic query helper — eliminates boilerplate
 // ─────────────────────────────────────────────
 type Table = 'profiles' | 'lands' | 'transactions' | 'seasons' | 'irrigation_logs'
   | 'field_operations' | 'scouting_logs' | 'inventory' | 'savings_logs'
-  | 'engineer_clients' | 'push_subscriptions';
+  | 'engineer_clients' | 'push_subscriptions' | 'ai_insights_history';
 
 function from(table: Table) {
   return supabase.from(table);
