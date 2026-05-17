@@ -551,7 +551,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
           <React.Fragment key={land.id}>
             {land.boundaries ? (
               <GeoJSON 
-                key={"orjut-map-ndvi-sync-" + isNDVIActive + "-" + land.id + "-" + (polygonId || 'empty')}
+                key={"orjut-ndvi-sync-" + isNDVIActive + "-" + land.id + "-" + (polygonId || 'empty')}
                 data={land.boundaries} 
                 style={() => ({
                   fillColor: '#2e7d32',
@@ -577,7 +577,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
             ) : (
               land.lat && land.lng && (
                 <Marker 
-                  key={"orjut-map-ndvi-sync-" + isNDVIActive + "-" + land.id + "-" + (polygonId || 'empty')}
+                  key={"orjut-ndvi-sync-" + isNDVIActive + "-" + land.id + "-" + (polygonId || 'empty')}
                   position={[land.lat, land.lng]}
                   eventHandlers={{
                     click: (e: any) => {
@@ -599,7 +599,13 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
           </React.Fragment>
         ))}
 
-        {activePopup && (
+        {activePopup && 
+         Array.isArray(activePopup.position) && 
+         activePopup.position.length === 2 && 
+         typeof activePopup.position[0] === 'number' && 
+         !isNaN(activePopup.position[0]) && 
+         typeof activePopup.position[1] === 'number' && 
+         !isNaN(activePopup.position[1]) && (
           <Popup 
             position={activePopup.position} 
             eventHandlers={{

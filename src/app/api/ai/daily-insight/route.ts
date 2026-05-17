@@ -4,6 +4,8 @@ import { GoogleGenAI } from '@google/genai';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 
+export const dynamic = 'force-dynamic';
+
 // 1. Initialize the official SDK
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY as string,

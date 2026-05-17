@@ -69,11 +69,11 @@ export async function buildLandContext(landId: string) {
         environment: land?.environment_type || 'acik'
       },
       recent_operations: Array.isArray(operations) ? operations : [],
-      latest_scouting: scoutingLogs?.[0] || null,
+      latest_scouting: Array.isArray(scoutingLogs) && scoutingLogs.length > 0 ? scoutingLogs[0] : null,
       scouting_logs: Array.isArray(scoutingLogs) ? scoutingLogs : [],
       recent_transactions: Array.isArray(transactions) ? transactions : [],
-      latest_ndvi: ndvi ? { mean: ndvi.mean, date: ndvi.date } : null,
-      current_weather: weather,
+      latest_ndvi: ndvi ? { mean: ndvi?.mean ?? 0, date: ndvi?.date ?? '' } : null,
+      current_weather: weather || { temperature: null, humidity: 0, rainfall: 0, windSpeed: null, uvIndex: 0, condition: 'Hava durumu verisi şu an alınamadı', forecast: [] },
       timestamp: new Date().toISOString()
     };
   } catch (error) {
@@ -126,10 +126,10 @@ export async function buildMinifiedRAGContext(landId: string) {
 
     // Minified format: CTX:[{D:"MM-DD", T:temp, H:hum, ACT:"recommendation"}], CURR:{T:temp, H:hum}
     const minifiedHistory = (Array.isArray(history) ? history : [])?.map(h => ({
-      D: h?.timestamp ? h.timestamp.split('T')?.[0]?.slice(5) || '' : '',
+      D: h?.timestamp && typeof h.timestamp === 'string' ? h.timestamp.split('T')?.[0]?.slice(5) || '' : '',
       T: h?.weather_snapshot?.temp ?? 0,
       H: h?.weather_snapshot?.humidity ?? 0,
-      ACT: h?.ai_recommendation ? h.ai_recommendation.slice(0, 30) : ''
+      ACT: h?.ai_recommendation && typeof h.ai_recommendation === 'string' ? h.ai_recommendation.slice(0, 30) : ''
     })) || [];
 
     return {
