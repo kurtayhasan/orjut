@@ -3,6 +3,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
+import { z } from 'zod';
+
+const DailyInsightSchema = z.object({
+  prompt: z.string().min(1, "Analiz için geçerli bir prompt gönderilmelidir.")
+});
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +23,15 @@ export async function POST(req: NextRequest) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
-    const { prompt } = await req.json();
+    const body = await req.json();
+    const parseResult = DailyInsightSchema.safeParse(body);
+    if (!parseResult.success) {
+      return NextResponse.json({ 
+        success: false, 
+        error: parseResult.error.issues[0]?.message || "Geçersiz parametreler." 
+      }, { status: 200 });
+    }
+    const { prompt } = parseResult.data;
 
     // 2. Call the API using the latest official method
     const response = await ai.models.generateContent({

@@ -8,6 +8,7 @@ import AuthGuard from '@/components/AuthGuard';
 import ExpenseModal from '@/components/ExpenseModal';
 import { useAppContext } from '@/context/AppContext';
 import { cn } from '@/lib/utils';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { isExpenseModalOpen, setIsExpenseModalOpen } = useAppContext();
@@ -23,7 +24,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           
           <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 pb-24 lg:pb-8 custom-scrollbar">
             <div className="max-w-[1400px] mx-auto w-full">
-              {children}
+              <ErrorBoundary>
+                {children}
+              </ErrorBoundary>
             </div>
           </main>
 

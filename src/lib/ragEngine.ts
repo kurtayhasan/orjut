@@ -60,7 +60,7 @@ export async function buildLandContext(landId: string) {
     }
 
     // Aggregate Context (Bulletproof defaults)
-    return {
+    const contextObj = {
       land: {
         crop: land?.crop_type || 'Bilinmiyor',
         size: land?.size_decare || 0,
@@ -76,10 +76,11 @@ export async function buildLandContext(landId: string) {
       current_weather: weather || { temperature: null, humidity: 0, rainfall: 0, windSpeed: null, uvIndex: 0, condition: 'Hava durumu verisi şu an alınamadı', forecast: [] },
       timestamp: new Date().toISOString()
     };
+    return limitContextSize(contextObj, 15000);
   } catch (error) {
     console.error("RAG Context Building Error:", error);
     // Bulletproof fallback return structure instead of null
-    return {
+    const fallbackObj = {
       land: { crop: 'Bilinmiyor', size: 0, city: 'Bilinmiyor', planting_date: new Date().toISOString(), environment: 'acik' },
       recent_operations: [],
       latest_scouting: null,
@@ -89,6 +90,7 @@ export async function buildLandContext(landId: string) {
       current_weather: { temperature: null, humidity: 0, rainfall: 0, windSpeed: null, uvIndex: 0, condition: 'Hava durumu verisi şu an alınamadı', forecast: [] },
       timestamp: new Date().toISOString()
     };
+    return limitContextSize(fallbackObj, 15000);
   }
 }
 
@@ -132,20 +134,55 @@ export async function buildMinifiedRAGContext(landId: string) {
       ACT: h?.ai_recommendation && typeof h.ai_recommendation === 'string' ? h.ai_recommendation.slice(0, 30) : ''
     })) || [];
 
-    return {
+    const minifiedContext = {
       LAND: { C: land?.crop_type || 'Bilinmiyor', S: land?.size_decare || 0, E: land?.environment_type === 'sera' ? 'S' : 'A' },
       CTX: minifiedHistory,
       CURR: { T: weather?.temperature || 0, H: weather?.humidity || 0, C: weather?.condition || 'Bilinmiyor' },
       RAW_WEATHER: weather // Keep for insertion into history
     };
+    return limitContextSize(minifiedContext, 15000);
   } catch (error) {
     console.error("Minified RAG Error:", error);
     // Bulletproof fallback return structure instead of null
-    return {
+    const fallbackMinified = {
       LAND: { C: 'Bilinmiyor', S: 0, E: 'A' },
       CTX: [],
       CURR: { T: 0, H: 0, C: 'Hava durumu verisi şu an alınamadı' },
       RAW_WEATHER: { temperature: null, humidity: 0, rainfall: 0, windSpeed: null, uvIndex: 0, condition: 'Hava durumu verisi şu an alınamadı', forecast: [] }
     };
+    return limitContextSize(fallbackMinified, 15000);
   }
+}
+
+/**
+ * PHASE 2: Dynamic JSON Context Size Limiter
+ * Recursively pops array elements and slices long text values to keep serialized RAG content under 15,000 characters.
+ */
+export function limitContextSize<T>(context: T, maxLength = 15000): T {
+  const serialized = JSON.stringify(context);
+  if (serialized.length <= maxLength) return context;
+  
+  if (context && typeof context === 'object') {
+    try {
+      const copy = JSON.parse(serialized);
+      for (const key in copy) {
+        if (Array.isArray(copy[key])) {
+          while (copy[key].length > 1 && JSON.stringify(copy).length > maxLength) {
+            copy[key].pop();
+          }
+        } else if (copy[key] && typeof copy[key] === 'object') {
+          for (const subKey in copy[key]) {
+            if (typeof copy[key][subKey] === 'string' && copy[key][subKey].length > 100) {
+              copy[key][subKey] = copy[key][subKey].slice(0, 100) + '...';
+            }
+          }
+        }
+      }
+      return copy;
+    } catch {
+      return context;
+    }
+  }
+  
+  return context;
 }

@@ -302,9 +302,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
 
     // 2. Tab Focus Real-time Sync (Immediate Sync when returning to tab)
+    let visibilityTimeout: NodeJS.Timeout;
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && (typeof window !== 'undefined' ? localStorage.getItem('user_id') : null)) {
-        refreshProfile();
+        clearTimeout(visibilityTimeout);
+        visibilityTimeout = setTimeout(() => {
+          refreshProfile();
+        }, 300);
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -319,6 +323,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return () => {
       subscription.unsubscribe();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearTimeout(visibilityTimeout);
       clearInterval(pollInterval);
     };
   }, [refreshProfile]);
@@ -416,12 +421,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isDarkMode]);
 
-  const calculateUnitCost = (amount: number, quantity: number) => {
+  const calculateUnitCost = useCallback((amount: number, quantity: number) => {
     if (!quantity || quantity <= 0) return 0;
     return amount / quantity;
-  };
+  }, []);
 
-  const addLand = async (land: any) => {
+  const addLand = useCallback(async (land: any) => {
     if (!activeOrgId) return;
     try {
       const { data, error } = await db.insertLand({ ...land, org_id: activeOrgId });
@@ -434,9 +439,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch (err: any) {
       toast.error("Hata: " + err.message);
     }
-  };
+  }, [activeOrgId]);
 
-  const updateLand = async (land: any) => {
+  const updateLand = useCallback(async (land: any) => {
     const { id, ...updateData } = land;
     try {
       const { error } = await db.updateLand(id, updateData);
@@ -446,9 +451,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch (err: any) {
       toast.error("Güncelleme başarısız oldu. Lütfen internet bağlantınızı kontrol edip tekrar deneyiniz.");
     }
-  };
+  }, []);
 
-  const deleteLand = async (id: string) => {
+  const deleteLand = useCallback(async (id: string) => {
     try {
       const land = lands.find(l => l.id === id);
       if (!land) return;
@@ -475,9 +480,37 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch (err: any) {
       toast.error("Silme işlemi gerçekleştirilemedi. Lütfen daha sonra tekrar deneyiniz.");
     }
-  };
+  }, [lands]);
 
-  const addExpense = async (
+  const updateInventoryItem = useCallback(async (id: string, updates: Partial<InventoryItem>) => {
+    try {
+      const { error } = await db.updateInventoryItem(id, updates);
+      if (error) throw error;
+      setInventory(prev => prev.map(item => item.id === id ? { ...item, ...updates } : item));
+    } catch (err) {
+      toast.error("Stok güncellenemedi. Lütfen tekrar deneyiniz.");
+    }
+  }, []);
+
+  const addFieldOperation = useCallback(async (op: any) => {
+    if (!activeOrgId) return;
+    try {
+      const { data, error } = await db.insertFieldOperation({ ...op, org_id: activeOrgId });
+      if (error) throw error;
+      if (data) {
+        setFieldOperations(prev => [data, ...prev]);
+        if (op.inventory_id) {
+          const item = inventory.find(i => i.id === op.inventory_id);
+          if (item) updateInventoryItem(item.id, { quantity: Math.max(0, item.quantity - op.amount) });
+        }
+        toast.success("İşlem kaydedildi");
+      }
+    } catch (err) {
+      toast.error("Tarla işlemi kaydedilemedi. Lütfen bilgileri kontrol edip tekrar deneyiniz.");
+    }
+  }, [activeOrgId, inventory, updateInventoryItem]);
+
+  const addExpense = useCallback(async (
     amount: number, 
     category: string, 
     date: string, 
@@ -559,9 +592,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch (err: any) {
       toast.error("Hata: " + err.message);
     }
-  };
+  }, [activeOrgId, activeSeason, inventory, updateInventoryItem, addFieldOperation, calculateUnitCost]);
 
-  const updateExpense = async (id: string, updates: any) => {
+  const updateExpense = useCallback(async (id: string, updates: any) => {
     try {
       const { error } = await db.updateTransaction(id, updates);
       if (error) throw error;
@@ -570,9 +603,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch (err: any) {
       toast.error("Masraf güncellenemedi. Lütfen tekrar deneyiniz.");
     }
-  };
+  }, []);
 
-  const deleteExpense = async (id: string) => {
+  const deleteExpense = useCallback(async (id: string) => {
     try {
       const tx = transactions.find(t => t.id === id);
       const { error } = await db.deleteTransaction(id);
@@ -583,9 +616,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch (err: any) {
       toast.error("Masraf silinemedi. Lütfen tekrar deneyiniz.");
     }
-  };
+  }, [transactions]);
 
-  const startNewSeason = async (name: string, startDate: string, endDate: string) => {
+  const startNewSeason = useCallback(async (name: string, startDate: string, endDate: string) => {
     if (!activeOrgId) return;
     const year = new Date(startDate).getFullYear();
     try {
@@ -600,9 +633,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch (err: any) {
       toast.error("Hata: " + err.message);
     }
-  };
+  }, [activeOrgId, activeSeason]);
 
-  const toggleSeasonStatus = async (id: string, currentStatus: boolean) => {
+  const toggleSeasonStatus = useCallback(async (id: string, currentStatus: boolean) => {
     try {
       const { error } = await db.updateSeason(id, { is_active: !currentStatus });
       if (error) throw error;
@@ -611,9 +644,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch (err) {
       toast.error("Sezon durumu güncellenemedi. Lütfen tekrar deneyiniz.");
     }
-  };
+  }, []);
 
-  const addInventoryItem = async (item: any) => {
+  const addInventoryItem = useCallback(async (item: any) => {
     if (!activeOrgId) return;
     try {
       const { data, error } = await db.insertInventoryItem({ ...item, org_id: activeOrgId });
@@ -623,19 +656,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       console.error("Inventory error:", err);
       toast.error(err.message || "Stok eklenirken bir hata oluştu.");
     }
-  };
+  }, [activeOrgId]);
 
-  const updateInventoryItem = async (id: string, updates: Partial<InventoryItem>) => {
-    try {
-      const { error } = await db.updateInventoryItem(id, updates);
-      if (error) throw error;
-      setInventory(prev => prev.map(item => item.id === id ? { ...item, ...updates } : item));
-    } catch (err) {
-      toast.error("Stok güncellenemedi. Lütfen tekrar deneyiniz.");
-    }
-  };
-
-  const deleteInventoryItem = async (id: string) => {
+  const deleteInventoryItem = useCallback(async (id: string) => {
     try {
       const { error } = await db.deleteInventoryItem(id);
       if (error) throw error;
@@ -644,27 +667,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch (err) {
       toast.error("Stok silinemedi. Lütfen tekrar deneyiniz.");
     }
-  };
+  }, []);
 
-  const addFieldOperation = async (op: any) => {
-    if (!activeOrgId) return;
-    try {
-      const { data, error } = await db.insertFieldOperation({ ...op, org_id: activeOrgId });
-      if (error) throw error;
-      if (data) {
-        setFieldOperations(prev => [data, ...prev]);
-        if (op.inventory_id) {
-          const item = inventory.find(i => i.id === op.inventory_id);
-          if (item) updateInventoryItem(item.id, { quantity: Math.max(0, item.quantity - op.amount) });
-        }
-        toast.success("İşlem kaydedildi");
-      }
-    } catch (err) {
-      toast.error("Tarla işlemi kaydedilemedi. Lütfen bilgileri kontrol edip tekrar deneyiniz.");
-    }
-  };
-
-  const addIrrigationLog = async (log: any) => {
+  const addIrrigationLog = useCallback(async (log: any) => {
     if (!activeOrgId) return;
     try {
       const { data, error } = await db.insertIrrigationLog({ ...log, org_id: activeOrgId });
@@ -676,9 +681,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch (err) {
       toast.error("Sulama kaydı eklenemedi. Lütfen tekrar deneyiniz.");
     }
-  };
+  }, [activeOrgId]);
 
-  const deleteIrrigationLog = async (id: string) => {
+  const deleteIrrigationLog = useCallback(async (id: string) => {
     try {
       const { error } = await db.deleteIrrigationLog(id);
       if (error) throw error;
@@ -687,9 +692,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch (err) {
       toast.error("Sulama kaydı silinemedi. Lütfen tekrar deneyiniz.");
     }
-  };
+  }, []);
 
-  const logSaving = async (amount: number, reason: string) => {
+  const logSaving = useCallback(async (amount: number, reason: string) => {
     const userId = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
     if (!userId) return;
     try {
@@ -699,9 +704,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       console.error("Saving log error:", err);
       toast.error(err.message || "Tasarruf günlüğü kaydedilirken bir hata oluştu.");
     }
-  };
+  }, []);
 
-  const requestWeatherAndInsight = async () => {
+  const requestWeatherAndInsight = useCallback(async () => {
     if (isAuthLoading || isLoadingProfile || !authSession || !userProfile || !activeOrgId) {
       toast.error("Oturum henüz yüklenmedi, lütfen bekleyin...");
       return;
@@ -758,9 +763,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
       const data = await res.json();
       if (data.success) {
-        // AI response is now JSON with insight and critical_alert
         try {
-          // If the API returns a string that is JSON, parse it
           const parsed = typeof data.insight === 'string' && data.insight.startsWith('{') 
             ? JSON.parse(data.insight) 
             : data;
@@ -776,9 +779,66 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch (e: any) { 
       toast.error("Hata: " + e.message, { id: 'ai-loading' });
     }
-  };
+  }, [isAuthLoading, isLoadingProfile, authSession, userProfile, activeOrgId, lands, fieldOperations, scoutingLogs, inventory]);
 
-  const value = {
+  const deleteFieldOperation = useCallback(async (id: string) => { 
+    try {
+      await db.deleteFieldOperation(id);
+      setFieldOperations(prev => prev.filter(o => o.id !== id));
+    } catch (err: any) {
+      toast.error("Tarla işlemi silinemedi: " + (err?.message || 'Bağlantı hatası.'));
+    }
+  }, []);
+
+  const addScoutingLog = useCallback(async (log: Omit<ScoutingLog, 'id'>) => { 
+    if (!activeOrgId) return; 
+    try {
+      const { data, error } = await db.insertScoutingLog({ ...log, org_id: activeOrgId }); 
+      if (error) throw error;
+      if (data) setScoutingLogs(prev => [data, ...prev]); 
+      toast.success("Gözlem raporu kaydedildi.");
+    } catch (err: any) {
+      toast.error("Gözlem kaydedilemedi: " + (err?.message || ''));
+      throw err;
+    }
+  }, [activeOrgId]);
+
+  const updateScoutingLog = useCallback(async (id: string, updates: Partial<ScoutingLog>) => { 
+    try {
+      const { error } = await db.updateScoutingLog(id, updates);
+      if (error) throw error;
+      setScoutingLogs(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
+      toast.success("Tavsiye kaydedildi");
+    } catch (err) {
+      toast.error("Tavsiye kaydedilemedi. Lütfen tekrar deneyiniz.");
+    }
+  }, []);
+
+  const updateScoutingPrescription = useCallback(async (id: string, isApplied: boolean, text?: string) => {
+    try {
+      const updates: Partial<ScoutingLog> = { is_prescription_applied: isApplied };
+      if (text) updates.prescription_text = text;
+      const { error } = await db.updateScoutingLog(id, updates);
+      if (error) throw error;
+      setScoutingLogs(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
+    } catch (err: any) {
+      console.error("Prescription update error:", err);
+      toast.error(err.message || "Reçete güncellenirken bir hata oluştu.");
+    }
+  }, []);
+
+  const deleteScoutingLog = useCallback(async (id: string) => { 
+    setScoutingLogs(prev => prev.filter(s => s.id !== id)); 
+    db.deleteScoutingLog(id); 
+  }, []);
+
+  const getAiHistory = useCallback(async (landId: string) => {
+    const { data, error } = await db.getAiInsightsHistory(landId);
+    if (error) return [];
+    return data || [];
+  }, []);
+
+  const value = useMemo(() => ({
     lang, setLang, t, totalExpenses, totalArea, addExpense, updateExpense, deleteExpense,
     weather: { 
       temp: weatherData?.temperature ?? null, 
@@ -795,63 +855,37 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s: Season) => setActiveSeason(s),
     weatherData, currentUserRole, userProfile, fieldOperations, scoutingLogs,
     addFieldOperation,
-    deleteFieldOperation: async (id: string) => { 
-      try {
-        await db.deleteFieldOperation(id);
-        setFieldOperations(prev => prev.filter(o => o.id !== id));
-      } catch (err: any) {
-        toast.error("Tarla işlemi silinemedi: " + (err?.message || 'Bağlantı hatası.'));
-      }
-    },
-    addScoutingLog: async (log: Omit<ScoutingLog, 'id'>) => { 
-      if (!activeOrgId) return; 
-      try {
-        const { data, error } = await db.insertScoutingLog({ ...log, org_id: activeOrgId }); 
-        if (error) throw error;
-        if (data) setScoutingLogs(prev => [data, ...prev]); 
-        toast.success("Gözlem raporu kaydedildi.");
-      } catch (err: any) {
-        toast.error("Gözlem kaydedilemedi: " + (err?.message || ''));
-        throw err; // re-throw so page-level catch handles it
-      }
-    },
-    updateScoutingLog: async (id: string, updates: Partial<ScoutingLog>) => { 
-      try {
-        const { error } = await db.updateScoutingLog(id, updates);
-        if (error) throw error;
-        setScoutingLogs(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
-        toast.success("Tavsiye kaydedildi");
-      } catch (err) {
-        toast.error("Tavsiye kaydedilemedi. Lütfen tekrar deneyiniz.");
-      }
-    },
-    updateScoutingPrescription: async (id: string, isApplied: boolean, text?: string) => {
-      try {
-        const updates: Partial<ScoutingLog> = { is_prescription_applied: isApplied };
-        if (text) updates.prescription_text = text;
-        const { error } = await db.updateScoutingLog(id, updates);
-        if (error) throw error;
-        setScoutingLogs(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
-      } catch (err: any) {
-        console.error("Prescription update error:", err);
-        toast.error(err.message || "Reçete güncellenirken bir hata oluştu.");
-      }
-    },
-    deleteScoutingLog: async (id: string) => { setScoutingLogs(prev => prev.filter(s => s.id !== id)); db.deleteScoutingLog(id); },
+    deleteFieldOperation,
+    addScoutingLog,
+    updateScoutingLog,
+    updateScoutingPrescription,
+    deleteScoutingLog,
     inventory, isLoadingInventory, addInventoryItem, updateInventoryItem, deleteInventoryItem,
-    isDarkMode, toggleDarkMode: () => setIsDarkMode(!isDarkMode), calculateUnitCost,
+    isDarkMode, toggleDarkMode: () => setIsDarkMode(prev => !prev), calculateUnitCost,
     userRole, selectedClientId, setSelectedClientId, activeOrgId,
     isPremium: !!userProfile?.is_premium,
     isDemo: false,
     showUpsell, triggerUpsell, closeUpsell,
-    getAiHistory: async (landId: string) => {
-      const { data, error } = await db.getAiInsightsHistory(landId);
-      if (error) return [];
-      return data || [];
-    },
+    getAiHistory,
     isExpenseModalOpen, setIsExpenseModalOpen, clearAllData,
     refreshProfile, syncNow, isLoadingProfile
-  };
+  }), [
+    lang, setLang, t, totalExpenses, totalArea, addExpense, updateExpense, deleteExpense,
+    weatherData, dailyInsight, criticalAlert, totalSavings, dailySpent, lands, transactions, irrigationLogs,
+    isLoadingLands, isLoadingTransactions, addLand, updateLand, deleteLand,
+    addIrrigationLog, deleteIrrigationLog, logSaving,
+    requestWeatherAndInsight, startNewSeason, toggleSeasonStatus,
+    isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, 
+    currentUserRole, userProfile, fieldOperations, scoutingLogs,
+    addFieldOperation, deleteFieldOperation, addScoutingLog, updateScoutingLog, updateScoutingPrescription, deleteScoutingLog,
+    inventory, isLoadingInventory, addInventoryItem, updateInventoryItem, deleteInventoryItem,
+    isDarkMode, setIsDarkMode, calculateUnitCost,
+    userRole, selectedClientId, setSelectedClientId, activeOrgId,
+    showUpsell, triggerUpsell, closeUpsell,
+    getAiHistory,
+    isExpenseModalOpen, setIsExpenseModalOpen, clearAllData,
+    refreshProfile, syncNow, isLoadingProfile
+  ]);
 
   return (
     <AppContext.Provider value={value}>

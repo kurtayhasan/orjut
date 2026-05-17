@@ -6,7 +6,7 @@ import 'leaflet/dist/leaflet.css';
 import { useAppContext } from '@/context/AppContext';
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { toast } from 'sonner';
-import { MapPin, X, Save, TreePine, Ruler, Search, Layers, Globe, ChevronDown, Lock, Radio, Activity, Droplet } from 'lucide-react';
+import { MapPin, X, Save, TreePine, Ruler, Search, Layers, Globe, ChevronDown, Lock, Radio, Activity, Droplet, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { WMSTileLayer, LayersControl } from 'react-leaflet';
 import { Country, State, City, ICountry, IState, ICity } from 'country-state-city';
@@ -518,10 +518,15 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
               ].map((layer) => {
                 const Icon = layer.icon;
                 const isActive = activeLayer === layer.id;
+                const isDisabledNDVI = layer.id === 'ndvi' && (!polygonId || polygonId === 'none');
                 return (
                   <button
                     key={layer.id}
                     onClick={() => {
+                      if (layer.id === 'ndvi' && (!polygonId || polygonId === 'none')) {
+                        toast.error("Bu arazinin AgroMonitoring kaydı bulunmamaktadır. NDVI analizi yapılamaz.");
+                        return;
+                      }
                       if (layer.premium && !isPremium) {
                         triggerUpsell();
                         return;
@@ -534,12 +539,15 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
                       "flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest",
                       isActive 
                         ? "bg-primary text-white shadow-lg" 
-                        : "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                        : isDisabledNDVI
+                          ? "opacity-50 cursor-not-allowed text-zinc-400"
+                          : "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                     )}
                   >
                     <Icon size={16} className={isActive ? "text-white" : "text-zinc-400"} />
                     <span>{layer.label}</span>
                     {layer.premium && !isPremium && <Lock size={12} className="ml-auto text-amber-500" />}
+                    {isDisabledNDVI && <AlertCircle size={12} className="ml-auto text-rose-500" />}
                   </button>
                 );
               })}

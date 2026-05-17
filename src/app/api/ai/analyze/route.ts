@@ -3,6 +3,12 @@ import { buildMinifiedRAGContext } from '@/lib/ragEngine';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
+import { z } from 'zod';
+
+const AnalyzeSchema = z.object({
+  landId: z.string().uuid("Geçersiz arazi kimliği (UUID)."),
+  userId: z.string().uuid("Geçersiz kullanıcı kimliği (UUID).")
+});
 
 export const dynamic = 'force-dynamic';
 
@@ -14,11 +20,14 @@ export async function POST(req: Request) {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { landId, userId } = await req.json();
-
-    if (!landId || !userId) {
-      return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
+    const body = await req.json();
+    const parseResult = AnalyzeSchema.safeParse(body);
+    if (!parseResult.success) {
+      return NextResponse.json({ 
+        error: parseResult.error.issues[0]?.message || "Geçersiz parametreler." 
+      }, { status: 200 });
     }
+    const { landId, userId } = parseResult.data;
 
     // 1. Verify Premium Status
     const { data: profile } = await supabase
