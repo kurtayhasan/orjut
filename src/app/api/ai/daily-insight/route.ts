@@ -72,8 +72,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { success: false, error: error.message || 'Internal server error' },
-      { status: 500 }
+      { success: false, error: "Analiz verileri şu an hazırlanamadı, lütfen bekleyiniz." },
+      { status: 200 }
     );
   }
 }

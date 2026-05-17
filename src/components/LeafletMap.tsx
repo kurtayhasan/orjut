@@ -119,7 +119,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
   const [editingLandId, setEditingLandId] = useState<string | null>(null);
   const [boundaries, setBoundaries] = useState<any>(null);
   const drawGroupRef = useRef<L.FeatureGroup>(null);
-  const [selectedLandForPopup, setSelectedLandForPopup] = useState<{ land: any; lat: number; lng: number } | null>(null);
+  const [activePopup, setActivePopup] = useState<{ position: [number, number]; content: React.ReactNode } | null>(null);
   
   // Location dropdown states
   const [selectedCountryCode, setSelectedCountryCode] = useState('TR');
@@ -551,11 +551,11 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
           <React.Fragment key={land.id}>
             {land.boundaries ? (
               <GeoJSON 
-                key={`isNDVIActive-${isNDVIActive}-${land.id}`}
+                key={`ndvi-${isNDVIActive}-${land.id}`}
                 data={land.boundaries} 
                 style={() => ({
                   fillColor: '#2e7d32',
-                  fillOpacity: isNDVIActive ? 0.01 : 0.3,
+                  fillOpacity: isNDVIActive ? 0.01 : 0.35,
                   color: '#1b5e20',
                   weight: isNDVIActive ? 1 : 2
                 })}
@@ -566,10 +566,9 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
                       return;
                     }
                     L.DomEvent.stopPropagation(e as any);
-                    setSelectedLandForPopup({
-                      land,
-                      lat: latlng.lat,
-                      lng: latlng.lng
+                    setActivePopup({
+                      position: [latlng.lat, latlng.lng],
+                      content: <LandWeatherPopup land={land} />
                     });
                     handleEditPlot(land);
                   }
@@ -578,7 +577,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
             ) : (
               land.lat && land.lng && (
                 <Marker 
-                  key={`isNDVIActive-${isNDVIActive}-${land.id}`}
+                  key={`ndvi-${isNDVIActive}-${land.id}`}
                   position={[land.lat, land.lng]}
                   eventHandlers={{
                     click: (e: any) => {
@@ -587,10 +586,9 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
                         return;
                       }
                       L.DomEvent.stopPropagation(e as any);
-                      setSelectedLandForPopup({
-                        land,
-                        lat: latlng.lat,
-                        lng: latlng.lng
+                      setActivePopup({
+                        position: [latlng.lat, latlng.lng],
+                        content: <LandWeatherPopup land={land} />
                       });
                       handleEditPlot(land);
                     }
@@ -601,16 +599,16 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
           </React.Fragment>
         ))}
 
-        {selectedLandForPopup && (
+        {activePopup && (
           <Popup 
-            position={[selectedLandForPopup.lat, selectedLandForPopup.lng]} 
+            position={activePopup.position} 
             eventHandlers={{
-              remove: () => setSelectedLandForPopup(null)
+              remove: () => setActivePopup(null)
             }}
             maxWidth={240}
             autoPan={true}
           >
-            <LandWeatherPopup land={selectedLandForPopup.land} />
+            {activePopup.content}
           </Popup>
         )}
 

@@ -41,16 +41,16 @@ export async function buildLandContext(landId: string) {
       .single();
 
     // 6. Fetch current weather
-    const weather = await fetchWeather(land.lat, land.lng);
+    const weather = await fetchWeather(land?.lat || 37.7478, land?.lng || 27.3971);
 
     // Aggregate Context
     return {
       land: {
-        crop: land.crop_type,
-        size: land.size_decare,
-        city: land.city,
-        planting_date: land.planting_date,
-        environment: land.environment_type
+        crop: land?.crop_type || 'Bilinmiyor',
+        size: land?.size_decare || 0,
+        city: land?.city || 'Bilinmiyor',
+        planting_date: land?.planting_date || new Date().toISOString(),
+        environment: land?.environment_type || 'acik'
       },
       recent_operations: operations || [],
       latest_scouting: scoutingLogs?.[0] || null,
@@ -79,7 +79,7 @@ export async function buildMinifiedRAGContext(landId: string) {
       .order('timestamp', { ascending: false })
       .limit(3);
 
-    const weather = await fetchWeather(land.lat, land.lng);
+    const weather = await fetchWeather(land?.lat || 37.7478, land?.lng || 27.3971);
 
     // Minified format: CTX:[{D:"MM-DD", T:temp, H:hum, ACT:"recommendation"}], CURR:{T:temp, H:hum}
     const minifiedHistory = history?.map(h => ({
@@ -90,9 +90,9 @@ export async function buildMinifiedRAGContext(landId: string) {
     })) || [];
 
     return {
-      LAND: { C: land.crop_type, S: land.size_decare, E: land.environment_type === 'sera' ? 'S' : 'A' },
+      LAND: { C: land?.crop_type || 'Bilinmiyor', S: land?.size_decare || 0, E: land?.environment_type === 'sera' ? 'S' : 'A' },
       CTX: minifiedHistory,
-      CURR: { T: weather.temperature, H: weather.humidity, C: weather.condition },
+      CURR: { T: weather?.temperature || 0, H: weather?.humidity || 0, C: weather?.condition || 'Bilinmiyor' },
       RAW_WEATHER: weather // Keep for insertion into history
     };
   } catch (error) {

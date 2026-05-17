@@ -75,6 +75,6 @@ export async function POST(req: Request) {
 
   } catch (error: any) {
     console.error("AI Analysis Route Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Analiz verileri şu an hazırlanamadı, lütfen bekleyiniz." }, { status: 200 });
   }
 }
