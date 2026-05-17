@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { createClient } from '@supabase/supabase-js';
+import { getSupabaseServer } from '@/lib/supabaseServer';
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY as string,
@@ -14,6 +15,10 @@ const supabase = createClient(
 );
 
 export async function GET(req: NextRequest) {
+  const supabaseRoute = getSupabaseServer();
+  const { data: { session } } = await supabaseRoute.auth.getSession();
+  if (!session) return new Response('Unauthorized', { status: 401 });
+
   // Verify the request is from Vercel Cron (optional security)
   const authHeader = req.headers.get('authorization');
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}` && process.env.CRON_SECRET) {

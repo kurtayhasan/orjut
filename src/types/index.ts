@@ -3,32 +3,46 @@ import type { LucideIcon } from 'lucide-react';
 // ─── Domain Models ────────────────────────────────────────────────────────────
 
 export interface Profile {
-  id:          string;
-  phone:       string;
-  first_name:  string;
-  last_name:   string;
-  is_premium:  boolean;
-  avatar_url?: string;
-  role?:       'farmer' | 'engineer' | 'admin';
+  id:             string;
+  phone:          string;
+  first_name:     string;
+  last_name:      string;
+  is_premium:     boolean;
+  payment_status?: 'free' | 'pending_approval' | 'approved';
+  avatar_url?:    string;
+  role?:          'farmer' | 'engineer' | 'admin';
+  created_at?:    string;
+  updated_at?:    string;
 }
 
 export interface Land {
   id:                        string;
   org_id:                    string;
+  profile_id?:               string;
+  name?:                     string;
+  geometry?:                 any;
   city:                      string;
   district:                  string;
+  neighborhood?:             string;
   block_no:                  string;
   parcel_no:                 string;
+  size?:                     number;
   size_decare:               number;
+  size_sqm?:                 number;  // Area in square meters, used for API guardrails
   crop_type:                 string;
   environment_type:          'acik_tarla' | 'sera';
   is_irrigated:              boolean;
+  soil_type?:                string;
   lat:                       number;
   lng:                       number;
   boundaries?:               GeoJSON.Geometry;
   planting_date?:            string;
+  expected_yield?:           number;
+  expected_price?:           number;
   expected_yield_per_decare?:number;
   expected_sell_price_unit?: number;
+  created_at?:               string;
+  updated_at?:               string;
 }
 
 export interface Transaction {
@@ -65,6 +79,7 @@ export interface InventoryItem {
 export interface ScoutingLog {
   id:           string;
   org_id:       string;
+  profile_id?:  string;
   land_id:      string;
   date:         string;
   notes:        string;
@@ -184,8 +199,10 @@ export interface CardProps {
 }
 
 export interface EmptyStateProps {
-  message:    string;
-  buttonText?: string;
-  onAction?:  () => void;
-  icon?:      LucideIcon;
+  title:        string;
+  description?: string;
+  emoji?:       string;
+  actionLabel?: string;
+  onAction?:    () => void;
+  icon?:        LucideIcon;
 }

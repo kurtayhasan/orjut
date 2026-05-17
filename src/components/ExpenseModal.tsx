@@ -48,6 +48,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
   
   const [quantity, setQuantity] = useState('');
   const [unit, setUnit] = useState('kg');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -59,10 +60,12 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
       setAppliedAmount('');
       setStockSelectionMode('existing');
       setDescription('');
+      setIsSubmitting(false);
     }
   }, [isOpen, defaultCategory, activeSeason]);
 
   const handleSubmit = async (e: React.FormEvent) => {
+    if (isSubmitting) return;
     e.preventDefault();
     
     if (!landId) {
@@ -95,6 +98,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
       return;
     }
 
+    setIsSubmitting(true);
     try {
       const inventoryData = addToInventory ? {
         name: invName || category,
@@ -148,8 +152,10 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
 
       toast.success("Kayıt başarıyla oluşturuldu.");
       onClose();
-    } catch (err) {
-      toast.error("Kayıt oluşturulurken bir hata oluştu.");
+    } catch (err: any) {
+      toast.error("Kayıt oluşturulurken bir hata oluştu: " + (err?.message || ''));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -410,8 +416,8 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
 
         {/* FOOTER */}
         <div className="flex gap-3 pt-4 border-t border-border">
-           <Button variant="ghost" fullWidth onClick={onClose} type="button" className="min-h-[48px]">Vazgeç</Button>
-           <Button fullWidth type="submit" size="lg" className="min-h-[48px]">Kayıt İşlemini Tamamla</Button>
+           <Button variant="ghost" fullWidth onClick={onClose} type="button" className="min-h-[48px]" disabled={isSubmitting}>Vazgeç</Button>
+           <Button fullWidth type="submit" size="lg" className="min-h-[48px]" isLoading={isSubmitting} disabled={isSubmitting}>Kayıt İşlemini Tamamla</Button>
         </div>
       </form>
     </BaseModal>

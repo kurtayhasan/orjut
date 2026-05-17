@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { db } from '@/lib/db';
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -12,41 +12,64 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Try to get session from local cache first
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) throw error;
+        // CUSTOM AUTH: This app uses profiles-based auth, NOT Supabase Auth.
+        // We verify by checking localStorage user_id and validating against DB.
+        const userId = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
 
-        if (!session) {
-          // If no session and we are online, strictly redirect
-          if (navigator.onLine) {
+        if (!userId) {
+          router.push('/login');
+          return;
+        }
+
+        // Online: verify user still exists in DB
+        if (navigator.onLine) {
+          const { data, error } = await db.getProfile(userId);
+          if (error || !data) {
+            // Invalid user_id — clear and redirect
+            localStorage.clear();
             router.push('/login');
+            return;
+          }
+          // Sync role from DB to localStorage for freshness
+          if (data.role) {
+            localStorage.setItem('user_role', data.role);
+          }
+          const overrideRole = localStorage.getItem('user_role_override');
+          const baseRole = overrideRole || data.role || 'farmer';
+          if (baseRole === 'admin' || baseRole === 'engineer') {
+            // privileged users can stay on any page
+            setIsAuthenticated(true);
           } else {
-            // If offline, check if we have a cached user_id as a fallback
-            const userId = localStorage.getItem('user_id');
-            if (!userId) {
-              router.push('/login');
-            } else {
-              setIsAuthenticated(true);
+            // farmer – prevent access to admin/engineer URLs
+            if (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/engineer')) {
+              router.push('/dashboard');
+              return;
             }
+            setIsAuthenticated(true);
           }
         } else {
-          // Valid session found
-          localStorage.setItem('user_id', session.user.id);
-          setIsAuthenticated(true);
-          
-          if (!navigator.onLine) {
-            import('sonner').then(({ toast }) => {
-              toast.info("Çevrimdışı Çalışıyorsunuz", {
-                description: "Verileriniz bağlantı gelince eşitlenecektir.",
-                duration: 5000,
-              });
-            });
+          // Offline: trust cached user_id and roles
+          const overrideRole = localStorage.getItem('user_role_override');
+          const baseRole = overrideRole || localStorage.getItem('user_role') || 'farmer';
+          if (baseRole === 'admin' || baseRole === 'engineer') {
+            setIsAuthenticated(true);
+          } else {
+            if (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/engineer')) {
+              router.push('/dashboard');
+              return;
+            }
+            setIsAuthenticated(true);
           }
+          
+          import('sonner').then(({ toast }) => {
+            toast.info("Çevrimiçi Değilsiniz", {
+              description: "Verileriniz bağlantı gelince eşitlenecektir.",
+              duration: 5000,
+            });
+          });
         }
       } catch (error) {
         console.error("Auth check failed:", error);
-        // Only redirect if online, if offline we try to stay in
         if (navigator.onLine) {
           router.push('/login');
         } else {

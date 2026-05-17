@@ -61,6 +61,30 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleUpdateRole = async (userId: string, newRole: string) => {
+    try {
+      toast.loading("Rol güncelleniyor...", { id: 'update-role' });
+      const { error } = await db.updateProfile(userId, { role: newRole as any });
+      if (error) throw error;
+      toast.success("Rol başarıyla güncellendi!", { id: 'update-role' });
+      fetchAdminData();
+    } catch (err: any) {
+      toast.error("Hata: " + err.message, { id: 'update-role' });
+    }
+  };
+
+  const handleTogglePremium = async (userId: string, currentStatus: boolean) => {
+    try {
+      toast.loading("Premium durumu güncelleniyor...", { id: 'toggle-premium' });
+      const { error } = await db.updateProfile(userId, { is_premium: !currentStatus });
+      if (error) throw error;
+      toast.success("Premium durumu güncellendi!", { id: 'toggle-premium' });
+      fetchAdminData();
+    } catch (err: any) {
+      toast.error("Hata: " + err.message, { id: 'toggle-premium' });
+    }
+  };
+
   if (isLoadingProfile) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-black">
@@ -75,7 +99,14 @@ export default function AdminDashboard() {
     <div className="p-8 max-w-7xl mx-auto space-y-8 min-h-screen bg-zinc-50 dark:bg-black">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => router.push('/dashboard')} leftIcon={<ArrowLeft size={18} />}>
+          <Button 
+            variant="ghost" 
+            onClick={() => {
+              localStorage.setItem('user_role_override', 'farmer');
+              window.location.href = '/dashboard';
+            }} 
+            leftIcon={<ArrowLeft size={18} />}
+          >
             Panel&apos;e Dön
           </Button>
           <h1 className="text-3xl font-black text-zinc-900 dark:text-white flex items-center gap-2">
@@ -185,6 +216,7 @@ export default function AdminDashboard() {
                 <th className="px-6 py-4">Rol</th>
                 <th className="px-6 py-4">Durum</th>
                 <th className="px-6 py-4">Kayıt Tarihi</th>
+                <th className="px-6 py-4 text-right">İşlemler</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
@@ -193,25 +225,41 @@ export default function AdminDashboard() {
                   <td className="px-6 py-4 font-bold">{u.first_name} {u.last_name}</td>
                   <td className="px-6 py-4 text-zinc-500">{u.phone}</td>
                   <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded text-[10px] font-black uppercase ${
-                      u.role === 'admin' ? 'bg-rose-100 text-rose-600' : 
-                      u.role === 'engineer' ? 'bg-indigo-100 text-indigo-600' : 
-                      'bg-emerald-100 text-emerald-600'
-                    }`}>
-                      {u.role}
-                    </span>
+                    <select 
+                      value={u.role || 'farmer'} 
+                      onChange={(e) => handleUpdateRole(u.id, e.target.value)}
+                      className={`px-2 py-1 rounded text-[10px] font-black uppercase outline-none cursor-pointer ${
+                        u.role === 'admin' ? 'bg-rose-100 text-rose-600' : 
+                        u.role === 'engineer' ? 'bg-indigo-100 text-indigo-600' : 
+                        'bg-emerald-100 text-emerald-600'
+                      }`}
+                    >
+                      <option value="farmer">Çiftçi</option>
+                      <option value="engineer">Mühendis</option>
+                      <option value="admin">Admin</option>
+                    </select>
                   </td>
                   <td className="px-6 py-4">
-                    {u.is_premium ? (
-                      <span className="flex items-center gap-1 text-amber-600 text-xs font-bold">
-                        <Star size={12} /> PRO
-                      </span>
-                    ) : (
-                      <span className="text-zinc-400 text-xs font-bold">Free</span>
-                    )}
+                    <button 
+                      onClick={() => handleTogglePremium(u.id, !!u.is_premium)}
+                      className="flex items-center gap-1 hover:opacity-80 transition-opacity"
+                    >
+                      {u.is_premium ? (
+                        <span className="flex items-center gap-1 text-amber-600 text-xs font-bold px-2 py-1 bg-amber-100 rounded">
+                          <Star size={12} /> PRO
+                        </span>
+                      ) : (
+                        <span className="text-zinc-500 text-xs font-bold px-2 py-1 bg-zinc-200 dark:bg-zinc-800 rounded">
+                          Free
+                        </span>
+                      )}
+                    </button>
                   </td>
                   <td className="px-6 py-4 text-xs text-zinc-400">
                     {new Date(u.created_at).toLocaleDateString('tr-TR')}
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    {/* Placeholder for future actions */}
                   </td>
                 </tr>
               ))}

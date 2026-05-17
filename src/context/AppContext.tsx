@@ -162,15 +162,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const finalRole = (overrideRole || data.role || 'farmer') as 'farmer' | 'engineer' | 'admin';
         setUserRole(finalRole);
         
-        // Auto-redirect logic
-        if (finalRole === 'admin' && window.location.pathname === '/dashboard') {
-          window.location.href = '/admin';
-        } else if (finalRole === 'engineer' && window.location.pathname === '/dashboard') {
-          window.location.href = '/engineer';
+        // Auto-redirect logic: Only redirect farmer away from admin/engineer pages
+        if (finalRole === 'farmer' && (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/engineer'))) {
+          window.location.href = '/dashboard';
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Hard Profile Re-fetch error:", err);
+      toast.error(err.message || "Profil yüklenirken bir hata oluştu.");
     } finally {
       setIsLoadingProfile(false);
     }
@@ -215,11 +214,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const finalRole = (overrideRole || p.data.role || 'farmer') as 'farmer' | 'engineer' | 'admin';
         setUserRole(finalRole);
 
-        // Phase 6: Admin/Engineer Auto-Redirect
-        if (finalRole === 'admin' && window.location.pathname === '/dashboard') {
-          window.location.href = '/admin';
-        } else if (finalRole === 'engineer' && window.location.pathname === '/dashboard') {
-          window.location.href = '/engineer';
+        // Phase 6: Farmer Auto-Redirect (admin/engineer can view any page)
+        if (finalRole === 'farmer' && (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/engineer'))) {
+          window.location.href = '/dashboard';
         }
       }
       setLands(l.data || []);
@@ -249,8 +246,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setDailySpent(allTx.filter((tx: any) => tx.date === todayStr && tx.type === 'expense').reduce((sum: number, tx: any) => sum + Number(tx.amount || 0), 0));
       }
 
-    } catch (e) {
+    } catch (e: any) {
       console.error("Critical Data Fetch Error:", e);
+      toast.error(e.message || "Veriler yüklenirken bir hata oluştu.");
     } finally {
       setIsLoadingLands(false);
       setIsLoadingTransactions(false);
@@ -272,19 +270,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const savedTheme = typeof window !== 'undefined' ? localStorage.getItem('theme') : null;
     setIsDarkMode(savedTheme === 'dark');
-    
+  }, []);
+
+  useEffect(() => {
     // PHASE 4: LOCAL CACHE SYNC / SECURITY PURGE
     const checkCacheSync = () => {
-      const cachedId = localStorage.getItem('user_id');
+      const cachedId = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
       if (cachedId && userProfile && cachedId !== userProfile.id) {
         localStorage.clear();
         window.location.reload();
       }
     };
-    
     checkCacheSync();
-    refreshAllData();
-  }, [refreshAllData, userProfile]);
+  }, [userProfile]);
+
+  useEffect(() => {
+    if (activeOrgId) {
+      refreshAllData();
+    }
+  }, [activeOrgId, refreshAllData]);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -501,6 +505,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (data) setInventory(prev => [...prev, data]);
     } catch (err: any) {
       console.error("Inventory error:", err);
+      toast.error(err.message || "Stok eklenirken bir hata oluştu.");
     }
   };
 
@@ -574,8 +579,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     try {
       await db.insertSavingLog({ user_id: userId, amount, reason });
       setTotalSavings(prev => prev + amount);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Saving log error:", err);
+      toast.error(err.message || "Tasarruf günlüğü kaydedilirken bir hata oluştu.");
     }
   };
 
@@ -613,7 +619,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         weather, 
         lands: landContexts, 
         inventoryStatus,
-        date: new Date().toLocaleDateString('tr-TR') 
+        date: new Date().toLocaleDateString('tr-TR'),
+        timestamp: new Date().toISOString()
       });
       const res = await fetch('/api/ai/daily-insight', { method: 'POST', body: JSON.stringify({ prompt }) });
       const data = await res.json();
@@ -647,8 +654,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     requestWeatherAndInsight, startNewSeason, toggleSeasonStatus,
     isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s: Season) => setActiveSeason(s),
     weatherData, currentUserRole, userProfile, fieldOperations, scoutingLogs,
-    addFieldOperation, deleteFieldOperation: async (id: string) => { setFieldOperations(prev => prev.filter(o => o.id !== id)); db.deleteFieldOperation(id); },
-    addScoutingLog: async (log: Omit<ScoutingLog, 'id'>) => { if (!activeOrgId) return; const { data } = await db.insertScoutingLog({ ...log, org_id: activeOrgId }); if (data) setScoutingLogs(prev => [data, ...prev]); },
+    addFieldOperation, deleteFieldOperation: async (id: string) => { 
+      try {
+        await db.deleteFieldOperation(id);
+        setFieldOperations(prev => prev.filter(o => o.id !== id));
+      } catch (err: any) {
+        toast.error("Silme hatası: " + (err?.message || ''));
+      }
+    },
+    addScoutingLog: async (log: Omit<ScoutingLog, 'id'>) => { 
+      if (!activeOrgId) return; 
+      try {
+        const { data, error } = await db.insertScoutingLog({ ...log, org_id: activeOrgId }); 
+        if (error) throw error;
+        if (data) setScoutingLogs(prev => [data, ...prev]); 
+        toast.success("Gözlem raporu kaydedildi.");
+      } catch (err: any) {
+        toast.error("Gözlem kaydedilemedi: " + (err?.message || ''));
+        throw err; // re-throw so page-level catch handles it
+      }
+    },
     updateScoutingLog: async (id: string, updates: Partial<ScoutingLog>) => { 
       try {
         const { error } = await db.updateScoutingLog(id, updates);
@@ -666,8 +691,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const { error } = await db.updateScoutingLog(id, updates);
         if (error) throw error;
         setScoutingLogs(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
-      } catch (err) {
+      } catch (err: any) {
         console.error("Prescription update error:", err);
+        toast.error(err.message || "Reçete güncellenirken bir hata oluştu.");
       }
     },
     deleteScoutingLog: async (id: string) => { setScoutingLogs(prev => prev.filter(s => s.id !== id)); db.deleteScoutingLog(id); },

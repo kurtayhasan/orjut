@@ -136,7 +136,16 @@ export default function LandsPage() {
                 <Grid size={20} />
               </button>
            </div>
-           <Button size="md" leftIcon={<Plus size={20} />}>Yeni Ekle</Button>
+           <Button 
+              size="md" 
+              leftIcon={<Plus size={20} />}
+              onClick={() => {
+                setViewMode('map');
+                toast.info("Lütfen haritanın sağ üstündeki poligon çizim aracını (beşgen ikon) kullanarak arazinizi harita üzerinde çizin.");
+              }}
+            >
+              Yeni Ekle
+            </Button>
         </div>
       </div>
 

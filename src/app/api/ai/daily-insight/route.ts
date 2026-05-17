@@ -1,6 +1,7 @@
 // OFFICIAL: @google/genai SDK — gemini-2.0-flash model
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { getSupabaseServer } from '@/lib/supabaseServer';
 
 // 1. Initialize the official SDK
 const ai = new GoogleGenAI({
@@ -8,6 +9,10 @@ const ai = new GoogleGenAI({
 });
 
 export async function POST(req: NextRequest) {
+  const supabase = getSupabaseServer();
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return new Response('Unauthorized', { status: 401 });
+
   try {
     const { prompt } = await req.json();
 

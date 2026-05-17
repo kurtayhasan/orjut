@@ -74,7 +74,14 @@ export default function EngineerDashboard() {
     <div className="p-8 max-w-5xl mx-auto space-y-8 min-h-screen bg-zinc-50 dark:bg-black">
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => router.push('/dashboard')} leftIcon={<ArrowLeft size={18} />}>
+          <Button 
+            variant="ghost" 
+            onClick={() => {
+              localStorage.setItem('user_role_override', 'farmer');
+              window.location.href = '/dashboard';
+            }} 
+            leftIcon={<ArrowLeft size={18} />}
+          >
             Kendi Panelime Dön
           </Button>
           <h1 className="text-3xl font-black text-zinc-900 dark:text-white flex items-center gap-2">

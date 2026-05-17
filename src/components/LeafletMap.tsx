@@ -36,14 +36,22 @@ function MapController({ selectedLand, searchResult }: { selectedLand: any, sear
   const map = useMap();
   
   useEffect(() => {
-    if (selectedLand && selectedLand.lat && selectedLand.lng) {
-      map.flyTo([selectedLand.lat, selectedLand.lng], 16, { animate: true, duration: 1.5 });
+    if (selectedLand) {
+      const lat = parseFloat(selectedLand.lat);
+      const lng = parseFloat(selectedLand.lng);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        map.flyTo([lat, lng], 16, { animate: true, duration: 1.5 });
+      }
     }
   }, [selectedLand, map]);
 
   useEffect(() => {
     if (searchResult) {
-      map.flyTo([searchResult.lat, searchResult.lng], 14, { animate: true, duration: 2 });
+      const lat = parseFloat(searchResult.lat as any);
+      const lng = parseFloat(searchResult.lng as any);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        map.flyTo([lat, lng], 14, { animate: true, duration: 2 });
+      }
     }
   }, [searchResult, map]);
 
@@ -96,11 +104,29 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
     if (layerType === 'polygon') {
       const geojson = layer.toGeoJSON();
       const areaSqm = turf.area(geojson);
+      
+      // KESİN LİMİT: 500 Dekar (500,000 m²)
+      if (areaSqm > 500000) {
+        toast.error("Alan çok büyük! Lütfen arazinizi maksimum 500 dekar olacak şekilde parça parça ekleyiniz.");
+        if (drawGroupRef.current) {
+          drawGroupRef.current.clearLayers();
+        }
+        return;
+      }
+      
       const decares = (areaSqm / 1000).toFixed(2);
       
       const centroid = turf.centroid(geojson);
-      const lng = Number(centroid.geometry.coordinates[0].toFixed(6));
-      const lat = Number(centroid.geometry.coordinates[1].toFixed(6));
+      const lng = Number(centroid?.geometry?.coordinates?.[0]?.toFixed(6) || NaN);
+      const lat = Number(centroid?.geometry?.coordinates?.[1]?.toFixed(6) || NaN);
+
+      if (isNaN(lat) || isNaN(lng)) {
+        toast.error("Poligon geometrisi geçersiz veya koordinatlar belirlenemedi.");
+        if (drawGroupRef.current) {
+          drawGroupRef.current.clearLayers();
+        }
+        return;
+      }
 
       // Coordinate truncation for polygon vertices (Phase 3 Optimization)
       if (geojson.geometry.type === 'Polygon') {
@@ -217,6 +243,31 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
       return;
     }
 
+    // SAAS QUOTA ENFORCEMENT
+    const otherLands = editingLandId ? lands.filter(l => l.id !== editingLandId) : lands;
+    const otherLandsArea = otherLands.reduce((sum, l) => sum + Number(l.size_decare || 0), 0);
+    const newTotalArea = otherLandsArea + Number(plotSize);
+
+    if (!isPremium) {
+      // Free Tier: Max 3 lands AND Max 100 dekar
+      if (!editingLandId && lands.length >= 3) {
+        triggerUpsell();
+        toast.error("Ücretsiz katmanda en fazla 3 arazi ekleyebilirsiniz. Lütfen paketinizi yükseltin.");
+        return;
+      }
+      if (newTotalArea > 100) {
+        triggerUpsell();
+        toast.error("Ücretsiz katmanda toplam arazi büyüklüğü 100 dönümü (dekar) geçemez. Lütfen paketinizi yükseltin.");
+        return;
+      }
+    } else {
+      // Pro Tier: Max 5000 dekar
+      if (newTotalArea > 5000) {
+        toast.error("5000 dönüm üzeri arazileriniz için lütfen Kurtay Bilişim kurumsal destek hattı ile iletişime geçiniz.");
+        return;
+      }
+    }
+
     if (editingLandId) {
       landData.id = editingLandId;
       await updateLand(landData);
@@ -251,10 +302,16 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
       const data = await res.json();
       if (data && data.length > 0) {
         const { lat, lon, display_name } = data[0];
-        const newPos = new L.LatLng(parseFloat(lat), parseFloat(lon));
-        setMarkerPosition(newPos);
-        setSearchQueryResult(newPos);
-        toast.success(`${display_name.split(',')[0]} konumuna gidiliyor...`);
+        const parsedLat = parseFloat(lat);
+        const parsedLon = parseFloat(lon);
+        if (!isNaN(parsedLat) && !isNaN(parsedLon)) {
+          const newPos = new L.LatLng(parsedLat, parsedLon);
+          setMarkerPosition(newPos);
+          setSearchQueryResult(newPos);
+          toast.success(`${display_name.split(',')[0]} konumuna gidiliyor...`);
+        } else {
+          toast.error("Geçersiz koordinat verisi alındı.");
+        }
       } else {
         toast.error("Konum bulunamadı.");
       }
@@ -282,6 +339,10 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
     setIsNDVIActive(!isNDVIActive);
   };
 
+  const ndviTileUrl = useMemo(() => {
+    return `https://api.agromonitoring.com/tile/1.0/{z}/{x}/{y}/NDVI/{id}?appid=${process.env.NEXT_PUBLIC_AGROMONITORING_API_KEY}`;
+  }, []);
+
   return (
     <div className="relative w-full h-full group">
       {/* NDVI Toggle Overlay */}
@@ -293,6 +354,15 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
           {isPremium ? <Radio size={18} className={isNDVIActive ? 'animate-pulse' : ''} /> : <Lock size={18} className="text-amber-500" />}
           <span className="text-xs font-black uppercase tracking-widest hidden sm:inline">🛰️ NDVI Isı Haritası</span>
         </button>
+        {isNDVIActive && (
+          <div 
+            className="px-3 py-2 bg-black/80 backdrop-blur-md text-white text-[10px] font-bold rounded-xl border border-white/10 shadow-lg flex flex-col cursor-help animate-in fade-in zoom-in-95"
+            title="Uydu verileri 3-5 günde bir güncellenir. Anlık veri çekilmez."
+          >
+            <span className="text-zinc-400">Son Uydu Geçişi / Veri Tarihi</span>
+            <span>~{new Date(Date.now() - 3 * 86400000).toLocaleDateString('tr-TR')}</span>
+          </div>
+        )}
       </div>
 
       {/* Search Bar */}
@@ -343,7 +413,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
           {isNDVIActive && focusLand && 
             <LayersControl.Overlay checked name="NDVI Analizi">
               <TileLayer
-                url={`https://api.agromonitoring.com/tile/1.0/{z}/{x}/{y}/NDVI/{id}?appid=${process.env.NEXT_PUBLIC_AGROMONITORING_API_KEY}`}
+                url={ndviTileUrl}
                 opacity={0.7}
               />
             </LayersControl.Overlay>

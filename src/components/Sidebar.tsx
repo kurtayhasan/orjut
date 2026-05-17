@@ -132,8 +132,7 @@ export default function Sidebar({ className }: { className?: string }) {
 
           <SidebarItem href="/dashboard/settings" icon={Settings} label="Ayarlar" active={pathname.includes('/settings')} onClick={closeSidebar} />
           
-          {/* ROLE SWITCHER (Phase 6) */}
-          {(userRole === 'admin' || userRole === 'engineer') && (
+          {((userProfile?.role === 'admin' || userProfile?.role === 'engineer') || (userRole === 'admin' || userRole === 'engineer')) && (
             <div className="pt-2">
               <div className="flex p-1 bg-white/5 rounded-lg border border-white/5">
                 {(['farmer', 'engineer', 'admin'] as const).map((r) => {

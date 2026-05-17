@@ -18,6 +18,7 @@ export interface AIActionPrompt {
   lands: LandContext[];     // sadece aktif araziler
   inventoryStatus: string[]; // Kritik veya azalan stoklar
   date: string;             // bugünün tarihi
+  timestamp?: string;       // zaman damgası
 }
 
 export function buildAIPrompt(data: AIActionPrompt): string {
@@ -51,6 +52,7 @@ TALİMATLAR:
 2. BİTKİ EVRESİNE BAK: Ekim tarihinden bu yana geçen süreyi (currentDay) kullanarak bitkinin kritik evresinde (çiçeklenme vb.) olup olmadığını tahmin et ve buna göre uyarı ver.
 3. STOK KONTROLÜ: Önerdiğin işlem için gerekli ürün stoklarda azsa (KRİTİK STOKLAR kısmında varsa), mutlaka "Tedarik etmeniz gerekiyor" uyarısını ekle.
 4. DİL: Profesyonel, çözüm odaklı ve teknik ziraat dili kullan.
+5. ZAMAN DAMGASI: Sana verilen veriler ${data.timestamp || new Date().toISOString()} anına aittir. Yorumunu bu saati ve tarihi dikkate alarak yap.
 
 FORMAT:
 SADECE aşağıdaki JSON formatında yanıt ver:

@@ -30,7 +30,7 @@ export default function EndOfDayModal({ isOpen, onClose }: ModalProps) {
   };
 
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose} showCloseButton={!closed}>
+    <BaseModal isOpen={isOpen} onClose={onClose}>
       {!closed ? (
         <>
           <div className="flex flex-col items-center text-center mb-6">

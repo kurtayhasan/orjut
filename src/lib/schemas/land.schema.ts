@@ -6,7 +6,7 @@ export const landSchema = z.object({
   neighborhood: z.string().optional(),
   block_no: z.string().optional(),
   parcel_no: z.string().optional(),
-  size_decare: z.number().min(0.01, "Alan 0'dan büyük olmalıdır"),
+  size_decare: z.number().min(0.01, "Alan 0'dan büyük olmalıdır").max(5000, "Bir arazi maksimum 5000 dekar olabilir"),
   crop_type: z.string().min(1, "Lütfen bir ürün tipi seçiniz"),
   environment_type: z.enum(['acik_tarla', 'sera']),
   is_irrigated: z.boolean(),

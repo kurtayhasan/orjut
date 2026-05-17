@@ -171,33 +171,14 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* DASHBOARD MOCKUP - Only for Desktop */}
-          <div className="mt-20 hidden md:block w-full max-w-5xl mx-auto rounded-2xl border-4 border-white shadow-2xl overflow-hidden bg-surface">
-             <div className="h-10 bg-surface-2 border-b border-border flex items-center px-4 gap-2">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-400" />
-                  <div className="w-3 h-3 rounded-full bg-amber-400" />
-                  <div className="w-3 h-3 rounded-full bg-green-400" />
-                </div>
-                <div className="flex-1 bg-white mx-10 h-6 rounded-md border border-border flex items-center px-3">
-                  <div className="w-full h-1 bg-border/40 rounded-full" />
-                </div>
-             </div>
-             <div className="aspect-[16/9] bg-bg p-6 grid grid-cols-12 gap-4">
-                <div className="col-span-3 space-y-4">
-                  <div className="h-40 bg-white rounded-xl border border-border" />
-                  <div className="h-20 bg-white rounded-xl border border-border" />
-                  <div className="h-20 bg-white rounded-xl border border-border" />
-                </div>
-                <div className="col-span-6 space-y-4">
-                   <div className="h-20 bg-primary-50 rounded-xl border border-primary-100" />
-                   <div className="h-64 bg-white rounded-xl border border-border" />
-                </div>
-                <div className="col-span-3 space-y-4">
-                   <div className="h-32 bg-white rounded-xl border border-border" />
-                   <div className="h-52 bg-white rounded-xl border border-border" />
-                </div>
-             </div>
+          {/* DASHBOARD MOCKUP - Real Generated UI Screenshot */}
+          <div className="mt-20 hidden md:block w-full max-w-5xl mx-auto rounded-3xl border-8 border-white/10 shadow-2xl overflow-hidden relative group">
+             <div className="absolute -inset-1 bg-gradient-to-r from-primary to-emerald-500 rounded-3xl blur opacity-20 group-hover:opacity-30 transition duration-1000" />
+             <img 
+               src="/orjut_dashboard_mockup.png" 
+               alt="Orjut ZiraiAsistan Dashboard Mockup" 
+               className="relative w-full h-auto rounded-2xl object-cover" 
+             />
           </div>
         </div>
       </section>
@@ -280,13 +261,13 @@ export default function LandingPage() {
                 </div>
                 <div className="flex-1 space-y-4 mb-8">
                   <div className="flex items-center gap-3 text-text-secondary font-bold text-sm">
-                    <Check className="text-primary flex-shrink-0" size={18} /> 3 Adet Arazi Takibi
+                    <Check className="text-primary flex-shrink-0" size={18} /> En Fazla 3 Arazi Takibi
                   </div>
                   <div className="flex items-center gap-3 text-text-secondary font-bold text-sm">
-                    <Check className="text-primary flex-shrink-0" size={18} /> Temel Finans Kayıtları
+                    <Check className="text-primary flex-shrink-0" size={18} /> Toplamda Maksimum 100 Dönüm
                   </div>
                   <div className="flex items-center gap-3 text-text-secondary font-bold text-sm">
-                    <Check className="text-primary flex-shrink-0" size={18} /> Stok Takibi
+                    <Check className="text-primary flex-shrink-0" size={18} /> Temel Finans ve Stok Takibi
                   </div>
                 </div>
                 <Button variant="neutral" fullWidth onClick={() => router.push('/login')}>Hemen Başla</Button>
@@ -301,10 +282,10 @@ export default function LandingPage() {
                   <h3 className="text-xl font-bold text-text-primary font-heading">Hasat Pro</h3>
                   <div className="mt-4">
                     <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-black text-text-primary">₺99</span>
+                      <span className="text-4xl font-black text-text-primary">₺499</span>
                       <span className="text-text-secondary font-bold">/ay</span>
                     </div>
-                    <p className="text-xs text-primary font-black mt-1 uppercase tracking-tighter">Yıllık 1.000 TL</p>
+                    <p className="text-xs text-primary font-black mt-1 uppercase tracking-tighter">Yıllık 4.990 TL</p>
                   </div>
                 </div>
                 <div className="flex-1 space-y-4 mb-8">
@@ -312,13 +293,16 @@ export default function LandingPage() {
                     <Check className="text-primary flex-shrink-0" size={18} /> Sınırsız Arazi Takibi
                   </div>
                   <div className="flex items-center gap-3 text-text-primary font-bold text-sm">
+                    <Check className="text-primary flex-shrink-0" size={18} /> Maksimum 5000 Dönüm Sınırı
+                  </div>
+                  <div className="flex items-center gap-3 text-text-primary font-bold text-sm">
                     <Check className="text-primary flex-shrink-0" size={18} /> Proaktif Yapay Zeka Danışmanı
                   </div>
                   <div className="flex items-center gap-3 text-text-primary font-bold text-sm">
-                    <Check className="text-primary flex-shrink-0" size={18} /> NDVI Uydu Haritaları
+                    <Check className="text-primary flex-shrink-0" size={18} /> NDVI Uydu Haritaları ve Raporlama
                   </div>
-                  <div className="flex items-center gap-3 text-text-primary font-bold text-sm">
-                    <Check className="text-primary flex-shrink-0" size={18} /> Gelişmiş Finansal Raporlama
+                  <div className="text-[10px] text-zinc-500 font-bold bg-zinc-50 border border-zinc-100 p-2.5 rounded-lg leading-relaxed">
+                     💡 5000 Dönüm üzeri araziler için özel kurumsal fiyatlandırma uygulanmaktadır.
                   </div>
                 </div>
                 <Button fullWidth onClick={() => router.push('/login')}>Pro'ya Geç</Button>

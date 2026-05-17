@@ -73,7 +73,7 @@ export default function PremiumUpsellModal({ isOpen, onClose }: PremiumUpsellMod
               Bu Özellik Hasat Pro Paketine Dâhildir
             </h2>
             <p className="text-sm text-zinc-400 text-center font-medium mb-8 leading-relaxed">
-              Yapay zekâ analizleri ve uydu görüntüleri için Premium&apos;a geçin.
+              Ayda sadece birkaç litre mazot parasına sınırsız uydu röntgeni, yapay zeka danışmanı ve mühendis desteği alın. <span className="text-emerald-400 font-bold">(Pro Hasat paketi 5.000 dekar ile sınırlıdır)</span>
             </p>
 
             {/* Features */}
@@ -140,7 +140,7 @@ export default function PremiumUpsellModal({ isOpen, onClose }: PremiumUpsellMod
             <div className="text-center mb-6">
               <div className="flex items-baseline justify-center gap-1">
                 <span className="text-4xl font-black text-white">
-                  {billingCycle === 'monthly' ? '100' : '1.000'}
+                  {billingCycle === 'monthly' ? '499' : '4.990'}
                 </span>
                 <span className="text-lg font-bold text-zinc-500">TL</span>
                 <span className="text-sm font-bold text-zinc-600">
@@ -149,7 +149,7 @@ export default function PremiumUpsellModal({ isOpen, onClose }: PremiumUpsellMod
               </div>
               {billingCycle === 'yearly' && (
                 <p className="text-xs text-emerald-500 font-bold mt-1">
-                  Aylık 83 TL&apos;ye denk gelir — 2 ay hediye!
+                  Aylık 415 TL&apos;ye denk gelir — 2 ay hediye!
                 </p>
               )}
             </div>
