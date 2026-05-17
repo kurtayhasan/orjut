@@ -196,10 +196,11 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
   const agromonitoringApiKey = process.env.NEXT_PUBLIC_AGROMONITORING_API_KEY;
   const polygonId = focusLand?.agromonitoring_polygon_id || focusLand?.id;
 
-  const ndviTileUrl = useMemo(() => {
-    if (!polygonId || !agromonitoringApiKey) return '';
-    return `https://api.agromonitoring.com/tile/db/{z}/{x}/{y}?polyid=${polygonId}&appid=${agromonitoringApiKey}`;
-  }, [polygonId, agromonitoringApiKey]);
+  const activeTileUrl = useMemo(() => {
+    if (!polygonId || !agromonitoringApiKey || activeLayer === 'normal') return '';
+    const palette = activeLayer === 'ndvi' ? 'NDVI' : 'NDWI';
+    return `https://api.agromonitoring.com/tile/db/${palette}/{z}/{x}/{y}?polyid=${polygonId}&appid=${agromonitoringApiKey}`;
+  }, [polygonId, agromonitoringApiKey, activeLayer]);
 
   // Effect to handle external edit request (from Edit button)
   useEffect(() => {
@@ -446,16 +447,51 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
 
   return (
     <div className="relative w-full h-full group">
-      {/* NDVI Toggle Overlay */}
+      {/* NDVI & Moisture Toggle Overlay */}
       <div className="absolute top-20 left-4 z-[1000] flex flex-col gap-2">
+        {/* NDVI Button */}
         <button 
-          onClick={handleNDVIToggle}
-          className={`p-3 rounded-2xl shadow-xl backdrop-blur-md transition-all border flex items-center gap-2 ${isNDVIActive ? 'bg-primary border-primary text-white' : 'bg-white/90 dark:bg-zinc-900/90 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-white'}`}
+          onClick={() => {
+            if (!isPremium) {
+              triggerUpsell();
+              return;
+            }
+            if (activeLayer === 'ndvi') {
+              setActiveLayer('normal');
+              setIsNDVIActive(false);
+            } else {
+              setActiveLayer('ndvi');
+              setIsNDVIActive(true);
+            }
+          }}
+          className={`p-3 rounded-2xl shadow-xl backdrop-blur-md transition-all border flex items-center gap-2 ${activeLayer === 'ndvi' ? 'bg-primary border-primary text-white font-black' : 'bg-white/90 dark:bg-zinc-900/90 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-white font-bold'}`}
         >
-          {isPremium ? <Radio size={18} className={isNDVIActive ? 'animate-pulse' : ''} /> : <Lock size={18} className="text-amber-500" />}
-          <span className="text-xs font-black uppercase tracking-widest hidden sm:inline">🛰️ NDVI Isı Haritası</span>
+          {isPremium ? <Radio size={18} className={activeLayer === 'ndvi' ? 'animate-pulse' : ''} /> : <Lock size={18} className="text-amber-500" />}
+          <span className="text-xs uppercase tracking-widest hidden sm:inline">🛰️ NDVI Bitki Sağlığı</span>
         </button>
-        {isNDVIActive && (
+
+        {/* Moisture Button */}
+        <button 
+          onClick={() => {
+            if (!isPremium) {
+              triggerUpsell();
+              return;
+            }
+            if (activeLayer === 'moisture') {
+              setActiveLayer('normal');
+              setIsNDVIActive(false);
+            } else {
+              setActiveLayer('moisture');
+              setIsNDVIActive(true);
+            }
+          }}
+          className={`p-3 rounded-2xl shadow-xl backdrop-blur-md transition-all border flex items-center gap-2 ${activeLayer === 'moisture' ? 'bg-blue-600 border-blue-600 text-white font-black' : 'bg-white/90 dark:bg-zinc-900/90 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-white font-bold'}`}
+        >
+          {isPremium ? <Droplet size={18} className={activeLayer === 'moisture' ? 'animate-pulse' : ''} /> : <Lock size={18} className="text-amber-500" />}
+          <span className="text-xs uppercase tracking-widest hidden sm:inline">💧 Toprak Nemi</span>
+        </button>
+
+        {activeLayer !== 'normal' && (
           <div 
             className="px-3 py-2 bg-black/80 backdrop-blur-md text-white text-[10px] font-bold rounded-xl border border-white/10 shadow-lg flex flex-col cursor-help animate-in fade-in zoom-in-95"
             title="Uydu verileri 3-5 günde bir güncellenir. Anlık veri çekilmez."
@@ -515,9 +551,10 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
 
         </LayersControl>
 
-        {isNDVIActive && polygonId && polygonId !== 'none' && agromonitoringApiKey && ndviTileUrl && (
+        {activeTileUrl && polygonId && polygonId !== 'none' && agromonitoringApiKey && (
           <TileLayer
-            url={ndviTileUrl}
+            key={"orjut-satellite-tiles-" + activeLayer}
+            url={activeTileUrl}
             zIndex={999}
             opacity={0.8}
           />
