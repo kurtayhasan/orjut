@@ -65,10 +65,8 @@ export default function AIPage() {
       });
 
       if (res.status === 401) {
-        toast.error("Oturum süresi doldu. Lütfen tekrar giriş yapın.");
-        localStorage.clear();
-        window.location.href = '/login';
-        return;
+        toast.error("Yapay zeka servisine erişilemedi veya oturum senkronizasyonu hatası.");
+        throw new Error("Yapay zeka servisine erişilemedi veya oturum senkronizasyonu hatası.");
       }
 
       if (!res.ok) {

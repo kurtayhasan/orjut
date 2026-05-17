@@ -551,6 +551,12 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
             {land.boundaries ? (
               <GeoJSON 
                 data={land.boundaries} 
+                style={() => ({
+                  fillColor: '#2e7d32',
+                  fillOpacity: isNDVIActive ? 0.05 : 0.4,
+                  color: '#1b5e20',
+                  weight: 3
+                })}
                 eventHandlers={{
                   click: (e) => {
                     L.DomEvent.stopPropagation(e as any);

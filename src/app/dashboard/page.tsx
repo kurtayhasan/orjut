@@ -111,22 +111,24 @@ export default function DashboardPage() {
       </div>
 
       {lands.length === 0 ? (
-        <Card className="flex flex-col items-center justify-center text-center py-16 px-6 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-xl space-y-6" padding="none">
-          <div className="w-20 h-20 bg-primary/10 text-primary rounded-3xl flex items-center justify-center animate-pulse mt-8">
-            <Tractor size={48} className="stroke-[1.5]" />
-          </div>
-          <div className="space-y-2 max-w-md">
-            <h2 className="text-xl font-black font-heading text-text-primary">İlk Arazinizi Ekleyin!</h2>
-            <p className="text-sm font-bold text-text-muted leading-relaxed px-4">
-              Hoş geldiniz! Akıllı tarım asistanınızın çalışması, NDVI sağlık analizlerinin yapılması ve konumunuza özel gerçek zamanlı hava durumunun alınabilmesi için lütfen harita üzerinden ilk arazinizi ekleyin.
-            </p>
-          </div>
-          <Link href="/dashboard/lands" className="pb-8">
-            <Button size="lg" className="font-black uppercase tracking-wider text-xs shadow-lg px-8 py-4" leftIcon={<Plus size={18} />}>
-              İlk Arazimi Ekle
-            </Button>
-          </Link>
-        </Card>
+        <div className="flex-1 w-full max-w-7xl mx-auto p-4">
+          <Card className="flex flex-col items-center justify-center text-center py-16 px-6 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-xl space-y-6" padding="none">
+            <div className="w-20 h-20 bg-primary/10 text-primary rounded-3xl flex items-center justify-center animate-pulse mt-8">
+              <Tractor size={48} className="stroke-[1.5]" />
+            </div>
+            <div className="space-y-2 max-w-md">
+              <h2 className="text-xl font-black font-heading text-text-primary">İlk Arazinizi Ekleyin!</h2>
+              <p className="text-sm font-bold text-text-muted leading-relaxed px-4">
+                Hoş geldiniz! Akıllı tarım asistanınızın çalışması, NDVI sağlık analizlerinin yapılması ve konumunuza özel gerçek zamanlı hava durumunun alınabilmesi için lütfen harita üzerinden ilk arazinizi ekleyin.
+              </p>
+            </div>
+            <Link href="/dashboard/lands" className="pb-8">
+              <Button size="lg" className="font-black uppercase tracking-wider text-xs shadow-lg px-8 py-4" leftIcon={<Plus size={18} />}>
+                İlk Arazimi Ekle
+              </Button>
+            </Link>
+          </Card>
+        </div>
       ) : (
         <>
           {/* PHASE 2: PRESCRIPTION ALERT BANNER */}

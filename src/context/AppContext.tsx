@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { toast } from 'sonner';
 import PremiumUpsellModal from '@/components/ui/PremiumUpsellModal';
 import { fetchWeather, WeatherData } from '@/lib/weatherService';
@@ -144,12 +144,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return myId;
   }, [userRole, selectedClientId, userProfile?.id]);
 
-  const refreshProfile = useCallback(async () => {
+  const lastProfileRefreshRef = useRef<number>(0);
+
+  const refreshProfile = useCallback(async (force = false) => {
     const userId = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
     if (!userId) {
       setIsLoadingProfile(false);
       return;
     }
+
+    const now = Date.now();
+    if (!force && now - lastProfileRefreshRef.current < 30000) {
+      return; // Soften visibility/polling triggers to max once every 30 seconds
+    }
+    lastProfileRefreshRef.current = now;
 
     setIsLoadingProfile(true);
     try {
@@ -707,10 +715,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ prompt }) 
       });
       if (res.status === 401) {
-        toast.error("Oturum süresi doldu. Lütfen tekrar giriş yapın.", { id: 'ai-loading' });
-        localStorage.clear();
-        window.location.href = '/login';
-        return;
+        toast.error("Yapay zeka servisine erişilemedi veya oturum senkronizasyonu hatası.", { id: 'ai-loading' });
+        throw new Error("Yapay zeka servisine erişilemedi veya oturum senkronizasyonu hatası.");
       }
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
