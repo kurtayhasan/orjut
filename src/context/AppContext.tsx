@@ -257,14 +257,33 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [activeOrgId]);
 
   useEffect(() => {
-    // HARD RE-FETCH: Subscribe to auth changes and fetch fresh profile
+    // 1. HARD RE-FETCH: Subscribe to auth changes
     const { data: { subscription } } = db.onAuthStateChange(async (event, session) => {
       if (session?.user?.id || localStorage.getItem('user_id')) {
         await refreshProfile();
       }
     });
 
-    return () => subscription.unsubscribe();
+    // 2. Tab Focus Real-time Sync (Immediate Sync when returning to tab)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && (typeof window !== 'undefined' ? localStorage.getItem('user_id') : null)) {
+        refreshProfile();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // 3. Background Polling (Every 5 minutes silent sync)
+    const pollInterval = setInterval(() => {
+      if (typeof window !== 'undefined' && localStorage.getItem('user_id')) {
+        refreshProfile();
+      }
+    }, 300000); // 5 minutes
+
+    return () => {
+      subscription.unsubscribe();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearInterval(pollInterval);
+    };
   }, [refreshProfile]);
 
   useEffect(() => {

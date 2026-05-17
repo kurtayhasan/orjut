@@ -15,16 +15,23 @@ export async function buildLandContext(landId: string) {
       .order('date', { ascending: false })
       .limit(3);
 
-    // 3. Fetch latest scouting log
-    const { data: scouting } = await supabase
+    // 3. Fetch last 15 scouting logs (Token Limit Protection)
+    const { data: scoutingLogs } = await supabase
       .from('scouting_logs')
       .select('*')
       .eq('land_id', landId)
       .order('date', { ascending: false })
-      .limit(1)
-      .single();
+      .limit(15);
 
-    // 4. Fetch latest NDVI snapshot
+    // 4. Fetch last 20 transactions/expenses (Token Limit Protection)
+    const { data: transactions } = await supabase
+      .from('transactions')
+      .select('*')
+      .eq('land_id', landId)
+      .order('date', { ascending: false })
+      .limit(20);
+
+    // 5. Fetch latest NDVI snapshot
     const { data: ndvi } = await supabase
       .from('ndvi_snapshots')
       .select('*')
@@ -33,7 +40,7 @@ export async function buildLandContext(landId: string) {
       .limit(1)
       .single();
 
-    // 5. Fetch current weather
+    // 6. Fetch current weather
     const weather = await fetchWeather(land.lat, land.lng);
 
     // Aggregate Context
@@ -46,7 +53,9 @@ export async function buildLandContext(landId: string) {
         environment: land.environment_type
       },
       recent_operations: operations || [],
-      latest_scouting: scouting || null,
+      latest_scouting: scoutingLogs?.[0] || null,
+      scouting_logs: scoutingLogs || [],
+      recent_transactions: transactions || [],
       latest_ndvi: ndvi ? { mean: ndvi.mean, date: ndvi.date } : null,
       current_weather: weather,
       timestamp: new Date().toISOString()
