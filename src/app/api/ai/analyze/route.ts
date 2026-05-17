@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import { buildMinifiedRAGContext } from '@/lib/ragEngine';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { getSupabaseServer } from '@/lib/supabaseServer';
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 
 export async function POST(req: Request) {
-  const supabase = getSupabaseServer();
+  const cookieStore = cookies();
+  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
   // Verify auth session
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { db } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -12,8 +13,16 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // CUSTOM AUTH: This app uses profiles-based auth, NOT Supabase Auth.
-        // We verify by checking localStorage user_id and validating against DB.
+        // Check if a valid Supabase auth session exists first (when online)
+        if (navigator.onLine) {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (!session) {
+            localStorage.clear();
+            router.push('/login');
+            return;
+          }
+        }
+
         const userId = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
 
         if (!userId) {

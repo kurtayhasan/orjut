@@ -119,6 +119,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
   const [editingLandId, setEditingLandId] = useState<string | null>(null);
   const [boundaries, setBoundaries] = useState<any>(null);
   const drawGroupRef = useRef<L.FeatureGroup>(null);
+  const [selectedLandForPopup, setSelectedLandForPopup] = useState<{ land: any; lat: number; lng: number } | null>(null);
   
   // Location dropdown states
   const [selectedCountryCode, setSelectedCountryCode] = useState('TR');
@@ -161,12 +162,12 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
     return [38.9637, 35.2433]; // Turkey General Center
   }, [focusLand, lands]);
 
-  const ndviTileUrl = useMemo(() => {
-    return `https://api.agromonitoring.com/tile/1.0/{z}/{x}/{y}/NDVI/{id}?appid=${process.env.NEXT_PUBLIC_AGROMONITORING_API_KEY}`;
-  }, []);
-
   const agromonitoringApiKey = process.env.NEXT_PUBLIC_AGROMONITORING_API_KEY;
   const polygonId = focusLand?.agromonitoring_polygon_id || focusLand?.id;
+
+  const ndviTileUrl = useMemo(() => {
+    return `https://api.agromonitoring.com/tile/db/{z}/{x}/{y}?polyid=${polygonId}&appid=${agromonitoringApiKey}`;
+  }, [polygonId, agromonitoringApiKey]);
 
   // Effect to handle external edit request (from Edit button)
   useEffect(() => {
@@ -482,7 +483,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
           {isNDVIActive && agromonitoringApiKey && polygonId && (
             <LayersControl.Overlay checked name="NDVI Analizi">
               <TileLayer
-                url={ndviTileUrl.replace('{id}', polygonId)}
+                url={ndviTileUrl}
                 zIndex={10}
                 opacity={0.7}
               />
@@ -550,43 +551,68 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
           <React.Fragment key={land.id}>
             {land.boundaries ? (
               <GeoJSON 
+                key={`isNDVIActive-${isNDVIActive}-${land.id}`}
                 data={land.boundaries} 
                 style={() => ({
                   fillColor: '#2e7d32',
-                  fillOpacity: isNDVIActive ? 0.05 : 0.4,
+                  fillOpacity: isNDVIActive ? 0.01 : 0.3,
                   color: '#1b5e20',
-                  weight: 3
+                  weight: isNDVIActive ? 1 : 2
                 })}
                 eventHandlers={{
-                  click: (e) => {
+                  click: (e: any) => {
+                    const latlng = e.latlng || (e.target && typeof e.target.getCenter === 'function' ? e.target.getCenter() : null);
+                    if (!latlng || typeof latlng.lat !== 'number' || isNaN(latlng.lat) || typeof latlng.lng !== 'number' || isNaN(latlng.lng)) {
+                      return;
+                    }
                     L.DomEvent.stopPropagation(e as any);
+                    setSelectedLandForPopup({
+                      land,
+                      lat: latlng.lat,
+                      lng: latlng.lng
+                    });
                     handleEditPlot(land);
                   }
                 }}
-              >
-                <Popup maxWidth={250}>
-                  <LandWeatherPopup land={land} />
-                </Popup>
-              </GeoJSON>
+              />
             ) : (
               land.lat && land.lng && (
                 <Marker 
+                  key={`isNDVIActive-${isNDVIActive}-${land.id}`}
                   position={[land.lat, land.lng]}
                   eventHandlers={{
-                    click: (e) => {
+                    click: (e: any) => {
+                      const latlng = e.latlng || (e.target && typeof e.target.getCenter === 'function' ? e.target.getCenter() : null);
+                      if (!latlng || typeof latlng.lat !== 'number' || isNaN(latlng.lat) || typeof latlng.lng !== 'number' || isNaN(latlng.lng)) {
+                        return;
+                      }
                       L.DomEvent.stopPropagation(e as any);
+                      setSelectedLandForPopup({
+                        land,
+                        lat: latlng.lat,
+                        lng: latlng.lng
+                      });
                       handleEditPlot(land);
                     }
                   }}
-                >
-                  <Popup maxWidth={250}>
-                    <LandWeatherPopup land={land} />
-                  </Popup>
-                </Marker>
+                />
               )
             )}
           </React.Fragment>
         ))}
+
+        {selectedLandForPopup && (
+          <Popup 
+            position={[selectedLandForPopup.lat, selectedLandForPopup.lng]} 
+            eventHandlers={{
+              remove: () => setSelectedLandForPopup(null)
+            }}
+            maxWidth={240}
+            autoPan={true}
+          >
+            <LandWeatherPopup land={selectedLandForPopup.land} />
+          </Popup>
+        )}
 
         {markerPosition && !editingLandId && <Marker position={markerPosition} />}
       </MapContainer>

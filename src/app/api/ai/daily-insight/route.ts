@@ -1,7 +1,8 @@
 // OFFICIAL: @google/genai SDK — gemini-2.0-flash model
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
-import { getSupabaseServer } from '@/lib/supabaseServer';
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
 
 // 1. Initialize the official SDK
 const ai = new GoogleGenAI({
@@ -9,7 +10,8 @@ const ai = new GoogleGenAI({
 });
 
 export async function POST(req: NextRequest) {
-  const supabase = getSupabaseServer();
+  const cookieStore = cookies();
+  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 

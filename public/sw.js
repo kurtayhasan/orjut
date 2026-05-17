@@ -36,9 +36,14 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // Ignore API and Supabase requests
-  if (url.pathname.startsWith('/api') || url.hostname.includes('supabase')) {
-    return;
+  // Kesinlikle cache'lenmeyecek kritik yollar:
+  if (
+    event.request.method !== 'GET' ||
+    url.pathname.includes('/api/') ||
+    url.searchParams.has('_rsc') || 
+    url.pathname.includes('/_next/')
+  ) {
+    return event.respondWith(fetch(event.request)); // Doğrudan network'e bırak, asla clone etme!
   }
 
   // Intercept Maps requests (stale-while-revalidate for navigation and static assets)
@@ -46,9 +51,11 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       caches.match(event.request).then((cachedResponse) => {
         const fetchPromise = fetch(event.request).then((networkResponse) => {
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, networkResponse.clone());
-          });
+          if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, networkResponse.clone());
+            });
+          }
           return networkResponse;
         }).catch(() => {
           if (event.request.mode === 'navigate') {

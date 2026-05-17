@@ -8,6 +8,7 @@ import { buildAIPrompt, LandContext } from '@/lib/aiActionEngine';
 import { Transaction, Land, Season, Profile, IrrigationLog, FieldOperation, ScoutingLog, InventoryItem } from '@/types';
 import { db } from '@/lib/db';
 import { translations, Language } from '@/lib/translations';
+import { supabase } from '@/lib/supabase';
 
 type AppContextType = {
   lang: Language;
@@ -110,6 +111,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [showUpsell, setShowUpsell] = useState(false);
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+  const [authSession, setAuthSession] = useState<any>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   const triggerUpsell = useCallback(() => setShowUpsell(true), []);
   const closeUpsell = useCallback(() => setShowUpsell(false), []);
@@ -135,14 +138,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const t = (key: keyof typeof translations['en']) => translations[lang][key] || key;
 
   const activeOrgId = useMemo(() => {
-    const myId = userProfile?.id || (typeof window !== 'undefined' ? localStorage.getItem('user_id') : null);
+    if (isAuthLoading || isLoadingProfile || !authSession || !userProfile) return null;
+    const myId = userProfile.id;
     
     // PHASE 3: Zero-UUID Protection & Auth Matching
     if (!myId || myId === '00000000-0000-0000-0000-000000000000') return null;
     
     if (userRole === 'engineer' && selectedClientId) return selectedClientId;
     return myId;
-  }, [userRole, selectedClientId, userProfile?.id]);
+  }, [userRole, selectedClientId, userProfile, authSession, isAuthLoading, isLoadingProfile]);
 
   const lastProfileRefreshRef = useRef<number>(0);
 
@@ -196,8 +200,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [refreshProfile]);
 
   const refreshAllData = useCallback(async () => {
-    const userId = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
-    if (!userId || !activeOrgId) return;
+    if (isAuthLoading || isLoadingProfile || !authSession || !userProfile || !activeOrgId) return;
+    const userId = userProfile.id;
 
     setIsLoadingLands(true);
     setIsLoadingTransactions(true);
@@ -265,11 +269,36 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [activeOrgId]);
 
   useEffect(() => {
+    // Check initial session
+    const checkInitialSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setAuthSession(session);
+        if (session?.user?.id) {
+          localStorage.setItem('user_id', session.user.id);
+          await refreshProfile(true);
+        } else {
+          setIsLoadingProfile(false);
+        }
+      } catch (err) {
+        console.error("Initial session check failed:", err);
+        setIsLoadingProfile(false);
+      } finally {
+        setIsAuthLoading(false);
+      }
+    };
+    checkInitialSession();
+
     // 1. HARD RE-FETCH: Subscribe to auth changes
     const { data: { subscription } } = db.onAuthStateChange(async (event, session) => {
+      setAuthSession(session);
       if (session?.user?.id || localStorage.getItem('user_id')) {
-        await refreshProfile();
+        await refreshProfile(true);
+      } else {
+        setUserProfile(null);
+        setIsLoadingProfile(false);
       }
+      setIsAuthLoading(false);
     });
 
     // 2. Tab Focus Real-time Sync (Immediate Sync when returning to tab)
@@ -672,6 +701,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const requestWeatherAndInsight = async () => {
+    if (isAuthLoading || isLoadingProfile || !authSession || !userProfile || !activeOrgId) {
+      toast.error("Oturum henüz yüklenmedi, lütfen bekleyin...");
+      return;
+    }
     let lat = 37.7478, lon = 27.3971;
     if (lands.length > 0 && lands[0].lat && lands[0].lng) { lat = lands[0].lat; lon = lands[0].lng; }
     toast.loading("Analiz ediliyor...", { id: 'ai-loading' });
