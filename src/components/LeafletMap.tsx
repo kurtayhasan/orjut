@@ -483,12 +483,11 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
 
         </LayersControl>
 
-        {isNDVIActive && agromonitoringApiKey && polygonId && ndviTileUrl && (
+        {isNDVIActive && polygonId && polygonId !== 'none' && agromonitoringApiKey && ndviTileUrl && (
           <TileLayer
-            key={`orjut-ndvi-tile-${isNDVIActive}-${polygonId}`}
             url={ndviTileUrl}
             zIndex={999}
-            opacity={0.75}
+            opacity={0.8}
           />
         )}
 
@@ -552,7 +551,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
           <React.Fragment key={land.id}>
             {land.boundaries ? (
               <GeoJSON 
-                key={`orjut-ndvi-layer-${isNDVIActive}-${land.id}-${polygonId || 'none'}`}
+                key={"orjut-map-ndvi-sync-" + isNDVIActive + "-" + land.id + "-" + (polygonId || 'empty')}
                 data={land.boundaries} 
                 style={() => ({
                   fillColor: '#2e7d32',
@@ -578,7 +577,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
             ) : (
               land.lat && land.lng && (
                 <Marker 
-                  key={`orjut-ndvi-layer-${isNDVIActive}-${land.id}-${polygonId || 'none'}`}
+                  key={"orjut-map-ndvi-sync-" + isNDVIActive + "-" + land.id + "-" + (polygonId || 'empty')}
                   position={[land.lat, land.lng]}
                   eventHandlers={{
                     click: (e: any) => {

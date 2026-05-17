@@ -5,13 +5,13 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 
 export async function POST(req: Request) {
-  const cookieStore = cookies();
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
-  // Verify auth session
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
   try {
+    const cookieStore = cookies();
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+    // Verify auth session
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
     const { landId, userId } = await req.json();
 
     if (!landId || !userId) {
@@ -36,8 +36,15 @@ export async function POST(req: Request) {
     const context: any = await buildMinifiedRAGContext(landId);
     if (!context) {
       return NextResponse.json({ 
-        error: "Analiz verileri şu an hazırlanamadı, lütfen bekleyiniz." 
-      }, { status: 200 }); // Avoid fofwarding a 500 error, return gracefully with status 200 and a descriptive error message
+        error: "Analiz motoru şu an yoğun veya eksik tarla verisi var. Lütfen masraflarınızı ve arazinizi kontrol edip tekrar deneyiniz." 
+      }, { status: 200 });
+    }
+
+    // Check GEMINI_API_KEY presence
+    if (!process.env.GEMINI_API_KEY) {
+      return NextResponse.json({ 
+        error: "Analiz motoru şu an yoğun veya eksik tarla verisi var. Lütfen masraflarınızı ve arazinizi kontrol edip tekrar deneyiniz." 
+      }, { status: 200 });
     }
 
     // 3. Call Gemini AI with forced JSON mode
@@ -57,6 +64,13 @@ export async function POST(req: Request) {
     { "risk": "...", "action": "...", "urgency": "düşük|orta|yüksek" }
     
     Veri: ${JSON.stringify(context)}`;
+
+    // Validate prompt string
+    if (!prompt || typeof prompt !== 'string' || prompt.trim() === '') {
+      return NextResponse.json({ 
+        error: "Analiz motoru şu an yoğun veya eksik tarla verisi var. Lütfen masraflarınızı ve arazinizi kontrol edip tekrar deneyiniz." 
+      }, { status: 200 });
+    }
 
     let analysis;
     try {
@@ -91,6 +105,6 @@ export async function POST(req: Request) {
 
   } catch (error: any) {
     console.error("AI Analysis Route Error:", error);
-    return NextResponse.json({ error: "Analiz verileri şu an hazırlanamadı, lütfen bekleyiniz." }, { status: 200 });
+    return NextResponse.json({ error: "Analiz motoru şu an yoğun veya eksik tarla verisi var. Lütfen masraflarınızı ve arazinizi kontrol edip tekrar deneyiniz." }, { status: 200 });
   }
 }
