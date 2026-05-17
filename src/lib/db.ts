@@ -160,7 +160,7 @@ export const db = {
   /* ── Engineer / Clients ───────────────── */
   getClients: (engineerId: string) =>
     from('engineer_clients')
-      .select('*, farmer:profiles!farmer_id(*)')
+      .select('*, farmer:profiles!farmer_id(*, lands(*), transactions(*))')
       .eq('engineer_id', engineerId),
 
   addClientRequest: async (engineerId: string, phone: string) => {

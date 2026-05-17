@@ -34,6 +34,32 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
           if (data.role) {
             localStorage.setItem('user_role', data.role);
           }
+          
+          // Auto-bind pending engineer invite if present
+          const pendingInvite = localStorage.getItem('pending_invite_engineer_id');
+          if (pendingInvite) {
+            try {
+              const { data: allRelations } = await (db as any).from('engineer_clients')
+                .select('*')
+                .eq('farmer_id', userId)
+                .eq('status', 'approved');
+
+              if (!allRelations || allRelations.length === 0) {
+                await (db as any).from('engineer_clients').insert([{
+                  engineer_id: pendingInvite,
+                  farmer_id: userId,
+                  status: 'approved'
+                }]);
+                import('sonner').then(({ toast }) => {
+                  toast.success('Mühendisiniz başarıyla atandı.');
+                });
+              }
+            } catch (err) {
+              console.error("Auto bind failed:", err);
+            } finally {
+              localStorage.removeItem('pending_invite_engineer_id');
+            }
+          }
           const overrideRole = localStorage.getItem('user_role_override');
           const baseRole = overrideRole || data.role || 'farmer';
           if (baseRole === 'admin' || baseRole === 'engineer') {
