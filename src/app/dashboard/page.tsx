@@ -158,7 +158,9 @@ export default function DashboardPage() {
                 <div className="text-center">
                   <Sun className="text-amber-300 mb-1 mx-auto drop-shadow-md" size={40} />
                   <div className="text-4xl font-black text-white">{weather.temp ?? '--'}°</div>
-                  <div className="text-[10px] font-black text-white/70 uppercase tracking-widest mt-1">SÖKE, AYDIN</div>
+                  <div className="text-[10px] font-black text-white/70 uppercase tracking-widest mt-1 truncate max-w-[120px]">
+                    {lands.length > 0 ? (lands[0].district || lands[0].city || 'Arazi Konumu').toUpperCase() : 'KONUM BEKLENİYOR'}
+                  </div>
                 </div>
                 <div className="w-px h-16 bg-white/20" />
                 <div className="space-y-3">
@@ -166,7 +168,7 @@ export default function DashboardPage() {
                     <Wind size={18} className="text-blue-200" /> {weather.windspeed ?? '--'} km/s
                   </div>
                   <div className="flex items-center gap-3 text-white/90 text-sm font-bold">
-                    <CloudRain size={18} className="text-blue-300" /> %12 Yağış
+                    <CloudRain size={18} className="text-blue-300" /> {(weather as any).humidity !== null ? `%${(weather as any).humidity} Nem` : '%-- Nem'}
                   </div>
                 </div>
               </div>

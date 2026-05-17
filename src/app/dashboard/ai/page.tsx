@@ -10,6 +10,7 @@ import {
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -55,12 +56,20 @@ export default function AIPage() {
       const res = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           message: userMessage.content,
           userId: localStorage.getItem('user_id'),
           lands: lands.map(l => ({ crop_type: l.crop_type, city: l.city, size_decare: l.size_decare }))
         })
       });
+
+      if (res.status === 401) {
+        toast.error("Oturum süresi doldu. Lütfen tekrar giriş yapın.");
+        localStorage.clear();
+        window.location.href = '/login';
+        return;
+      }
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));

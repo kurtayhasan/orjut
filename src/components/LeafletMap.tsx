@@ -37,9 +37,9 @@ function MapController({ selectedLand, searchResult }: { selectedLand: any, sear
   
   useEffect(() => {
     if (selectedLand) {
-      const lat = parseFloat(selectedLand.lat);
-      const lng = parseFloat(selectedLand.lng);
-      if (!isNaN(lat) && !isNaN(lng)) {
+      const lat = parseFloat(selectedLand.lat as any);
+      const lng = parseFloat(selectedLand.lng as any);
+      if (typeof lat === 'number' && !isNaN(lat) && typeof lng === 'number' && !isNaN(lng)) {
         map.flyTo([lat, lng], 16, { animate: true, duration: 1.5 });
       }
     }
@@ -49,13 +49,65 @@ function MapController({ selectedLand, searchResult }: { selectedLand: any, sear
     if (searchResult) {
       const lat = parseFloat(searchResult.lat as any);
       const lng = parseFloat(searchResult.lng as any);
-      if (!isNaN(lat) && !isNaN(lng)) {
+      if (typeof lat === 'number' && !isNaN(lat) && typeof lng === 'number' && !isNaN(lng)) {
         map.flyTo([lat, lng], 14, { animate: true, duration: 2 });
       }
     }
   }, [searchResult, map]);
 
   return null;
+}
+
+function LandWeatherPopup({ land }: { land: any }) {
+  const [weather, setWeather] = useState<{ temp: number | null, humidity: number | null }>({ temp: null, humidity: null });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    async function loadWeather() {
+      if (!land.lat || !land.lng) return;
+      try {
+        const { fetchWeather } = await import('@/lib/weatherService');
+        const data = await fetchWeather(parseFloat(land.lat), parseFloat(land.lng));
+        if (active) {
+          setWeather({ temp: data.temperature, humidity: data.humidity });
+        }
+      } catch (err) {
+        console.error("Failed to load weather for popup:", err);
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+    loadWeather();
+    return () => {
+      active = false;
+    };
+  }, [land]);
+
+  return (
+    <div className="p-2 min-w-[160px] max-w-[240px] space-y-2 text-zinc-900 dark:text-zinc-100 font-sans">
+      <div className="border-b border-zinc-100 dark:border-zinc-800 pb-1.5">
+        <h4 className="font-black text-xs text-indigo-600 dark:text-indigo-400">
+          {land.district || land.city || 'İsimsiz Arazi'}
+        </h4>
+        <p className="text-[9px] text-zinc-500 dark:text-zinc-400 font-bold uppercase mt-0.5">
+          {land.crop_type} • {land.size_decare} Dekar
+        </p>
+      </div>
+      <div className="flex items-center justify-between text-[11px] font-bold pt-0.5">
+        <span className="text-zinc-500 dark:text-zinc-400">Sıcaklık:</span>
+        <span className="text-zinc-800 dark:text-zinc-100 font-black">
+          {loading ? '...' : weather.temp !== null ? `${weather.temp}°C` : '--'}
+        </span>
+      </div>
+      <div className="flex items-center justify-between text-[11px] font-bold">
+        <span className="text-zinc-500 dark:text-zinc-400">Nem Oranı:</span>
+        <span className="text-zinc-800 dark:text-zinc-100 font-black">
+          {loading ? '...' : weather.humidity !== null ? `${weather.humidity}%` : '--'}
+        </span>
+      </div>
+    </div>
+  );
 }
 
 export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, editLand?: any }) {
@@ -93,9 +145,20 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
   const cities = useMemo(() => selectedStateCode ? City.getCitiesOfState(selectedCountryCode, selectedStateCode) : [], [selectedCountryCode, selectedStateCode]);
 
   const mapCenter: [number, number] = useMemo(() => {
-    if (focusLand?.lat && focusLand?.lng) return [focusLand.lat, focusLand.lng];
-    if (lands.length > 0 && lands[0].lat && lands[0].lng) return [lands[0].lat, lands[0].lng];
-    return [37.3122, 40.7339]; // Mardin
+    const parseCoord = (val: any) => {
+      const parsed = parseFloat(val);
+      return typeof parsed === 'number' && !isNaN(parsed) ? parsed : null;
+    };
+    const focusLat = parseCoord(focusLand?.lat);
+    const focusLng = parseCoord(focusLand?.lng);
+    if (focusLat !== null && focusLng !== null) return [focusLat, focusLng];
+
+    if (lands.length > 0) {
+      const landLat = parseCoord(lands[0].lat);
+      const landLng = parseCoord(lands[0].lng);
+      if (landLat !== null && landLng !== null) return [landLat, landLng];
+    }
+    return [38.9637, 35.2433]; // Turkey General Center
   }, [focusLand, lands]);
 
   const ndviTileUrl = useMemo(() => {
@@ -395,7 +458,8 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
         center={mapCenter}
         zoom={13} 
         scrollWheelZoom={true} 
-        style={{ height: '100%', width: '100%', zIndex: 0 }}
+        {...({ tap: false } as any)}
+        style={{ height: '100%', width: '100%', zIndex: 0, touchAction: 'none' }}
         className="rounded-3xl overflow-hidden shadow-inner"
       >
         <LayersControl position="topright">
@@ -419,6 +483,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
             <LayersControl.Overlay checked name="NDVI Analizi">
               <TileLayer
                 url={ndviTileUrl.replace('{id}', polygonId)}
+                zIndex={10}
                 opacity={0.7}
               />
             </LayersControl.Overlay>
@@ -492,7 +557,11 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
                     handleEditPlot(land);
                   }
                 }}
-              />
+              >
+                <Popup maxWidth={250}>
+                  <LandWeatherPopup land={land} />
+                </Popup>
+              </GeoJSON>
             ) : (
               land.lat && land.lng && (
                 <Marker 
@@ -503,7 +572,11 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
                       handleEditPlot(land);
                     }
                   }}
-                />
+                >
+                  <Popup maxWidth={250}>
+                    <LandWeatherPopup land={land} />
+                  </Popup>
+                </Marker>
               )
             )}
           </React.Fragment>

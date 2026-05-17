@@ -18,7 +18,7 @@ type AppContextType = {
   addExpense: (amount: number, category: string, date: string, land_id: string, description: string, receipt_url?: string, receipt_thumbnail_url?: string, inventoryData?: { name: string, type: string, quantity: number, unit: string, id?: string }, season_id?: string, hybridData?: { appliedAmount: number, landId: string, type: string }) => Promise<void>;
   updateExpense: (id: string, updates: any) => Promise<void>;
   deleteExpense: (id: string) => Promise<void>;
-  weather: { temp: number | null, windspeed: number | null, loading: boolean, error: string | null };
+  weather: { temp: number | null, windspeed: number | null, humidity: number | null, condition: string, loading: boolean, error: string | null };
   dailyInsight: string | null;
   criticalAlert: string | null;
   totalSavings: number;
@@ -289,6 +289,65 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       refreshAllData();
     }
   }, [activeOrgId, refreshAllData]);
+
+  // Load weather dynamically based on lands, browser geolocation, or fallback Söke/Aydın
+  useEffect(() => {
+    let active = true;
+    async function loadCurrentWeather() {
+      let lat: number | null = null;
+      let lon: number | null = null;
+
+      // 1. Try first land
+      if (lands.length > 0) {
+        const firstLand = lands[0];
+        const parsedLat = parseFloat(firstLand.lat as any);
+        const parsedLon = parseFloat(firstLand.lng as any);
+        if (typeof parsedLat === 'number' && !isNaN(parsedLat) && typeof parsedLon === 'number' && !isNaN(parsedLon)) {
+          lat = parsedLat;
+          lon = parsedLon;
+        }
+      }
+
+      // 2. Try browser geolocation if no land
+      if ((lat === null || lon === null) && typeof navigator !== 'undefined' && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            if (!active) return;
+            try {
+              const data = await fetchWeather(position.coords.latitude, position.coords.longitude);
+              if (active) setWeatherData(data);
+            } catch (err) {
+              console.error("Browser location weather failed:", err);
+            }
+          },
+          (err) => console.log("Geolocation permission denied or failed:", err),
+          { timeout: 5000 }
+        );
+        return;
+      }
+
+      // 3. Fallback to Söke/Aydın
+      if (lat === null || lon === null) {
+        lat = 37.7478;
+        lon = 27.3971;
+      }
+
+      try {
+        const data = await fetchWeather(lat, lon);
+        if (active) setWeatherData(data);
+      } catch (err) {
+        console.error("Default weather fetch failed:", err);
+      }
+    }
+
+    if (activeOrgId) {
+      loadCurrentWeather();
+    }
+
+    return () => {
+      active = false;
+    };
+  }, [lands, activeOrgId]);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -622,7 +681,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         date: new Date().toLocaleDateString('tr-TR'),
         timestamp: new Date().toISOString()
       });
-      const res = await fetch('/api/ai/daily-insight', { method: 'POST', body: JSON.stringify({ prompt }) });
+      const res = await fetch('/api/ai/daily-insight', { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ prompt }) 
+      });
+      if (res.status === 401) {
+        toast.error("Oturum süresi doldu. Lütfen tekrar giriş yapın.", { id: 'ai-loading' });
+        localStorage.clear();
+        window.location.href = '/login';
+        return;
+      }
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
@@ -651,7 +721,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const value = {
     lang, setLang, t, totalExpenses, totalArea, addExpense, updateExpense, deleteExpense,
-    weather: { temp: weatherData?.temperature || null, windspeed: weatherData?.windSpeed || null, loading: false, error: null },
+    weather: { 
+      temp: weatherData?.temperature ?? null, 
+      windspeed: weatherData?.windSpeed ?? null, 
+      humidity: weatherData?.humidity ?? null,
+      condition: weatherData?.condition ?? 'Hava Durumu Servisi',
+      loading: false, 
+      error: null 
+    },
     dailyInsight, criticalAlert, totalSavings, dailySpent, lands, transactions, irrigationLogs,
     isLoadingLands, isLoadingTransactions, addLand, updateLand, deleteLand,
     addIrrigationLog, deleteIrrigationLog, logSaving,
