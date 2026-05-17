@@ -17,7 +17,7 @@ const supabase = createClient(
 export async function GET(req: NextRequest) {
   const supabaseRoute = getSupabaseServer();
   const { data: { session } } = await supabaseRoute.auth.getSession();
-  if (!session) return new Response('Unauthorized', { status: 401 });
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   // Verify the request is from Vercel Cron (optional security)
   const authHeader = req.headers.get('authorization');

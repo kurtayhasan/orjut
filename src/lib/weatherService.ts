@@ -71,6 +71,7 @@ export async function fetchWeather(lat: number, lon: number): Promise<WeatherDat
 
   try {
     const res  = await fetch(`${BASE_URL}?${params}`);
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const json = await res.json();
     if (!json.current || !json.daily) throw new Error('Invalid weather response');
 

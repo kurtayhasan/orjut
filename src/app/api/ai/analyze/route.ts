@@ -7,7 +7,7 @@ export async function POST(req: Request) {
   const supabase = getSupabaseServer();
   // Verify auth session
   const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return new Response('Unauthorized', { status: 401 });
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
     const { landId, userId } = await req.json();

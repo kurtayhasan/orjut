@@ -623,6 +623,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         timestamp: new Date().toISOString()
       });
       const res = await fetch('/api/ai/daily-insight', { method: 'POST', body: JSON.stringify({ prompt }) });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
+      }
       const data = await res.json();
       if (data.success) {
         // AI response is now JSON with insight and critical_alert

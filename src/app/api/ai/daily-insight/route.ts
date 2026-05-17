@@ -11,7 +11,7 @@ const ai = new GoogleGenAI({
 export async function POST(req: NextRequest) {
   const supabase = getSupabaseServer();
   const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return new Response('Unauthorized', { status: 401 });
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
     const { prompt } = await req.json();

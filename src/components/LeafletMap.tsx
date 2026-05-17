@@ -92,6 +92,19 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
   const states = useMemo(() => State.getStatesOfCountry(selectedCountryCode), [selectedCountryCode]);
   const cities = useMemo(() => selectedStateCode ? City.getCitiesOfState(selectedCountryCode, selectedStateCode) : [], [selectedCountryCode, selectedStateCode]);
 
+  const mapCenter: [number, number] = useMemo(() => {
+    if (focusLand?.lat && focusLand?.lng) return [focusLand.lat, focusLand.lng];
+    if (lands.length > 0 && lands[0].lat && lands[0].lng) return [lands[0].lat, lands[0].lng];
+    return [37.3122, 40.7339]; // Mardin
+  }, [focusLand, lands]);
+
+  const ndviTileUrl = useMemo(() => {
+    return `https://api.agromonitoring.com/tile/1.0/{z}/{x}/{y}/NDVI/{id}?appid=${process.env.NEXT_PUBLIC_AGROMONITORING_API_KEY}`;
+  }, []);
+
+  const agromonitoringApiKey = process.env.NEXT_PUBLIC_AGROMONITORING_API_KEY;
+  const polygonId = focusLand?.agromonitoring_polygon_id || focusLand?.id;
+
   // Effect to handle external edit request (from Edit button)
   useEffect(() => {
     if (editLand) {
@@ -149,6 +162,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
 
       try {
         const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
         if (data && data.address) {
           const addr = data.address;
@@ -299,6 +313,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
     setIsSearching(true);
     try {
       const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`);
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
       if (data && data.length > 0) {
         const { lat, lon, display_name } = data[0];
@@ -322,12 +337,6 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
     }
   };
 
-  const mapCenter: [number, number] = useMemo(() => {
-    if (focusLand?.lat && focusLand?.lng) return [focusLand.lat, focusLand.lng];
-    if (lands.length > 0 && lands[0].lat && lands[0].lng) return [lands[0].lat, lands[0].lng];
-    return [37.3122, 40.7339]; // Mardin
-  }, [focusLand, lands]);
-
   // select class helper
   const selectClass = "w-full px-3 py-3 bg-zinc-50 dark:bg-zinc-800 border-2 border-zinc-100 dark:border-zinc-700 rounded-xl outline-none focus:border-primary focus:bg-white dark:focus:bg-zinc-700 transition-all text-sm font-semibold appearance-none cursor-pointer text-zinc-900 dark:text-zinc-100";
 
@@ -338,10 +347,6 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
     }
     setIsNDVIActive(!isNDVIActive);
   };
-
-  const ndviTileUrl = useMemo(() => {
-    return `https://api.agromonitoring.com/tile/1.0/{z}/{x}/{y}/NDVI/{id}?appid=${process.env.NEXT_PUBLIC_AGROMONITORING_API_KEY}`;
-  }, []);
 
   return (
     <div className="relative w-full h-full group">
@@ -410,14 +415,14 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
             />
           </LayersControl.BaseLayer>
 
-          {isNDVIActive && focusLand && 
+          {isNDVIActive && agromonitoringApiKey && polygonId && (
             <LayersControl.Overlay checked name="NDVI Analizi">
               <TileLayer
-                url={ndviTileUrl}
+                url={ndviTileUrl.replace('{id}', polygonId)}
                 opacity={0.7}
               />
             </LayersControl.Overlay>
-          }
+          )}
         </LayersControl>
 
         <FeatureGroup ref={drawGroupRef}>
