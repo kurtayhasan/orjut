@@ -170,12 +170,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error;
       if (data) {
         setUserProfile(data);
-        const overrideRole = localStorage.getItem('user_role_override');
+        const overrideRole = typeof window !== 'undefined' ? localStorage.getItem('user_role_override') : null;
         const finalRole = (overrideRole || data.role || 'farmer') as 'farmer' | 'engineer' | 'admin';
         setUserRole(finalRole);
         
         // Auto-redirect logic: Only redirect farmer away from admin/engineer pages
-        if (finalRole === 'farmer' && (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/engineer'))) {
+        if (finalRole === 'farmer' && typeof window !== 'undefined' && (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/engineer'))) {
           window.location.href = '/dashboard';
         }
       }
@@ -192,7 +192,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     try {
       await refreshProfile();
       // We don't use refreshAllData directly here because we want a clean state
-      window.location.reload(); 
+      if (typeof window !== 'undefined') {
+        window.location.reload(); 
+      }
       toast.success("Senkronizasyon tamamlandı", { id: 'sync-now' });
     } catch (err) {
       toast.error("Senkronizasyon başarısız", { id: 'sync-now' });
@@ -222,12 +224,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // PHASE 3: STRICT STATE RESET - If data is null/empty, state must be []
       if (p.data) {
         setUserProfile(p.data);
-        const overrideRole = localStorage.getItem('user_role_override');
+        const overrideRole = typeof window !== 'undefined' ? localStorage.getItem('user_role_override') : null;
         const finalRole = (overrideRole || p.data.role || 'farmer') as 'farmer' | 'engineer' | 'admin';
         setUserRole(finalRole);
 
         // Phase 6: Farmer Auto-Redirect (admin/engineer can view any page)
-        if (finalRole === 'farmer' && (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/engineer'))) {
+        if (finalRole === 'farmer' && typeof window !== 'undefined' && (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/engineer'))) {
           window.location.href = '/dashboard';
         }
       }
@@ -275,7 +277,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const { data: { session } } = await supabase.auth.getSession();
         setAuthSession(session);
         if (session?.user?.id) {
-          localStorage.setItem('user_id', session.user.id);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('user_id', session.user.id);
+          }
           await refreshProfile(true);
         } else {
           setIsLoadingProfile(false);
@@ -292,7 +296,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     // 1. HARD RE-FETCH: Subscribe to auth changes
     const { data: { subscription } } = db.onAuthStateChange(async (event, session) => {
       setAuthSession(session);
-      if (session?.user?.id || localStorage.getItem('user_id')) {
+      const cachedUserId = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
+      if (session?.user?.id || cachedUserId) {
         await refreshProfile(true);
       } else {
         setUserProfile(null);
@@ -338,8 +343,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const checkCacheSync = () => {
       const cachedId = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
       if (cachedId && userProfile && cachedId !== userProfile.id) {
-        localStorage.clear();
-        window.location.reload();
+        if (typeof window !== 'undefined') {
+          localStorage.clear();
+          window.location.reload();
+        }
       }
     };
     checkCacheSync();
@@ -414,10 +421,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('theme', 'dark');
+      }
     } else {
       document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('theme', 'light');
+      }
     }
   }, [isDarkMode]);
 

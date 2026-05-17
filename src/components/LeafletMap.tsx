@@ -16,12 +16,14 @@ import 'leaflet-draw/dist/leaflet.draw.css';
 import { landSchema } from '@/lib/schemas/land.schema';
 
 // Fix Leaflet default icon issues in Next.js
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
+if (typeof window !== 'undefined') {
+  delete (L.Icon.Default.prototype as any)._getIconUrl;
+  L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  });
+}
 
 // Top 15 Global Crops
 const CROP_TYPES = [
@@ -112,6 +114,15 @@ function LandWeatherPopup({ land }: { land: any }) {
 
 export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, editLand?: any }) {
   const { addLand, updateLand, lands, userProfile, isDarkMode, triggerUpsell, isPremium } = useAppContext();
+  
+  if (typeof window === 'undefined') {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-surface-2 animate-skeleton-pulse animate-pulse">
+        <span className="text-sm text-text-muted font-bold">Harita Yükleniyor...</span>
+      </div>
+    );
+  }
+
   const [isNDVIActive, setIsNDVIActive] = useState(false);
   const [activeLayer, setActiveLayer] = useState<'normal' | 'ndvi' | 'moisture'>('normal');
   const [markerPosition, setMarkerPosition] = useState<L.LatLng | null>(null);

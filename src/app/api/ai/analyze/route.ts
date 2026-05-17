@@ -14,13 +14,19 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await (cookies() as any);
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
     // Verify auth session
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const body = await req.json();
+    let body;
+    try {
+      body = await req.json();
+    } catch (e) {
+      return NextResponse.json({ error: "Geçersiz veri formatı" }, { status: 200 });
+    }
+
     const parseResult = AnalyzeSchema.safeParse(body);
     if (!parseResult.success) {
       return NextResponse.json({ 
@@ -89,7 +95,7 @@ export async function POST(req: Request) {
       const responseText = result.response.text();
       analysis = JSON.parse(responseText || '{}');
     } catch (geminiError) {
-      console.error("Gemini AI or JSON parsing failed:", geminiError);
+      console.error('GEMINI_FATAL:', geminiError);
       analysis = {
         risk: "Analiz gerçekleştirilemedi.",
         action: "Hava ve tarla verileri şu an yapay zeka tarafından işlenemiyor, lütfen birazdan tekrar deneyiniz.",

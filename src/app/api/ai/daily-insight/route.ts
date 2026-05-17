@@ -17,13 +17,19 @@ const ai = new GoogleGenAI({
 });
 
 export async function POST(req: NextRequest) {
-  const cookieStore = cookies();
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
   try {
-    const body = await req.json();
+    const cookieStore = await (cookies() as any);
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    let body;
+    try {
+      body = await req.json();
+    } catch (e) {
+      return NextResponse.json({ success: false, error: "Geçersiz veri formatı" }, { status: 200 });
+    }
+
     const parseResult = DailyInsightSchema.safeParse(body);
     if (!parseResult.success) {
       return NextResponse.json({ 
@@ -33,11 +39,37 @@ export async function POST(req: NextRequest) {
     }
     const { prompt } = parseResult.data;
 
-    // 2. Call the API using the latest official method
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.1-flash-lite-preview',
-      contents: prompt,
-    });
+    let response;
+    try {
+      // 2. Call the API using the latest official method
+      response = await ai.models.generateContent({
+        model: 'gemini-3.1-flash-lite-preview',
+        contents: prompt,
+      });
+    } catch (geminiError: any) {
+      console.error('GEMINI_FATAL:', geminiError);
+      
+      // Graceful fallback for rate limits (429) or quota errors
+      if (
+        geminiError?.status === 429 ||
+        geminiError?.message?.includes('429') ||
+        geminiError?.message?.includes('quota') ||
+        geminiError?.message?.includes('RESOURCE_EXHAUSTED')
+      ) {
+        return NextResponse.json({
+          success: true,
+          insight: 'Sistem yoğunluğu nedeniyle detaylı analiz alınamadı.',
+          critical_alert: null,
+          recommended_action: 'Lütfen hava durumunu manuel kontrol ederek operasyonlarınıza karar verin.',
+          rate_limited: true,
+        });
+      }
+
+      return NextResponse.json(
+        { success: false, error: "Analiz verileri şu an hazırlanamadı, lütfen bekleyiniz." },
+        { status: 200 }
+      );
+    }
 
     // 3. Extract and clean the response text
     const rawText = response.text ?? '';
@@ -68,26 +100,9 @@ export async function POST(req: NextRequest) {
       recommended_action: data.recommended_action || null,
     });
   } catch (error: any) {
-    console.error('Gemini API Error:', error);
-
-    // Graceful fallback for rate limits (429) or quota errors
-    if (
-      error?.status === 429 ||
-      error?.message?.includes('429') ||
-      error?.message?.includes('quota') ||
-      error?.message?.includes('RESOURCE_EXHAUSTED')
-    ) {
-      return NextResponse.json({
-        success: true,
-        insight: 'Sistem yoğunluğu nedeniyle detaylı analiz alınamadı.',
-        critical_alert: null,
-        recommended_action: 'Lütfen hava durumunu manuel kontrol ederek operasyonlarınıza karar verin.',
-        rate_limited: true,
-      });
-    }
-
+    console.error('Outer DailyInsight Route Error:', error);
     return NextResponse.json(
-      { success: false, error: "Analiz verileri şu an hazırlanamadı, lütfen bekleyiniz." },
+      { success: false, error: "Sistem hatası. Lütfen birazdan tekrar deneyiniz." },
       { status: 200 }
     );
   }
