@@ -512,6 +512,29 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
         {markerPosition && !editingLandId && <Marker position={markerPosition} />}
       </MapContainer>
 
+      {isNDVIActive && (
+        <div className="absolute bottom-6 right-6 z-[1000] bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-white/20 dark:border-zinc-800 p-4 rounded-2xl shadow-2xl max-w-[220px] pointer-events-none select-none">
+          <h4 className="text-[10px] font-black text-zinc-900 dark:text-white uppercase tracking-widest mb-3 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            NDVI Sağlık İndeksi
+          </h4>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-md bg-[#2d8f2d] border border-green-700/30" />
+              <span className="text-[9px] font-black uppercase tracking-wider text-zinc-600 dark:text-zinc-300">🟢 Yüksek / İyi Gelişim</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-md bg-[#e6e600] border border-yellow-600/30" />
+              <span className="text-[9px] font-black uppercase tracking-wider text-zinc-600 dark:text-zinc-300">🟡 Orta Gelişim</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-md bg-[#cc0000] border border-red-700/30" />
+              <span className="text-[9px] font-black uppercase tracking-wider text-zinc-600 dark:text-zinc-300">🔴 Düşük / Stres</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* TKGM Crop & Size Selector */}
       {showCropSelector && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[50] flex items-center justify-center p-4">

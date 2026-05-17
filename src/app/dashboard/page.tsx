@@ -66,7 +66,26 @@ export default function DashboardPage() {
     [scoutingLogs]
   );
 
-  const categories = ['Mazot', 'Gübre', 'İlaç', 'Tohum', 'İşçilik'];
+  const categoryStats = useMemo(() => {
+    const expenseTransactions = transactions.filter(t => t.type === 'expense');
+    const total = expenseTransactions.reduce((sum, t) => sum + Number(t.amount || 0), 0);
+    
+    if (total === 0) return [];
+    
+    const grouped: Record<string, number> = {};
+    expenseTransactions.forEach(t => {
+      const cat = t.description || 'Diğer';
+      grouped[cat] = (grouped[cat] || 0) + Number(t.amount || 0);
+    });
+    
+    return Object.entries(grouped)
+      .map(([name, value]) => ({
+        name,
+        value,
+        percentage: Math.round((value / total) * 100)
+      }))
+      .sort((a, b) => b.value - a.value);
+  }, [transactions]);
 
   // Helper to get last activity for a land
   const getLandLastActivity = (landId: string) => {
@@ -231,17 +250,39 @@ export default function DashboardPage() {
                  <h4 className="text-sm font-black font-heading uppercase tracking-widest text-text-primary">Gider Analizi</h4>
               </div>
               <div className="space-y-5">
-                 {categories.map((cat, idx) => (
-                   <div key={cat} className="space-y-1.5">
-                      <div className="flex justify-between text-[11px] font-black uppercase tracking-tighter">
-                         <span className="text-text-muted">{cat}</span>
-                         <span className="text-text-primary">{20 + idx * 4}%</span>
-                      </div>
-                      <div className="h-2 w-full bg-surface-3 rounded-full overflow-hidden">
-                         <div className={cn("h-full rounded-full", idx === 0 ? "bg-primary" : "bg-primary/60")} style={{ width: `${20 + idx * 4}%` }} />
-                      </div>
+                 {categoryStats.length === 0 ? (
+                   <div className="flex flex-col items-center justify-center py-8 text-center bg-transparent">
+                     <p className="text-xs font-bold text-text-muted leading-relaxed max-w-[180px] mx-auto">
+                       Gider analizi oluşturmak için henüz masraf girmediniz.
+                     </p>
+                     <Button 
+                       variant="outline" 
+                       size="sm" 
+                       className="mt-4 font-black text-[10px] uppercase tracking-wider"
+                       onClick={() => setIsExpenseModalOpen(true)}
+                     >
+                       Gider Ekle
+                     </Button>
                    </div>
-                 ))}
+                 ) : (
+                   categoryStats.map((stat, idx) => (
+                     <div key={stat.name} className="space-y-1.5">
+                        <div className="flex justify-between text-[11px] font-black uppercase tracking-tighter">
+                           <span className="text-text-muted truncate mr-2">{stat.name}</span>
+                           <span className="text-text-primary shrink-0">%{stat.percentage}</span>
+                        </div>
+                        <div className="h-2 w-full bg-surface-3 rounded-full overflow-hidden">
+                           <div 
+                             className={cn(
+                               "h-full rounded-full transition-all duration-500", 
+                               idx === 0 ? "bg-primary" : "bg-primary/60"
+                             )} 
+                             style={{ width: `${stat.percentage}%` }} 
+                           />
+                        </div>
+                     </div>
+                   ))
+                 )}
               </div>
            </Card>
 
