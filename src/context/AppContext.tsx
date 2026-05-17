@@ -348,6 +348,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // Load weather dynamically based on lands, browser geolocation, or fallback Söke/Aydın
   useEffect(() => {
+    if (isLoadingProfile || !userProfile || !activeOrgId) return;
     let active = true;
     async function loadCurrentWeather() {
       let lat: number | null = null;
@@ -443,7 +444,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setLands(prev => prev.map(l => l.id === id ? { ...l, ...updateData } : l));
       toast.success("Arazi güncellendi");
     } catch (err: any) {
-      toast.error("Güncelleme hatası");
+      toast.error("Güncelleme başarısız oldu. Lütfen internet bağlantınızı kontrol edip tekrar deneyiniz.");
     }
   };
 
@@ -472,7 +473,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       
       toast.success("Arazi ve bağlı tüm veriler silindi");
     } catch (err: any) {
-      toast.error("Silme hatası");
+      toast.error("Silme işlemi gerçekleştirilemedi. Lütfen daha sonra tekrar deneyiniz.");
     }
   };
 
@@ -567,7 +568,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setTransactions(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
       toast.success("İşlem güncellendi");
     } catch (err: any) {
-      toast.error("Güncelleme hatası");
+      toast.error("Masraf güncellenemedi. Lütfen tekrar deneyiniz.");
     }
   };
 
@@ -580,7 +581,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setTransactions(prev => prev.filter(t => t.id !== id));
       toast.success("İşlem silindi");
     } catch (err: any) {
-      toast.error("Silme hatası");
+      toast.error("Masraf silinemedi. Lütfen tekrar deneyiniz.");
     }
   };
 
@@ -608,7 +609,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setSeasons(prev => prev.map(s => s.id === id ? { ...s, is_active: !currentStatus } : s));
       toast.success(`Sezon ${!currentStatus ? 'açıldı' : 'kapatıldı'}`);
     } catch (err) {
-      toast.error("İşlem başarısız");
+      toast.error("Sezon durumu güncellenemedi. Lütfen tekrar deneyiniz.");
     }
   };
 
@@ -630,7 +631,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error;
       setInventory(prev => prev.map(item => item.id === id ? { ...item, ...updates } : item));
     } catch (err) {
-      toast.error("Güncelleme hatası");
+      toast.error("Stok güncellenemedi. Lütfen tekrar deneyiniz.");
     }
   };
 
@@ -641,7 +642,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setInventory(prev => prev.filter(i => i.id !== id));
       toast.success("Silindi");
     } catch (err) {
-      toast.error("Silme hatası");
+      toast.error("Stok silinemedi. Lütfen tekrar deneyiniz.");
     }
   };
 
@@ -659,7 +660,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         toast.success("İşlem kaydedildi");
       }
     } catch (err) {
-      toast.error("İşlem hatası");
+      toast.error("Tarla işlemi kaydedilemedi. Lütfen bilgileri kontrol edip tekrar deneyiniz.");
     }
   };
 
@@ -673,7 +674,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         toast.success("Sulama eklendi");
       }
     } catch (err) {
-      toast.error("Kayıt hatası");
+      toast.error("Sulama kaydı eklenemedi. Lütfen tekrar deneyiniz.");
     }
   };
 
@@ -684,7 +685,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setIrrigationLogs(prev => prev.filter(l => l.id !== id));
       toast.success("Silindi");
     } catch (err) {
-      toast.error("Silme hatası");
+      toast.error("Sulama kaydı silinemedi. Lütfen tekrar deneyiniz.");
     }
   };
 
@@ -793,12 +794,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     requestWeatherAndInsight, startNewSeason, toggleSeasonStatus,
     isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s: Season) => setActiveSeason(s),
     weatherData, currentUserRole, userProfile, fieldOperations, scoutingLogs,
-    addFieldOperation, deleteFieldOperation: async (id: string) => { 
+    addFieldOperation,
+    deleteFieldOperation: async (id: string) => { 
       try {
         await db.deleteFieldOperation(id);
         setFieldOperations(prev => prev.filter(o => o.id !== id));
       } catch (err: any) {
-        toast.error("Silme hatası: " + (err?.message || ''));
+        toast.error("Tarla işlemi silinemedi: " + (err?.message || 'Bağlantı hatası.'));
       }
     },
     addScoutingLog: async (log: Omit<ScoutingLog, 'id'>) => { 
@@ -820,7 +822,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setScoutingLogs(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
         toast.success("Tavsiye kaydedildi");
       } catch (err) {
-        toast.error("Kaydedilemedi");
+        toast.error("Tavsiye kaydedilemedi. Lütfen tekrar deneyiniz.");
       }
     },
     updateScoutingPrescription: async (id: string, isApplied: boolean, text?: string) => {

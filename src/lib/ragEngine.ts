@@ -5,7 +5,6 @@ export async function buildLandContext(landId: string) {
   try {
     // 1. Fetch Land Details
     const { data: land } = await supabase.from('lands').select('*').eq('id', landId).single();
-    if (!land) throw new Error("Land not found");
 
     // 2. Fetch last 3 field operations
     const { data: operations } = await supabase
@@ -40,10 +39,27 @@ export async function buildLandContext(landId: string) {
       .limit(1)
       .single();
 
-    // 6. Fetch current weather
-    const weather = await fetchWeather(land?.lat || 37.7478, land?.lng || 27.3971);
+    // 6. Fetch current weather with isolated try-catch and safe coordinate handling
+    let weather;
+    try {
+      const latVal = (land?.lat !== undefined && land?.lat !== null && !isNaN(Number(land.lat))) ? Number(land.lat) : 37.7478;
+      const lngVal = (land?.lng !== undefined && land?.lng !== null && !isNaN(Number(land.lng))) ? Number(land.lng) : 27.3971;
+      weather = await fetchWeather(latVal, lngVal);
+    } catch (weatherErr) {
+      console.error("RAG Weather fetch failed, using fallback:", weatherErr);
+      weather = {
+        temperature: null,
+        humidity: 0,
+        rainfall: 0,
+        windSpeed: null,
+        uvIndex: 0,
+        condition: 'Hava durumu verisi şu an alınamadı',
+        isError: true,
+        forecast: []
+      };
+    }
 
-    // Aggregate Context
+    // Aggregate Context (Bulletproof defaults)
     return {
       land: {
         crop: land?.crop_type || 'Bilinmiyor',
@@ -52,24 +68,33 @@ export async function buildLandContext(landId: string) {
         planting_date: land?.planting_date || new Date().toISOString(),
         environment: land?.environment_type || 'acik'
       },
-      recent_operations: operations || [],
+      recent_operations: Array.isArray(operations) ? operations : [],
       latest_scouting: scoutingLogs?.[0] || null,
-      scouting_logs: scoutingLogs || [],
-      recent_transactions: transactions || [],
+      scouting_logs: Array.isArray(scoutingLogs) ? scoutingLogs : [],
+      recent_transactions: Array.isArray(transactions) ? transactions : [],
       latest_ndvi: ndvi ? { mean: ndvi.mean, date: ndvi.date } : null,
       current_weather: weather,
       timestamp: new Date().toISOString()
     };
   } catch (error) {
     console.error("RAG Context Building Error:", error);
-    return null;
+    // Bulletproof fallback return structure instead of null
+    return {
+      land: { crop: 'Bilinmiyor', size: 0, city: 'Bilinmiyor', planting_date: new Date().toISOString(), environment: 'acik' },
+      recent_operations: [],
+      latest_scouting: null,
+      scouting_logs: [],
+      recent_transactions: [],
+      latest_ndvi: null,
+      current_weather: { temperature: null, humidity: 0, rainfall: 0, windSpeed: null, uvIndex: 0, condition: 'Hava durumu verisi şu an alınamadı', forecast: [] },
+      timestamp: new Date().toISOString()
+    };
   }
 }
 
 export async function buildMinifiedRAGContext(landId: string) {
   try {
     const { data: land } = await supabase.from('lands').select('*').eq('id', landId).single();
-    if (!land) throw new Error("Land not found");
 
     // Fetch last 3 history records for context
     const { data: history } = await supabase
@@ -79,14 +104,32 @@ export async function buildMinifiedRAGContext(landId: string) {
       .order('timestamp', { ascending: false })
       .limit(3);
 
-    const weather = await fetchWeather(land?.lat || 37.7478, land?.lng || 27.3971);
+    // Fetch current weather with isolated try-catch and safe coordinate handling
+    let weather;
+    try {
+      const latVal = (land?.lat !== undefined && land?.lat !== null && !isNaN(Number(land.lat))) ? Number(land.lat) : 37.7478;
+      const lngVal = (land?.lng !== undefined && land?.lng !== null && !isNaN(Number(land.lng))) ? Number(land.lng) : 27.3971;
+      weather = await fetchWeather(latVal, lngVal);
+    } catch (weatherErr) {
+      console.error("Minified RAG Weather fetch failed, using fallback:", weatherErr);
+      weather = {
+        temperature: null,
+        humidity: 0,
+        rainfall: 0,
+        windSpeed: null,
+        uvIndex: 0,
+        condition: 'Hava durumu verisi şu an alınamadı',
+        isError: true,
+        forecast: []
+      };
+    }
 
     // Minified format: CTX:[{D:"MM-DD", T:temp, H:hum, ACT:"recommendation"}], CURR:{T:temp, H:hum}
-    const minifiedHistory = history?.map(h => ({
-      D: h.timestamp ? h.timestamp.split('T')[0].slice(5) : '',
-      T: h.weather_snapshot?.temp,
-      H: h.weather_snapshot?.humidity,
-      ACT: h.ai_recommendation?.slice(0, 30) // Limit recommendation length in context
+    const minifiedHistory = (Array.isArray(history) ? history : [])?.map(h => ({
+      D: h?.timestamp ? h.timestamp.split('T')?.[0]?.slice(5) || '' : '',
+      T: h?.weather_snapshot?.temp ?? 0,
+      H: h?.weather_snapshot?.humidity ?? 0,
+      ACT: h?.ai_recommendation ? h.ai_recommendation.slice(0, 30) : ''
     })) || [];
 
     return {
@@ -97,6 +140,12 @@ export async function buildMinifiedRAGContext(landId: string) {
     };
   } catch (error) {
     console.error("Minified RAG Error:", error);
-    return null;
+    // Bulletproof fallback return structure instead of null
+    return {
+      LAND: { C: 'Bilinmiyor', S: 0, E: 'A' },
+      CTX: [],
+      CURR: { T: 0, H: 0, C: 'Hava durumu verisi şu an alınamadı' },
+      RAW_WEATHER: { temperature: null, humidity: 0, rainfall: 0, windSpeed: null, uvIndex: 0, condition: 'Hava durumu verisi şu an alınamadı', forecast: [] }
+    };
   }
 }

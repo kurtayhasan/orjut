@@ -166,6 +166,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
   const polygonId = focusLand?.agromonitoring_polygon_id || focusLand?.id;
 
   const ndviTileUrl = useMemo(() => {
+    if (!polygonId || !agromonitoringApiKey) return '';
     return `https://api.agromonitoring.com/tile/db/{z}/{x}/{y}?polyid=${polygonId}&appid=${agromonitoringApiKey}`;
   }, [polygonId, agromonitoringApiKey]);
 
@@ -480,16 +481,16 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
             />
           </LayersControl.BaseLayer>
 
-          {isNDVIActive && agromonitoringApiKey && polygonId && (
-            <LayersControl.Overlay checked name="NDVI Analizi">
-              <TileLayer
-                url={ndviTileUrl}
-                zIndex={10}
-                opacity={0.7}
-              />
-            </LayersControl.Overlay>
-          )}
         </LayersControl>
+
+        {isNDVIActive && agromonitoringApiKey && polygonId && ndviTileUrl && (
+          <TileLayer
+            key={`orjut-ndvi-tile-${isNDVIActive}-${polygonId}`}
+            url={ndviTileUrl}
+            zIndex={999}
+            opacity={0.75}
+          />
+        )}
 
         <FeatureGroup ref={drawGroupRef}>
           <EditControl
@@ -551,7 +552,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
           <React.Fragment key={land.id}>
             {land.boundaries ? (
               <GeoJSON 
-                key={`ndvi-${isNDVIActive}-${land.id}`}
+                key={`orjut-ndvi-layer-${isNDVIActive}-${land.id}-${polygonId || 'none'}`}
                 data={land.boundaries} 
                 style={() => ({
                   fillColor: '#2e7d32',
@@ -577,7 +578,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
             ) : (
               land.lat && land.lng && (
                 <Marker 
-                  key={`ndvi-${isNDVIActive}-${land.id}`}
+                  key={`orjut-ndvi-layer-${isNDVIActive}-${land.id}-${polygonId || 'none'}`}
                   position={[land.lat, land.lng]}
                   eventHandlers={{
                     click: (e: any) => {

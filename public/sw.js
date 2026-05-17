@@ -42,9 +42,11 @@ self.addEventListener('fetch', (event) => {
     url.pathname.startsWith('/api') ||
     url.hostname.includes('supabase') ||
     url.searchParams.has('_rsc') ||
+    url.pathname.includes('_rsc=') ||
     url.pathname.startsWith('/_next')
   ) {
-    return; // Doğrudan tarayıcının ve network'ün orijinal akışına bırak, müdahale etme!
+    event.respondWith(fetch(event.request));
+    return;
   }
 
   // 2. Sadece statik varlıklar ve navigasyon için kontrollü akış

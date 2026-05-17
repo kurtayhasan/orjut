@@ -44,7 +44,7 @@ export default function DashboardPage() {
     lands, transactions, isLoadingTransactions, 
     userProfile, weather, dailyInsight, criticalAlert,
     requestWeatherAndInsight, inventory, setIsExpenseModalOpen,
-    fieldOperations, scoutingLogs, userRole 
+    fieldOperations, scoutingLogs, userRole, isLoadingProfile 
   } = useAppContext();
 
   const [activeTab, setActiveTab] = useState<'all' | 'expense' | 'income'>('all');
@@ -97,6 +97,17 @@ export default function DashboardPage() {
     
     return { lastOp, lastSc };
   };
+
+  if (isLoadingProfile || !userProfile) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <p className="text-zinc-500 dark:text-zinc-400 font-black text-xs uppercase tracking-widest animate-pulse">
+          Oturum Bilgileri Yükleniyor...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-fade-in pb-10">

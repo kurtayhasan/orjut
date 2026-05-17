@@ -50,19 +50,42 @@ const FALLBACK: WeatherData = {
 };
 
 export async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
-  // SSR guard — localStorage is browser-only
-  if (typeof window === 'undefined') return FALLBACK;
+  // Safe coordinates check
+  if (
+    lat === undefined || 
+    lat === null || 
+    isNaN(Number(lat)) || 
+    lon === undefined || 
+    lon === null || 
+    isNaN(Number(lon))
+  ) {
+    return {
+      ...FALLBACK,
+      condition: 'Hava durumu verisi şu an alınamadı'
+    };
+  }
 
-  const cacheKey = `weather_cache_${lat}_${lon}`;
-  const cached = localStorage.getItem(cacheKey);
-  if (cached) {
-    const { data, timestamp } = JSON.parse(cached) as { data: WeatherData; timestamp: number };
-    if (Date.now() - timestamp < CACHE_TTL) return data;
+  const numLat = Number(lat);
+  const numLon = Number(lon);
+
+  const cacheKey = `weather_cache_${numLat}_${numLon}`;
+  const isBrowser = typeof window !== 'undefined';
+
+  if (isBrowser) {
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const { data, timestamp } = JSON.parse(cached) as { data: WeatherData; timestamp: number };
+        if (Date.now() - timestamp < CACHE_TTL) return data;
+      }
+    } catch (e) {
+      console.warn("Storage access failed:", e);
+    }
   }
 
   const params = new URLSearchParams({
-    latitude:      lat.toString(),
-    longitude:     lon.toString(),
+    latitude:      numLat.toString(),
+    longitude:     numLon.toString(),
     current:       'temperature_2m,relative_humidity_2m,rain,wind_speed_10m,uv_index',
     daily:         'temperature_2m_max,temperature_2m_min,precipitation_sum,weathercode',
     forecast_days: '4',
@@ -92,10 +115,19 @@ export async function fetchWeather(lat: number, lon: number): Promise<WeatherDat
       })),
     };
 
-    localStorage.setItem(cacheKey, JSON.stringify({ data: weather, timestamp: Date.now() }));
+    if (isBrowser) {
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify({ data: weather, timestamp: Date.now() }));
+      } catch (e) {
+        console.warn("Storage write failed:", e);
+      }
+    }
     return weather;
   } catch (err) {
     console.error('Weather fetch failed:', err);
-    return FALLBACK;
+    return {
+      ...FALLBACK,
+      condition: 'Hava durumu verisi şu an alınamadı'
+    };
   }
 }

@@ -35,7 +35,9 @@ export async function POST(req: Request) {
     // 2. Build Minified RAG Context (Phase 5)
     const context: any = await buildMinifiedRAGContext(landId);
     if (!context) {
-      return NextResponse.json({ error: "Context building failed" }, { status: 500 });
+      return NextResponse.json({ 
+        error: "Analiz verileri şu an hazırlanamadı, lütfen bekleyiniz." 
+      }, { status: 200 }); // Avoid fofwarding a 500 error, return gracefully with status 200 and a descriptive error message
     }
 
     // 3. Call Gemini AI with forced JSON mode
@@ -56,20 +58,34 @@ export async function POST(req: Request) {
     
     Veri: ${JSON.stringify(context)}`;
 
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
-    const analysis = JSON.parse(responseText);
+    let analysis;
+    try {
+      const result = await model.generateContent(prompt);
+      const responseText = result.response.text();
+      analysis = JSON.parse(responseText || '{}');
+    } catch (geminiError) {
+      console.error("Gemini AI or JSON parsing failed:", geminiError);
+      analysis = {
+        risk: "Analiz gerçekleştirilemedi.",
+        action: "Hava ve tarla verileri şu an yapay zeka tarafından işlenemiyor, lütfen birazdan tekrar deneyiniz.",
+        urgency: "düşük"
+      };
+    }
 
     // 4. Save to History (Phase 3)
-    await supabase.from('ai_insights_history').insert([{
-      land_id: landId,
-      weather_snapshot: {
-        temp: context.CURR.T,
-        humidity: context.CURR.H,
-        condition: context.CURR.C
-      },
-      ai_recommendation: analysis.action
-    }]);
+    try {
+      await supabase.from('ai_insights_history').insert([{
+        land_id: landId,
+        weather_snapshot: {
+          temp: context?.CURR?.T ?? 0,
+          humidity: context?.CURR?.H ?? 0,
+          condition: context?.CURR?.C ?? 'Bilinmiyor'
+        },
+        ai_recommendation: analysis?.action || 'Tavsiye alınamadı.'
+      }]);
+    } catch (insertError) {
+      console.error("Failed to insert AI insight to history:", insertError);
+    }
 
     return NextResponse.json({ success: true, analysis });
 
