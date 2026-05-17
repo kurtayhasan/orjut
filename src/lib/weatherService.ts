@@ -99,20 +99,26 @@ export async function fetchWeather(lat: number, lon: number): Promise<WeatherDat
     if (!json.current || !json.daily) throw new Error('Invalid weather response');
 
     const { current: c, daily: d } = json;
+    const dailyCodes = d.weather_code || d.weathercode || [];
+    const conditionCode = typeof dailyCodes[0] === 'number' ? dailyCodes[0] : 0;
+
     const weather: WeatherData = {
       temperature: c.temperature_2m,
       humidity:    c.relative_humidity_2m,
       rainfall:    c.rain,
       windSpeed:   c.wind_speed_10m,
       uvIndex:     c.uv_index,
-      condition:   describeWeatherCode(d.weathercode[0]),
-      forecast:    d.time.slice(1, 4).map((date: string, i: number) => ({
-        date,
-        maxTemp:     d.temperature_2m_max[i + 1],
-        minTemp:     d.temperature_2m_min[i + 1],
-        rainfall:    d.precipitation_sum[i + 1],
-        description: describeWeatherCode(d.weathercode[i + 1]),
-      })),
+      condition:   describeWeatherCode(conditionCode),
+      forecast:    d.time.slice(1, 4).map((date: string, i: number) => {
+        const fCode = typeof dailyCodes[i + 1] === 'number' ? dailyCodes[i + 1] : 0;
+        return {
+          date,
+          maxTemp:     d.temperature_2m_max[i + 1],
+          minTemp:     d.temperature_2m_min[i + 1],
+          rainfall:    d.precipitation_sum[i + 1],
+          description: describeWeatherCode(fCode),
+        };
+      }),
     };
 
     if (isBrowser) {

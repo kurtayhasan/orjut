@@ -130,7 +130,6 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
   const [editingLandId, setEditingLandId] = useState<string | null>(null);
   const [boundaries, setBoundaries] = useState<any>(null);
   const drawGroupRef = useRef<L.FeatureGroup>(null);
-  const [activePopup, setActivePopup] = useState<{ position: [number, number]; content: React.ReactNode } | null>(null);
   
   // Location dropdown states
   const [selectedCountryCode, setSelectedCountryCode] = useState('TR');
@@ -580,19 +579,14 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
                 })}
                 eventHandlers={{
                   click: (e: any) => {
-                    const latlng = e.latlng || (e.target && typeof e.target.getCenter === 'function' ? e.target.getCenter() : null);
-                    if (!latlng || typeof latlng.lat !== 'number' || isNaN(latlng.lat) || typeof latlng.lng !== 'number' || isNaN(latlng.lng)) {
-                      return;
-                    }
-                    L.DomEvent.stopPropagation(e as any);
-                    setActivePopup({
-                      position: [latlng.lat, latlng.lng],
-                      content: <LandWeatherPopup land={land} />
-                    });
                     handleEditPlot(land);
                   }
                 }}
-              />
+              >
+                <Popup maxWidth={240} autoPan={true}>
+                  <LandWeatherPopup land={land} />
+                </Popup>
+              </GeoJSON>
             ) : (
               land.lat && land.lng && (
                 <Marker 
@@ -600,42 +594,18 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
                   position={[land.lat, land.lng]}
                   eventHandlers={{
                     click: (e: any) => {
-                      const latlng = e.latlng || (e.target && typeof e.target.getCenter === 'function' ? e.target.getCenter() : null);
-                      if (!latlng || typeof latlng.lat !== 'number' || isNaN(latlng.lat) || typeof latlng.lng !== 'number' || isNaN(latlng.lng)) {
-                        return;
-                      }
-                      L.DomEvent.stopPropagation(e as any);
-                      setActivePopup({
-                        position: [latlng.lat, latlng.lng],
-                        content: <LandWeatherPopup land={land} />
-                      });
                       handleEditPlot(land);
                     }
                   }}
-                />
+                >
+                  <Popup maxWidth={240} autoPan={true}>
+                    <LandWeatherPopup land={land} />
+                  </Popup>
+                </Marker>
               )
             )}
           </React.Fragment>
         ))}
-
-        {activePopup && 
-         Array.isArray(activePopup.position) && 
-         activePopup.position.length === 2 && 
-         typeof activePopup.position[0] === 'number' && 
-         !isNaN(activePopup.position[0]) && 
-         typeof activePopup.position[1] === 'number' && 
-         !isNaN(activePopup.position[1]) && (
-          <Popup 
-            position={activePopup.position} 
-            eventHandlers={{
-              remove: () => setActivePopup(null)
-            }}
-            maxWidth={240}
-            autoPan={true}
-          >
-            {activePopup.content}
-          </Popup>
-        )}
 
         {markerPosition && !editingLandId && <Marker position={markerPosition} />}
       </MapContainer>

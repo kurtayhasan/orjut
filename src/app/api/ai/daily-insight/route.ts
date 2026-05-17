@@ -11,10 +11,7 @@ const DailyInsightSchema = z.object({
 
 export const dynamic = 'force-dynamic';
 
-// 1. Initialize the official SDK
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY as string,
-});
+// We initialize the official SDK inside the handler for build-time safety
 
 export async function POST(req: NextRequest) {
   try {
@@ -44,11 +41,21 @@ export async function POST(req: NextRequest) {
     }
     const { prompt } = parseResult.data;
 
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ 
+        success: false, 
+        error: "Yapay zeka analiz motoru şu an yapılandırılmamış (GEMINI_API_KEY eksik)." 
+      }, { status: 200 });
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
+
     let response;
     try {
       // 2. Call the API using the latest official method
       response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite-preview',
+        model: 'gemini-2.0-flash',
         contents: prompt,
       });
     } catch (geminiError: any) {

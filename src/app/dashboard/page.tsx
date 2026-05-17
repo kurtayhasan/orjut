@@ -44,7 +44,8 @@ export default function DashboardPage() {
     lands, transactions, isLoadingTransactions, 
     userProfile, weather, dailyInsight, criticalAlert,
     requestWeatherAndInsight, inventory, setIsExpenseModalOpen,
-    fieldOperations, scoutingLogs, userRole, isLoadingProfile 
+    fieldOperations, scoutingLogs, userRole, isLoadingProfile,
+    isAnalyzing
   } = useAppContext();
 
   const [activeTab, setActiveTab] = useState<'all' | 'expense' | 'income'>('all');
@@ -235,16 +236,24 @@ export default function DashboardPage() {
                        <div className="flex flex-col items-center justify-center py-6 text-center text-white/60">
                          <BrainCircuit size={36} className="animate-pulse mb-3" />
                          <p className="text-xs font-bold">Yapay zeka analiz raporunuz hazırlanmaya hazır.</p>
-                         <Button 
-                           variant="outline" 
-                           size="sm" 
-                           className="mt-4 border-white/30 hover:bg-white/10 text-white font-black text-[10px] uppercase tracking-wider"
-                           onClick={requestWeatherAndInsight}
-                         >
-                           Analizi Başlat
-                         </Button>
-                       </div>
-                     )}
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="mt-4 border-white/30 hover:bg-white/10 text-white font-black text-[10px] uppercase tracking-wider flex items-center gap-2"
+                            onClick={() => handleStartAnalysis()}
+                            disabled={isAnalyzing}
+                          >
+                            {isAnalyzing ? (
+                              <>
+                                <span className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                                <span>Analiz Ediliyor...</span>
+                              </>
+                            ) : (
+                              <span>Analizi Başlat</span>
+                            )}
+                          </Button>
+                        </div>
+                      )}
                   </div>
                   
                   <div className="flex items-center justify-between border-t border-white/10 pt-4 text-[10px] font-black text-white/50 uppercase tracking-widest">

@@ -78,6 +78,7 @@ type AppContextType = {
   clearAllData: () => void;
   refreshProfile: () => Promise<void>;
   syncNow: () => Promise<void>;
+  isAnalyzing: boolean;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -113,6 +114,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
   const [authSession, setAuthSession] = useState<any>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const triggerUpsell = useCallback(() => setShowUpsell(true), []);
   const closeUpsell = useCallback(() => setShowUpsell(false), []);
@@ -138,7 +140,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const t = (key: keyof typeof translations['en']) => translations[lang][key] || key;
 
   const activeOrgId = useMemo(() => {
-    if (isAuthLoading || isLoadingProfile || !authSession || !userProfile) return null;
+    if (isAuthLoading || isLoadingProfile || !userProfile) return null;
     const myId = userProfile.id;
     
     // PHASE 3: Zero-UUID Protection & Auth Matching
@@ -146,7 +148,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     
     if (userRole === 'engineer' && selectedClientId) return selectedClientId;
     return myId;
-  }, [userRole, selectedClientId, userProfile, authSession, isAuthLoading, isLoadingProfile]);
+  }, [userRole, selectedClientId, userProfile, isAuthLoading, isLoadingProfile]);
 
   const lastProfileRefreshRef = useRef<number>(0);
 
@@ -718,10 +720,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const requestWeatherAndInsight = useCallback(async () => {
-    if (isAuthLoading || isLoadingProfile || !authSession || !userProfile || !activeOrgId) {
-      toast.error("Oturum henüz yüklenmedi, lütfen bekleyin...");
-      return;
+    if (isAnalyzing) return;
+    if (isAuthLoading || isLoadingProfile || !userProfile || !activeOrgId) {
+      const cachedUserId = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
+      if (!cachedUserId && !activeOrgId) {
+        toast.error("Oturum henüz yüklenmedi, lütfen bekleyin...");
+        return;
+      }
     }
+    setIsAnalyzing(true);
     let lat = 37.7478, lon = 27.3971;
     if (lands.length > 0 && lands[0].lat && lands[0].lng) { lat = lands[0].lat; lon = lands[0].lng; }
     toast.loading("Analiz ediliyor...", { id: 'ai-loading' });
@@ -789,8 +796,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       } else throw new Error(data.error);
     } catch (e: any) { 
       toast.error("Hata: " + e.message, { id: 'ai-loading' });
+    } finally {
+      setIsAnalyzing(false);
     }
-  }, [isAuthLoading, isLoadingProfile, authSession, userProfile, activeOrgId, lands, fieldOperations, scoutingLogs, inventory]);
+  }, [isAnalyzing, isAuthLoading, isLoadingProfile, userProfile, activeOrgId, lands, fieldOperations, scoutingLogs, inventory]);
 
   const deleteFieldOperation = useCallback(async (id: string) => { 
     try {
@@ -879,7 +888,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     showUpsell, triggerUpsell, closeUpsell,
     getAiHistory,
     isExpenseModalOpen, setIsExpenseModalOpen, clearAllData,
-    refreshProfile, syncNow, isLoadingProfile
+    refreshProfile, syncNow, isLoadingProfile, isAnalyzing
   }), [
     lang, setLang, t, totalExpenses, totalArea, addExpense, updateExpense, deleteExpense,
     weatherData, dailyInsight, criticalAlert, totalSavings, dailySpent, lands, transactions, irrigationLogs,
@@ -895,7 +904,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     showUpsell, triggerUpsell, closeUpsell,
     getAiHistory,
     isExpenseModalOpen, setIsExpenseModalOpen, clearAllData,
-    refreshProfile, syncNow, isLoadingProfile
+    refreshProfile, syncNow, isLoadingProfile, isAnalyzing
   ]);
 
   return (
