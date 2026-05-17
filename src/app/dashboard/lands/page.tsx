@@ -365,7 +365,13 @@ export default function LandsPage() {
                     hoverable 
                     padding="md" 
                     status={land.is_irrigated ? 'info' : 'default'}
-                    onClick={() => { setMapFocusLand(land); setSelectedLand(land); }}
+                    onClick={() => { 
+                      setMapFocusLand(land); 
+                      setSelectedLand(land); 
+                      if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                        setViewMode('map');
+                      }
+                    }}
                     className={cn(
                       "transition-all",
                       mapFocusLand?.id === land.id && "ring-2 ring-primary border-primary/20"

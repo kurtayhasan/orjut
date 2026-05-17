@@ -730,33 +730,46 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
     setIsAnalyzing(true);
     let lat = 37.7478, lon = 27.3971;
-    if (lands.length > 0 && lands[0].lat && lands[0].lng) { lat = lands[0].lat; lon = lands[0].lng; }
+    if (lands.length > 0) {
+      const parsedLat = parseFloat(String(lands[0]?.lat ?? ''));
+      const parsedLng = parseFloat(String(lands[0]?.lng ?? ''));
+      if (!isNaN(parsedLat) && !isNaN(parsedLng)) {
+        lat = parsedLat;
+        lon = parsedLng;
+      } else {
+        toast.error("Seçili arazinin coğrafi konum bilgileri geçersiz. Merkez koordinatlar kullanılıyor.");
+      }
+    }
     toast.loading("Analiz ediliyor...", { id: 'ai-loading' });
+    
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 seconds timeout
+    
     try {
       const weather = await fetchWeather(lat, lon);
       setWeatherData(weather);
       const landContexts: LandContext[] = lands.map(land => ({
         id: land.id,
-        cropName: land.crop_type, 
+        cropName: land.crop_type || 'Ekin', 
         sowingDate: land.planting_date || new Date().toISOString(),
         currentDay: land.planting_date ? Math.floor((Date.now() - new Date(land.planting_date).getTime()) / 86400000) : 0,
         totalArea: land.size_decare || 0,
         lat: land.lat || 37.0,
         lng: land.lng || 35.0,
-        soilType: (land as any).soil_type,
+        soilType: (land as any).soil_type || 'Killi/Tınlı',
         lastOperations: fieldOperations
           .filter(o => o.land_id === land.id)
           .slice(0, 3)
-          .map(o => `${o.date}: ${o.type} (${o.amount} ${o.unit || ''})`),
+          .map(o => `${o.date || 'Tarih'}: ${o.type || 'İşlem'} (${o.amount || 0} ${o.unit || ''})`),
         scoutingNotes: scoutingLogs
           .filter(s => s.land_id === land.id)
           .slice(0, 3)
-          .map(s => `${s.date}: ${s.health_status} - ${s.notes}`)
+          .map(s => `${s.date || 'Tarih'}: ${s.health_status || 'Durum'} - ${s.notes || ''}`)
       }));
 
       const inventoryStatus = inventory
         .filter(i => i.quantity < 10)
-        .map(i => `${i.item_name} (${i.quantity} ${i.unit} kaldı)`);
+        .map(i => `${i.item_name || 'Ürün'} (${i.quantity || 0} ${i.unit || ''} kaldı)`);
 
       const prompt = buildAIPrompt({ 
         weather, 
@@ -765,12 +778,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         date: new Date().toLocaleDateString('tr-TR'),
         timestamp: new Date().toISOString()
       });
+      
       const res = await fetch('/api/ai/daily-insight', { 
         method: 'POST', 
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ prompt }) 
+        body: JSON.stringify({ prompt }),
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
+      
       if (res.status === 401) {
         toast.error("Yapay zeka servisine erişilemedi veya oturum senkronizasyonu hatası.", { id: 'ai-loading' });
         throw new Error("Yapay zeka servisine erişilemedi veya oturum senkronizasyonu hatası.");
@@ -795,7 +812,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         toast.success("Analiz tamamlandı", { id: 'ai-loading' });
       } else throw new Error(data.error);
     } catch (e: any) { 
-      toast.error("Hata: " + e.message, { id: 'ai-loading' });
+      clearTimeout(timeoutId);
+      if (e.name === 'AbortError') {
+        toast.error("Hata: Yapay zeka servis bağlantısı zaman aşımına uğradı (15s).", { id: 'ai-loading' });
+      } else {
+        toast.error("Hata: " + e.message, { id: 'ai-loading' });
+      }
     } finally {
       setIsAnalyzing(false);
     }
