@@ -5,6 +5,16 @@ import { useRouter } from 'next/navigation';
 import { db } from '@/lib/db';
 import { supabase } from '@/lib/supabase';
 
+const clearAuthCache = () => {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('user_phone');
+    localStorage.removeItem('user_role');
+    localStorage.removeItem('user_role_override');
+    localStorage.removeItem('pending_invite_engineer_id');
+  }
+};
+
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -17,7 +27,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         if (navigator.onLine) {
           const { data: { session } } = await supabase.auth.getSession();
           if (!session) {
-            localStorage.clear();
+            clearAuthCache();
             router.push('/login');
             return;
           }
@@ -35,7 +45,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
           const { data, error } = await db.getProfile(userId);
           if (error || !data) {
             // Invalid user_id — clear and redirect
-            localStorage.clear();
+            clearAuthCache();
             router.push('/login');
             return;
           }

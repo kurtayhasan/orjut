@@ -33,7 +33,21 @@ export default function LoginPage() {
 
   useEffect(() => {
     generateCaptcha();
-  }, []);
+
+    // Auto-redirect to dashboard if already authenticated
+    async function checkExistingSession() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const cachedUserId = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
+        if (session && cachedUserId) {
+          router.replace('/dashboard');
+        }
+      } catch (err) {
+        console.error("Auto-redirect check failed:", err);
+      }
+    }
+    checkExistingSession();
+  }, [router]);
 
   // Login Form
   const loginForm = useForm<LoginFormData>({
@@ -71,7 +85,6 @@ export default function LoginPage() {
       console.error("Auth Error:", err);
       const message = err.message === 'Invalid login credentials' ? VM.loginFailed : err.message;
       toast.error(message || VM.serverError);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -109,15 +122,16 @@ export default function LoginPage() {
         } else {
           toast.success("Kayıt başarılı! Lütfen telefon numaranızı doğrulayın veya giriş yapın.");
           setIsLogin(true);
+          setIsLoading(false);
         }
       } else {
         toast.success("Kayıt başarılı! Giriş yapabilirsiniz.");
         setIsLogin(true);
+        setIsLoading(false);
       }
     } catch (err: any) {
       console.error("Auth Error:", err);
       toast.error(err.message || VM.serverError);
-    } finally {
       setIsLoading(false);
     }
   };

@@ -36,6 +36,13 @@ const CROP_TYPES = [
 
 function MapController({ selectedLand, searchResult }: { selectedLand: any, searchResult: L.LatLng | null }) {
   const map = useMap();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [map]);
   
   useEffect(() => {
     if (selectedLand) {
@@ -130,6 +137,20 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
   const [editingLandId, setEditingLandId] = useState<string | null>(null);
   const [boundaries, setBoundaries] = useState<any>(null);
   const drawGroupRef = useRef<L.FeatureGroup>(null);
+  const mapRef = useRef<L.Map | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (mapRef.current) {
+        try {
+          mapRef.current.remove();
+        } catch (e) {
+          console.warn("Leaflet cleanup warning:", e);
+        }
+        mapRef.current = null;
+      }
+    };
+  }, []);
   
   // Location dropdown states
   const [selectedCountryCode, setSelectedCountryCode] = useState('TR');
@@ -467,6 +488,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
       </div>
 
       <MapContainer 
+        ref={mapRef}
         center={mapCenter}
         zoom={13} 
         scrollWheelZoom={true} 
