@@ -18,7 +18,12 @@ const ai = new GoogleGenAI({
 
 export async function POST(req: NextRequest) {
   try {
-    const cookieStore = await (cookies() as any);
+    let cookieStore;
+    try {
+      cookieStore = await cookies();
+    } catch {
+      cookieStore = cookies();
+    }
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

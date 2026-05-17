@@ -57,12 +57,16 @@ export default function LoginPage() {
       if (error) throw error;
       
       if (authData.user) {
-        localStorage.setItem('user_id', authData.user.id);
-        localStorage.setItem('user_phone', authData.user.phone || '');
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('user_id', authData.user.id);
+          localStorage.setItem('user_phone', authData.user.phone || '');
+        }
       }
       
       toast.success("Giriş başarılı! Yönlendiriliyorsunuz...");
-      window.location.href = '/dashboard';
+      if (typeof window !== 'undefined') {
+        window.location.href = '/dashboard';
+      }
     } catch (err: any) {
       console.error("Auth Error:", err);
       const message = err.message === 'Invalid login credentials' ? VM.loginFailed : err.message;
@@ -95,11 +99,19 @@ export default function LoginPage() {
       });
       if (error) throw error;
       
-      toast.success("Kayıt başarılı! Şimdi giriş yapabilirsiniz.");
-      if (authData.user) {
-        localStorage.setItem('user_id', authData.user.id);
-        window.location.href = '/dashboard';
+      if (authData?.user) {
+        if (authData.session) {
+          toast.success("Kayıt başarılı! Yönlendiriliyorsunuz...");
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('user_id', authData.user.id);
+            window.location.href = '/dashboard';
+          }
+        } else {
+          toast.success("Kayıt başarılı! Lütfen telefon numaranızı doğrulayın veya giriş yapın.");
+          setIsLogin(true);
+        }
       } else {
+        toast.success("Kayıt başarılı! Giriş yapabilirsiniz.");
         setIsLogin(true);
       }
     } catch (err: any) {
@@ -157,8 +169,10 @@ export default function LoginPage() {
             {isLogin ? (
               <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-5">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-text-primary">Telefon Numarası</label>
+                  <label htmlFor="login-phone" className="text-sm font-semibold text-text-primary">Telefon Numarası</label>
                   <PhoneInput
+                    id="login-phone"
+                    name="phone"
                     international
                     defaultCountry="TR"
                     value={loginForm.watch('phone')}
@@ -174,6 +188,7 @@ export default function LoginPage() {
                 </div>
 
                 <Input
+                  id="login-password"
                   label="Şifre"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
@@ -185,6 +200,7 @@ export default function LoginPage() {
                       type="button" 
                       onClick={() => setShowPassword(!showPassword)}
                       className="text-text-muted hover:text-text-primary p-1"
+                      aria-label={showPassword ? "Şifreyi gizle" : "Şifreyi göster"}
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
@@ -204,6 +220,7 @@ export default function LoginPage() {
               <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <Input
+                    id="register-first-name"
                     label="İsim"
                     placeholder="Ahmet"
                     required
@@ -211,6 +228,7 @@ export default function LoginPage() {
                     {...registerForm.register('firstName')}
                   />
                   <Input
+                    id="register-last-name"
                     label="Soyisim"
                     placeholder="Yılmaz"
                     required
@@ -220,8 +238,10 @@ export default function LoginPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-text-primary">Telefon Numarası</label>
+                  <label htmlFor="register-phone" className="text-sm font-semibold text-text-primary">Telefon Numarası</label>
                   <PhoneInput
+                    id="register-phone"
+                    name="phone"
                     international
                     defaultCountry="TR"
                     value={registerForm.watch('phone')}
@@ -237,6 +257,7 @@ export default function LoginPage() {
                 </div>
 
                 <Input
+                  id="register-password"
                   label="Şifre"
                   type="password"
                   placeholder="••••••••"
@@ -246,6 +267,7 @@ export default function LoginPage() {
                 />
                 
                 <Input
+                  id="register-confirm-password"
                   label="Şifre Tekrar"
                   type="password"
                   placeholder="••••••••"
@@ -255,7 +277,7 @@ export default function LoginPage() {
                 />
 
                 <div className="space-y-2 pt-2">
-                  <label className="text-sm font-semibold text-text-primary">Güvenlik Doğrulaması</label>
+                  <label htmlFor="register-captcha" className="text-sm font-semibold text-text-primary">Güvenlik Doğrulaması</label>
                   <div className="flex gap-3">
                     <div className="flex-1 bg-surface-2 border-2 border-border rounded-md flex items-center justify-center relative overflow-hidden h-12">
                       <span className="font-black text-2xl italic tracking-[0.4em] text-primary select-none z-10">
@@ -265,12 +287,14 @@ export default function LoginPage() {
                         type="button"
                         onClick={generateCaptcha}
                         className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-text-muted hover:text-text-primary transition-colors z-20"
+                        aria-label="Güvenlik kodunu yenile"
                       >
                         <RefreshCcw size={16} />
                       </button>
                     </div>
                     <div className="w-28">
                       <input 
+                        id="register-captcha"
                         type="text" 
                         required
                         maxLength={4}

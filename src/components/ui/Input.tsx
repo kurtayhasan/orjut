@@ -14,7 +14,8 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement | HTMLSe
 
 const Input = forwardRef<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement, InputProps>(
   ({ label, error, hint, leftIcon, rightElement, className, id, as = 'input', children, ...props }, ref) => {
-    const inputId = id || `input-${Math.random().toString(36).slice(2)}`;
+    const inputId = id || props.name || `input-${Math.random().toString(36).slice(2)}`;
+    const inputName = props.name || inputId;
     const errorId = `${inputId}-error`;
     const hintId  = `${inputId}-hint`;
 
@@ -43,6 +44,8 @@ const Input = forwardRef<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElem
             <select
               ref={ref as any}
               id={inputId}
+              name={inputName}
+              aria-label={label || props.placeholder}
               className={cn(baseClassName, 'appearance-none cursor-pointer')}
               {...(props as any)}
             >
@@ -54,6 +57,8 @@ const Input = forwardRef<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElem
             <textarea
               ref={ref as any}
               id={inputId}
+              name={inputName}
+              aria-label={label || props.placeholder}
               className={cn(baseClassName, 'min-h-[100px] resize-none')}
               {...(props as any)}
             />
@@ -63,6 +68,8 @@ const Input = forwardRef<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElem
             <input
               ref={ref as any}
               id={inputId}
+              name={inputName}
+              aria-label={label || props.placeholder}
               className={baseClassName}
               {...(props as any)}
             />

@@ -14,7 +14,12 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
-    const cookieStore = await (cookies() as any);
+    let cookieStore;
+    try {
+      cookieStore = await cookies();
+    } catch {
+      cookieStore = cookies();
+    }
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
     // Verify auth session
     const { data: { session } } = await supabase.auth.getSession();
