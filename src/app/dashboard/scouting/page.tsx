@@ -246,7 +246,7 @@ export default function ScoutingPage() {
 
                     {log.notes && (
                       <div className="bg-indigo-50/50 p-4 rounded-2xl text-sm text-zinc-600 leading-relaxed italic">
-                        "{log.notes}"
+                        &ldquo;{log.notes}&rdquo;
                       </div>
                     )}
                   </div>
