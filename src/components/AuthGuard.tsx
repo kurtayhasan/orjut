@@ -79,13 +79,19 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
               localStorage.removeItem('pending_invite_engineer_id');
             }
           }
+          const actualRole = data.role || 'farmer';
           const overrideRole = localStorage.getItem('user_role_override');
-          const baseRole = overrideRole || data.role || 'farmer';
+          let baseRole = actualRole;
+          if (overrideRole) {
+            if (actualRole === 'admin') {
+              baseRole = overrideRole;
+            } else if (actualRole === 'engineer' && overrideRole !== 'admin') {
+              baseRole = overrideRole;
+            }
+          }
           if (baseRole === 'admin' || baseRole === 'engineer') {
-            // privileged users can stay on any page
             setIsAuthenticated(true);
           } else {
-            // farmer – prevent access to admin/engineer URLs
             if (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/engineer')) {
               router.push('/dashboard');
               return;
@@ -94,8 +100,16 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
           }
         } else {
           // Offline: trust cached user_id and roles
+          const actualRole = localStorage.getItem('user_role') || 'farmer';
           const overrideRole = localStorage.getItem('user_role_override');
-          const baseRole = overrideRole || localStorage.getItem('user_role') || 'farmer';
+          let baseRole = actualRole;
+          if (overrideRole) {
+            if (actualRole === 'admin') {
+              baseRole = overrideRole;
+            } else if (actualRole === 'engineer' && overrideRole !== 'admin') {
+              baseRole = overrideRole;
+            }
+          }
           if (baseRole === 'admin' || baseRole === 'engineer') {
             setIsAuthenticated(true);
           } else {

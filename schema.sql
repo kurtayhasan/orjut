@@ -1,7 +1,6 @@
 -- ============================================================
--- ORJUT / ZiraiAsistan — PRODUCTION SCHEMA & RLS LOCKDOWN
--- Version: 1.0 | Date: 2026-05-03
--- Run this ENTIRE script in Supabase SQL Editor
+-- ORJUT / ZiraiAsistan — PRODUCTION SCHEMA & RLS SECURED
+-- Version: 2.1 | Date: 2026-06-28
 -- ============================================================
 
 -- ============================================================
@@ -10,22 +9,16 @@
 CREATE EXTENSION IF NOT EXISTS postgis;
 
 -- ============================================================
--- PART 1: PROFILES TABLE (Custom Auth — NOT using auth.users)
+-- PART 1: PROFILES TABLE (Linked with Supabase Auth auth.users)
 -- ============================================================
--- NOTE: This app uses a custom profiles-based auth system.
--- The `profiles.id` (UUID) is stored in localStorage as `user_id`
--- and used as `org_id` across all tables.
--- Because we are NOT using Supabase Auth (auth.uid()), standard
--- RLS via auth.uid() is NOT possible. Instead, we enforce 
--- data isolation via org_id filters in the frontend AND via
--- a service_role approach for server-side operations.
-
 CREATE TABLE IF NOT EXISTS public.profiles (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    phone TEXT UNIQUE NOT NULL,
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    phone TEXT,
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
-    password TEXT, -- Plain text for MVP (MUST hash before v1.0 GA)
+    role TEXT DEFAULT 'farmer' CONSTRAINT chk_profile_role CHECK (role IN ('farmer', 'engineer', 'admin')),
+    is_premium BOOLEAN DEFAULT false,
+    payment_status TEXT DEFAULT 'free',
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -77,6 +70,8 @@ CREATE TABLE IF NOT EXISTS public.transactions (
     receipt_url TEXT,
     receipt_thumbnail_url TEXT,
     date DATE NOT NULL DEFAULT CURRENT_DATE,
+    quantity NUMERIC,
+    unit TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -97,7 +92,7 @@ CREATE TABLE IF NOT EXISTS public.seasons (
 -- PART 5: INVENTORY TABLE
 -- ============================================================
 DO $$ BEGIN
-    CREATE TYPE inventory_type AS ENUM ('seed', 'fertilizer', 'fuel', 'other');
+    CREATE TYPE inventory_type AS ENUM ('seed', 'fertilizer', 'fuel', 'pesticide', 'other');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
@@ -176,44 +171,103 @@ CREATE TABLE IF NOT EXISTS public.collaborators (
 );
 
 -- ============================================================
--- PART 11: SAFE MIGRATION (ALTER existing tables if needed)
+-- PART 11: FIELD OPERATIONS TABLE
 -- ============================================================
-
--- Lands: Add columns that may be missing
-ALTER TABLE public.lands ADD COLUMN IF NOT EXISTS size_decare NUMERIC;
-ALTER TABLE public.lands ADD COLUMN IF NOT EXISTS size NUMERIC;
-ALTER TABLE public.lands ADD COLUMN IF NOT EXISTS lat DOUBLE PRECISION;
-ALTER TABLE public.lands ADD COLUMN IF NOT EXISTS lng DOUBLE PRECISION;
-ALTER TABLE public.lands ADD COLUMN IF NOT EXISTS expected_yield_per_decare NUMERIC;
-ALTER TABLE public.lands ADD COLUMN IF NOT EXISTS expected_sell_price_unit NUMERIC;
-ALTER TABLE public.lands ADD COLUMN IF NOT EXISTS planting_date DATE;
-
--- Lands: Rename legacy column if exists
-DO $$ BEGIN
-  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='lands' AND column_name='size_hectares') THEN
-    ALTER TABLE public.lands RENAME COLUMN size_hectares TO size_decare;
-  END IF;
-END $$;
-
--- Lands: Make crop_type TEXT if it was enum
-ALTER TABLE public.lands ALTER COLUMN crop_type TYPE TEXT;
-
--- Lands: Allow nullable name
-DO $$ BEGIN
-  ALTER TABLE public.lands ALTER COLUMN name DROP NOT NULL;
-EXCEPTION WHEN others THEN NULL;
-END $$;
-
--- Transactions: Add missing columns
-ALTER TABLE public.transactions ADD COLUMN IF NOT EXISTS category TEXT;
-ALTER TABLE public.transactions ADD COLUMN IF NOT EXISTS receipt_url TEXT;
-ALTER TABLE public.transactions ADD COLUMN IF NOT EXISTS receipt_thumbnail_url TEXT;
-
--- Profiles: Add password column
-ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS password TEXT;
+CREATE TABLE IF NOT EXISTS public.field_operations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    org_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    land_id UUID NOT NULL REFERENCES public.lands(id) ON DELETE CASCADE,
+    inventory_id UUID REFERENCES public.inventory(id) ON DELETE SET NULL,
+    type TEXT NOT NULL, -- 'sulama', 'gubreleme', 'ilaclama', 'hasat', 'diger'
+    amount NUMERIC,
+    unit TEXT,
+    date DATE NOT NULL DEFAULT CURRENT_DATE,
+    notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
 
 -- ============================================================
--- PART 12: PERFORMANCE INDEXES
+-- PART 12: SCOUTING LOGS TABLE
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.scouting_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    org_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    land_id UUID NOT NULL REFERENCES public.lands(id) ON DELETE CASCADE,
+    health_status TEXT, -- 'saglikli', 'hastalik', 'zararli'
+    growth_stage TEXT,
+    notes TEXT,
+    date DATE NOT NULL DEFAULT CURRENT_DATE,
+    is_prescription_applied BOOLEAN DEFAULT false,
+    prescription_text TEXT,
+    image_url TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================
+-- PART 13: IRRIGATION LOGS TABLE
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.irrigation_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    org_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    land_id UUID NOT NULL REFERENCES public.lands(id) ON DELETE CASCADE,
+    amount NUMERIC,
+    unit TEXT DEFAULT 'm3',
+    duration_minutes INTEGER,
+    date DATE NOT NULL DEFAULT CURRENT_DATE,
+    notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================
+-- PART 14: ENGINEER CLIENTS TABLE (Relationship for Consultant role)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.engineer_clients (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    engineer_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    farmer_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    status TEXT DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(engineer_id, farmer_id)
+);
+
+-- ============================================================
+-- PART 15: AI INSIGHTS HISTORY
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.ai_insights_history (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    land_id UUID NOT NULL REFERENCES public.lands(id) ON DELETE CASCADE,
+    weather_snapshot JSONB,
+    ai_recommendation TEXT,
+    timestamp TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================
+-- PART 16: PUSH SUBSCRIPTIONS (PWA Support)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.push_subscriptions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    subscription_json JSONB NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================
+-- PART 17: NDVI SNAPSHOTS TABLE
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.ndvi_snapshots (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    land_id UUID REFERENCES public.lands(id) ON DELETE CASCADE,
+    date DATE DEFAULT CURRENT_DATE,
+    mean FLOAT,
+    min FLOAT,
+    max FLOAT,
+    cloud_cover FLOAT,
+    tile_url TEXT,
+    created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now())
+);
+
+-- ============================================================
+-- PART 18: PERFORMANCE INDEXES
 -- ============================================================
 CREATE INDEX IF NOT EXISTS idx_lands_org_id ON public.lands(org_id);
 CREATE INDEX IF NOT EXISTS idx_transactions_org_id ON public.transactions(org_id);
@@ -225,28 +279,15 @@ CREATE INDEX IF NOT EXISTS idx_seasons_org_id ON public.seasons(org_id);
 CREATE INDEX IF NOT EXISTS idx_collaborators_land_id ON public.collaborators(land_id);
 CREATE INDEX IF NOT EXISTS idx_collaborators_user_id ON public.collaborators(user_id);
 CREATE INDEX IF NOT EXISTS idx_savings_user_id ON public.savings_logs(user_id);
-CREATE INDEX IF NOT EXISTS idx_profiles_phone ON public.profiles(phone);
+CREATE INDEX IF NOT EXISTS idx_field_ops_land_id ON public.field_operations(land_id);
+CREATE INDEX IF NOT EXISTS idx_scouting_land_id ON public.scouting_logs(land_id);
+CREATE INDEX IF NOT EXISTS idx_eng_clients_eng_id ON public.engineer_clients(engineer_id);
+CREATE INDEX IF NOT EXISTS idx_eng_clients_far_id ON public.engineer_clients(farmer_id);
 
 -- ============================================================
--- PART 13: ROW LEVEL SECURITY (RLS)
+-- PART 19: ROW LEVEL SECURITY (RLS) LOCKDOWN WITH TYPE CASTS
 -- ============================================================
--- IMPORTANT ARCHITECTURE NOTE:
--- This app uses CUSTOM auth (profiles table + localStorage),
--- NOT Supabase Auth (auth.users). Therefore auth.uid() is NOT
--- available. The frontend uses the `anon` key and filters by
--- org_id in application code.
---
--- For TRUE RLS enforcement, we would need to migrate to 
--- Supabase Auth. For the MVP, we enable RLS and create 
--- permissive policies that allow the anon role to operate
--- (since all queries already filter by org_id).
---
--- This is a PRAGMATIC approach for MVP security:
--- - RLS is ON (tables are protected by default)
--- - Anon role gets filtered access
--- - Server-side (service_role) has full access for cron/AI
-
--- 13A. Enable RLS on all tables
+-- Enable RLS on all tables
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.lands ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.transactions ENABLE ROW LEVEL SECURITY;
@@ -257,8 +298,15 @@ ALTER TABLE public.ai_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.daily_summaries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.market_prices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.collaborators ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.field_operations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.scouting_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.irrigation_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.engineer_clients ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ai_insights_history ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.push_subscriptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ndvi_snapshots ENABLE ROW LEVEL SECURITY;
 
--- 13B. Drop existing policies (clean slate)
+-- Drop existing policies
 DO $$ 
 DECLARE r RECORD;
 BEGIN
@@ -268,73 +316,133 @@ BEGIN
   END LOOP;
 END $$;
 
--- 13C. PROFILES — Users can read/update only their own profile
--- Signup (insert) is open for registration
-CREATE POLICY "profiles_select" ON public.profiles FOR SELECT USING (true);
-CREATE POLICY "profiles_insert" ON public.profiles FOR INSERT WITH CHECK (true);
-CREATE POLICY "profiles_update" ON public.profiles FOR UPDATE USING (true) WITH CHECK (true);
+-- 1. PROFILES: Read/update only own profile.
+CREATE POLICY "profiles_select" ON public.profiles FOR SELECT USING (auth.uid()::text = id::text);
+CREATE POLICY "profiles_update" ON public.profiles FOR UPDATE USING (auth.uid()::text = id::text) WITH CHECK (auth.uid()::text = id::text);
 
--- 13D. LANDS — Full CRUD filtered by org_id
--- Since we can't use auth.uid(), allow all anon operations
--- (the frontend enforces org_id filtering)
-CREATE POLICY "lands_select" ON public.lands FOR SELECT USING (true);
-CREATE POLICY "lands_insert" ON public.lands FOR INSERT WITH CHECK (true);
-CREATE POLICY "lands_update" ON public.lands FOR UPDATE USING (true) WITH CHECK (true);
-CREATE POLICY "lands_delete" ON public.lands FOR DELETE USING (true);
+-- 2. LANDS: Isolation by org_id (auth.uid() must match org_id)
+CREATE POLICY "lands_all" ON public.lands FOR ALL USING (org_id::text = auth.uid()::text) WITH CHECK (org_id::text = auth.uid()::text);
 
--- 13E. TRANSACTIONS — Full CRUD
-CREATE POLICY "transactions_select" ON public.transactions FOR SELECT USING (true);
-CREATE POLICY "transactions_insert" ON public.transactions FOR INSERT WITH CHECK (true);
-CREATE POLICY "transactions_update" ON public.transactions FOR UPDATE USING (true) WITH CHECK (true);
-CREATE POLICY "transactions_delete" ON public.transactions FOR DELETE USING (true);
+-- 3. TRANSACTIONS: Isolation by org_id
+CREATE POLICY "transactions_all" ON public.transactions FOR ALL USING (org_id::text = auth.uid()::text) WITH CHECK (org_id::text = auth.uid()::text);
 
--- 13F. SEASONS — Full CRUD
-CREATE POLICY "seasons_select" ON public.seasons FOR SELECT USING (true);
-CREATE POLICY "seasons_insert" ON public.seasons FOR INSERT WITH CHECK (true);
-CREATE POLICY "seasons_update" ON public.seasons FOR UPDATE USING (true) WITH CHECK (true);
-CREATE POLICY "seasons_delete" ON public.seasons FOR DELETE USING (true);
+-- 4. SEASONS: Isolation by org_id
+CREATE POLICY "seasons_all" ON public.seasons FOR ALL USING (org_id::text = auth.uid()::text) WITH CHECK (org_id::text = auth.uid()::text);
 
--- 13G. INVENTORY — Full CRUD
-CREATE POLICY "inventory_select" ON public.inventory FOR SELECT USING (true);
-CREATE POLICY "inventory_insert" ON public.inventory FOR INSERT WITH CHECK (true);
-CREATE POLICY "inventory_update" ON public.inventory FOR UPDATE USING (true) WITH CHECK (true);
-CREATE POLICY "inventory_delete" ON public.inventory FOR DELETE USING (true);
+-- 5. INVENTORY: Isolation by org_id
+CREATE POLICY "inventory_all" ON public.inventory FOR ALL USING (org_id::text = auth.uid()::text) WITH CHECK (org_id::text = auth.uid()::text);
 
--- 13H. SAVINGS LOGS — Full CRUD
-CREATE POLICY "savings_select" ON public.savings_logs FOR SELECT USING (true);
-CREATE POLICY "savings_insert" ON public.savings_logs FOR INSERT WITH CHECK (true);
+-- 6. SAVINGS LOGS: Isolation by user_id
+CREATE POLICY "savings_all" ON public.savings_logs FOR ALL USING (user_id::text = auth.uid()::text) WITH CHECK (user_id::text = auth.uid()::text);
 
--- 13I. AI LOGS — Full CRUD
-CREATE POLICY "ai_logs_select" ON public.ai_logs FOR SELECT USING (true);
-CREATE POLICY "ai_logs_insert" ON public.ai_logs FOR INSERT WITH CHECK (true);
+-- 7. AI LOGS: Isolation by user_id
+CREATE POLICY "ai_logs_all" ON public.ai_logs FOR ALL USING (user_id::text = auth.uid()::text) WITH CHECK (user_id::text = auth.uid()::text);
 
--- 13J. DAILY SUMMARIES — Full CRUD
-CREATE POLICY "summaries_select" ON public.daily_summaries FOR SELECT USING (true);
-CREATE POLICY "summaries_insert" ON public.daily_summaries FOR INSERT WITH CHECK (true);
-CREATE POLICY "summaries_update" ON public.daily_summaries FOR UPDATE USING (true) WITH CHECK (true);
+-- 8. DAILY SUMMARIES: Isolation by user_id
+CREATE POLICY "summaries_all" ON public.daily_summaries FOR ALL USING (user_id::text = auth.uid()::text) WITH CHECK (user_id::text = auth.uid()::text);
 
--- 13K. MARKET PRICES — Public read, admin write
+-- 9. MARKET PRICES: Readable by everyone, modifications restricted to service_role/admin
 CREATE POLICY "market_select" ON public.market_prices FOR SELECT USING (true);
-CREATE POLICY "market_insert" ON public.market_prices FOR INSERT WITH CHECK (true);
 
--- 13L. COLLABORATORS — Full CRUD
-CREATE POLICY "collab_select" ON public.collaborators FOR SELECT USING (true);
-CREATE POLICY "collab_insert" ON public.collaborators FOR INSERT WITH CHECK (true);
-CREATE POLICY "collab_update" ON public.collaborators FOR UPDATE USING (true) WITH CHECK (true);
-CREATE POLICY "collab_delete" ON public.collaborators FOR DELETE USING (true);
+-- 10. COLLABORATORS: Access if user is collaborator or owns the land
+CREATE POLICY "collaborators_all" ON public.collaborators FOR ALL USING (
+    user_id::text = auth.uid()::text OR 
+    land_id IN (SELECT id FROM public.lands WHERE org_id::text = auth.uid()::text)
+);
+
+-- 11. FIELD OPERATIONS: Isolation by org_id
+CREATE POLICY "field_ops_all" ON public.field_operations FOR ALL USING (org_id::text = auth.uid()::text) WITH CHECK (org_id::text = auth.uid()::text);
+
+-- 12. SCOUTING LOGS: Isolation by org_id
+CREATE POLICY "scouting_all" ON public.scouting_logs FOR ALL USING (org_id::text = auth.uid()::text) WITH CHECK (org_id::text = auth.uid()::text);
+
+-- 13. IRRIGATION LOGS: Isolation by org_id
+CREATE POLICY "irrigation_all" ON public.irrigation_logs FOR ALL USING (org_id::text = auth.uid()::text) WITH CHECK (org_id::text = auth.uid()::text);
+
+-- 14. ENGINEER CLIENTS: Access if user is the engineer or the farmer
+CREATE POLICY "engineer_clients_all" ON public.engineer_clients FOR ALL USING (
+    engineer_id::text = auth.uid()::text OR farmer_id::text = auth.uid()::text
+);
+
+-- 15. AI INSIGHTS HISTORY: Access via Land relationship owned by the user
+CREATE POLICY "ai_insights_history_all" ON public.ai_insights_history FOR ALL USING (
+    land_id IN (SELECT id FROM public.lands WHERE org_id::text = auth.uid()::text)
+);
+
+-- 16. PUSH SUBSCRIPTIONS: Isolation by user_id
+CREATE POLICY "push_subscriptions_all" ON public.push_subscriptions FOR ALL USING (user_id::text = auth.uid()::text) WITH CHECK (user_id::text = auth.uid()::text);
+
+-- 17. NDVI SNAPSHOTS: Access via Land relationship owned by the user
+CREATE POLICY "ndvi_snapshots_all" ON public.ndvi_snapshots FOR ALL USING (
+    land_id IN (SELECT id FROM public.lands WHERE org_id::text = auth.uid()::text)
+);
 
 -- ============================================================
--- PART 14: STORAGE POLICIES (Receipts Bucket)
+-- PART 20: AUTH.USERS TRIGGER FOR PROFILE SYNCHRONIZATION
 -- ============================================================
--- Run this AFTER creating the 'receipts' bucket in Supabase Dashboard
--- Dashboard → Storage → New Bucket → Name: receipts → Public: ON
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger AS $$
+DECLARE
+    v_first_name TEXT;
+    v_last_name TEXT;
+BEGIN
+    v_first_name := COALESCE(new.raw_user_meta_data->>'first_name', SPLIT_PART(new.raw_user_meta_data->>'full_name', ' ', 1), 'Yeni');
+    v_last_name := COALESCE(new.raw_user_meta_data->>'last_name', SPLIT_PART(new.raw_user_meta_data->>'full_name', ' ', 2), 'Kullanıcı');
 
--- Allow authenticated uploads
-INSERT INTO storage.buckets (id, name, public) 
-VALUES ('receipts', 'receipts', true)
-ON CONFLICT (id) DO NOTHING;
+    INSERT INTO public.profiles (id, phone, first_name, last_name, is_premium, role)
+    VALUES (
+        new.id,
+        new.phone,
+        v_first_name,
+        v_last_name,
+        false,
+        'farmer'
+    )
+    ON CONFLICT (id) DO UPDATE 
+    SET phone = EXCLUDED.phone,
+        first_name = EXCLUDED.first_name,
+        last_name = EXCLUDED.last_name;
+
+    RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- ============================================================
--- VERIFICATION
+-- PART 21: RPC - ATOMIC EXPENSE (Updates inventory & inserts transaction)
 -- ============================================================
-SELECT 'Schema & RLS Lockdown Complete ✅' AS status;
+CREATE OR REPLACE FUNCTION public.apply_expense_atomic(
+    p_tx_data JSONB,
+    p_inventory_id UUID,
+    p_quantity NUMERIC
+) RETURNS JSONB AS $$
+DECLARE
+    v_tx_id UUID;
+BEGIN
+    -- 1. Insert Transaction
+    INSERT INTO public.transactions (
+        org_id, land_id, type, amount, description, category, date, quantity, unit
+    ) VALUES (
+        (p_tx_data->>'org_id')::UUID,
+        (p_tx_data->>'land_id')::UUID,
+        (p_tx_data->>'type')::transaction_type,
+        (p_tx_data->>'amount')::NUMERIC,
+        p_tx_data->>'description',
+        p_tx_data->>'category',
+        (p_tx_data->>'date')::DATE,
+        (p_tx_data->>'quantity')::NUMERIC,
+        p_tx_data->>'unit'
+    ) RETURNING id INTO v_tx_id;
+
+    -- 2. Update Inventory
+    UPDATE public.inventory
+    SET quantity = quantity - p_quantity
+    WHERE id = p_inventory_id;
+
+    RETURN jsonb_build_object('success', true, 'transaction_id', v_tx_id);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;

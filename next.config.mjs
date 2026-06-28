@@ -6,6 +6,9 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  experimental: {
+    serverComponentsExternalPackages: ['@google/genai'],
+  },
   images: {
     unoptimized: true,
     remotePatterns: [

@@ -5,25 +5,29 @@ import { GoogleGenAI } from '@google/genai';
 import { createClient } from '@supabase/supabase-js';
 import { getSupabaseServer } from '@/lib/supabaseServer';
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY as string,
-});
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
 export async function GET(req: NextRequest) {
-  const supabaseRoute = getSupabaseServer();
-  const { data: { session } } = await supabaseRoute.auth.getSession();
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  // Verify the request is from Vercel Cron (optional security)
+  // Verify the request is from Vercel Cron (optional security) or has an active session
   const authHeader = req.headers.get('authorization');
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}` && process.env.CRON_SECRET) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const isCronTokenValid = !!(authHeader && authHeader === `Bearer ${process.env.CRON_SECRET}` && process.env.CRON_SECRET);
+
+  if (!isCronTokenValid) {
+    const supabaseRoute = getSupabaseServer();
+    const { data: { session } } = await supabaseRoute.auth.getSession();
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
   }
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return NextResponse.json({ error: 'GEMINI_API_KEY is not set' }, { status: 500 });
+  }
+
+  const ai = new GoogleGenAI({ apiKey });
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+  );
 
   try {
     // Fetch all users with lands

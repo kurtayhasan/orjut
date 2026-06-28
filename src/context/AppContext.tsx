@@ -172,9 +172,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error;
       if (data) {
         setUserProfile(data);
+        const actualRole = data.role || 'farmer';
         const overrideRole = typeof window !== 'undefined' ? localStorage.getItem('user_role_override') : null;
-        const finalRole = (overrideRole || data.role || 'farmer') as 'farmer' | 'engineer' | 'admin';
-        setUserRole(finalRole);
+        let finalRole = actualRole;
+        if (overrideRole) {
+          if (actualRole === 'admin') {
+            finalRole = overrideRole;
+          } else if (actualRole === 'engineer' && overrideRole !== 'admin') {
+            finalRole = overrideRole;
+          }
+        }
+        setUserRole(finalRole as 'farmer' | 'engineer' | 'admin');
         
         // Auto-redirect logic: Only redirect farmer away from admin/engineer pages
         if (finalRole === 'farmer' && typeof window !== 'undefined' && (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/engineer'))) {
@@ -226,9 +234,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // PHASE 3: STRICT STATE RESET - If data is null/empty, state must be []
       if (p.data) {
         setUserProfile(p.data);
+        const actualRole = p.data.role || 'farmer';
         const overrideRole = typeof window !== 'undefined' ? localStorage.getItem('user_role_override') : null;
-        const finalRole = (overrideRole || p.data.role || 'farmer') as 'farmer' | 'engineer' | 'admin';
-        setUserRole(finalRole);
+        let finalRole = actualRole;
+        if (overrideRole) {
+          if (actualRole === 'admin') {
+            finalRole = overrideRole;
+          } else if (actualRole === 'engineer' && overrideRole !== 'admin') {
+            finalRole = overrideRole;
+          }
+        }
+        setUserRole(finalRole as 'farmer' | 'engineer' | 'admin');
 
         // Phase 6: Farmer Auto-Redirect (admin/engineer can view any page)
         if (finalRole === 'farmer' && typeof window !== 'undefined' && (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/engineer'))) {
