@@ -1,29 +1,24 @@
 import { NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { getSupabaseServer } from '@/lib/supabaseServer';
 import { checkRateLimit } from '@/lib/rateLimit';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: Request) {
-  let cookieStore;
   try {
-    cookieStore = await cookies();
-  } catch {
-    cookieStore = cookies();
-  }
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
-  
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+    const supabase = getSupabaseServer();
+    
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-  const userId = session.user.id;
+    const userId = session.user.id;
 
-  if (!(await checkRateLimit(userId, 5, 3600_000))) {
-    return NextResponse.json({ error: 'Too many export requests. Try again later.' }, { status: 429 });
-  }
+    if (!(await checkRateLimit(userId, 5, 3600_000))) {
+      return NextResponse.json({ error: 'Too many export requests. Try again later.' }, { status: 429 });
+    }
 
-  try {
     const [profile, lands, transactions, seasons, fieldOps, scouting, irrigation, inventory] = await Promise.all([
       supabase.from('profiles').select('*').eq('id', userId).single(),
       supabase.from('lands').select('*').eq('org_id', userId).limit(1000),
