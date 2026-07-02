@@ -80,12 +80,23 @@ export async function POST(req: Request) {
     // 3. Call Gemini AI with forced JSON mode
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
+    // RAG Semantic Search Phase
+    const { queryRAGDocuments } = await import('@/lib/ragEngine');
+    const cropName = context?.LAND?.C || 'Tarım';
+    const ragQuery = `${cropName} ürünlerinde güncel hava durumuna göre hastalık riskleri`;
+    const ragDocs = await queryRAGDocuments(ragQuery, 1);
+    
+    let ragText = '';
+    if (ragDocs && ragDocs.length > 0) {
+      ragText = `\nEK BİLGİ (Kütüphane): ${ragDocs[0].content}\n`;
+    }
+
     const prompt = `Sen kıdemli bir ziraat mühendisisin. Bu ultra-sıkıştırılmış (minified) veriyi analiz et:
     LAND: {C:Ürün, S:Alan, E:A(Açık)/S(Sera)}
     CTX: Geçmiş kayıtlar
     CURR: Güncel hava (T:Sıcaklık, H:Nem, C:Durum)
 
-    Kullanıcının tarlası için riskleri ve eylem planını belirle.
+    Kullanıcının tarlası için riskleri ve eylem planını belirle.${ragText}
     SADECE şu JSON formatında yanıt ver:
     { "risk": "...", "action": "...", "urgency": "düşük|orta|yüksek" }
     
@@ -107,10 +118,11 @@ export async function POST(req: Request) {
       });
       let responseText = '';
       if (response) {
-        if (typeof response.text === 'function') {
-          responseText = response.text() || '';
+        const anyResponse = response as any;
+        if (typeof anyResponse.text === 'function') {
+          responseText = anyResponse.text() || '';
         } else {
-          responseText = response.text || '';
+          responseText = anyResponse.text || '';
         }
       }
       analysis = JSON.parse(String(responseText) || '{}');

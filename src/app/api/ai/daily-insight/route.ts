@@ -59,12 +59,24 @@ export async function POST(req: NextRequest) {
 
     const ai = new GoogleGenAI({ apiKey });
 
+    // RAG Semantic Search Phase
+    const { queryRAGDocuments } = await import('@/lib/ragEngine');
+    const ragDocs = await queryRAGDocuments(prompt, 2);
+    
+    let enhancedPrompt = prompt;
+    if (ragDocs && ragDocs.length > 0) {
+      enhancedPrompt = `Soru/Bağlam: ${prompt}\n\nAşağıdaki tarımsal veritabanı kaynaklarından yararlan (eğer alakalı ise):\n`;
+      ragDocs.forEach((doc: any, i: number) => {
+        enhancedPrompt += `[Kaynak ${i+1}]: ${doc.content}\n`;
+      });
+    }
+
     let response;
     try {
       // 2. Call the API using the latest official method
       response = await ai.models.generateContent({
         model: 'gemini-2.0-flash',
-        contents: prompt,
+        contents: enhancedPrompt,
       });
     } catch (geminiError: any) {
       console.error('GEMINI_FATAL:', geminiError);
@@ -94,10 +106,11 @@ export async function POST(req: NextRequest) {
     // 3. Extract and clean the response text
     let rawText = '';
     if (response) {
-      if (typeof response.text === 'function') {
-        rawText = response.text() || '';
+      const anyResponse = response as any;
+      if (typeof anyResponse.text === 'function') {
+        rawText = anyResponse.text() || '';
       } else {
-        rawText = response.text || '';
+        rawText = anyResponse.text || '';
       }
     }
     

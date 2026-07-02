@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { fetchWeather } from './weatherService';
+import { generateEmbedding } from './embeddings';
 
 export async function buildLandContext(landId: string) {
   try {
@@ -185,4 +186,34 @@ export function limitContextSize<T>(context: T, maxLength = 15000): T {
   }
   
   return context;
+}
+
+/**
+ * PHASE 3: True RAG Semantic Search
+ * Takes a query, generates its vector embedding, and retrieves the most relevant
+ * documents (knowledge base, PDF excerpts, past logs) from Supabase pgvector.
+ */
+export async function queryRAGDocuments(query: string, limit: number = 3) {
+  try {
+    // 1. Generate an embedding for the user's query or current situation
+    const queryEmbedding = await generateEmbedding(query);
+    
+    // 2. Search Supabase using the match_rag_documents RPC
+    const { data, error } = await supabase.rpc('match_rag_documents', {
+      query_embedding: queryEmbedding,
+      match_threshold: 0.65, // Minimum similarity score (adjust based on needs)
+      match_count: limit,
+      filter_metadata: {} // Can be used to filter by user_id or land_id
+    });
+
+    if (error) {
+      console.error("Supabase RPC Error matching documents:", error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error("Error in queryRAGDocuments:", error);
+    return [];
+  }
 }
