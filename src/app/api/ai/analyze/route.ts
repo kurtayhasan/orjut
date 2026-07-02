@@ -105,8 +105,15 @@ export async function POST(req: Request) {
         contents: prompt,
         config: { responseMimeType: 'application/json' }
       });
-      const responseText = response.text ?? '';
-      analysis = JSON.parse(responseText || '{}');
+      let responseText = '';
+      if (response) {
+        if (typeof response.text === 'function') {
+          responseText = response.text() || '';
+        } else {
+          responseText = response.text || '';
+        }
+      }
+      analysis = JSON.parse(String(responseText) || '{}');
     } catch (geminiError) {
       console.error('GEMINI_FATAL:', geminiError);
       analysis = {

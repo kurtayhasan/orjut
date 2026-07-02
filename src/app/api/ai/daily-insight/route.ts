@@ -92,8 +92,16 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. Extract and clean the response text
-    const rawText = response.text ?? '';
-    let cleanResponse = rawText.trim();
+    let rawText = '';
+    if (response) {
+      if (typeof response.text === 'function') {
+        rawText = response.text() || '';
+      } else {
+        rawText = response.text || '';
+      }
+    }
+    
+    let cleanResponse = String(rawText).trim();
 
     // Strip markdown formatting if Gemini wraps it in ```json ... ```
     const jsonBlockMatch = cleanResponse.match(/```json\s*([\s\S]*?)\s*```/);
