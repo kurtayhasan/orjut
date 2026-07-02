@@ -122,7 +122,7 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error('Outer DailyInsight Route Error:', error);
     return NextResponse.json(
-      { success: false, error: "Sistem hatası. Lütfen birazdan tekrar deneyiniz." },
+      { success: false, error: "Sistem hatası: " + (error?.message || String(error)) },
       { status: 200 }
     );
   }
