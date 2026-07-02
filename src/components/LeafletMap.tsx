@@ -15,6 +15,8 @@ import * as turf from '@turf/turf';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import { landSchema } from '@/lib/schemas/land.schema';
 import type { Land } from '@/types';
+import { useWeather } from '@/hooks/useWeather';
+import { useAgroMonitoring } from './map/hooks/useAgroMonitoring';
 
 // Fix Leaflet default icon issues in Next.js
 if (typeof window !== 'undefined') {
@@ -69,30 +71,13 @@ function MapController({ selectedLand, searchResult }: { selectedLand: Partial<L
 }
 
 function LandWeatherPopup({ land }: { land: Partial<Land> }) {
-  const [weather, setWeather] = useState<{ temp: number | null, humidity: number | null }>({ temp: null, humidity: null });
-  const [loading, setLoading] = useState(true);
+  const { weather, loading, fetchWeatherForLocation } = useWeather();
 
   useEffect(() => {
-    let active = true;
-    async function loadWeather() {
-      if (!land.lat || !land.lng) return;
-      try {
-        const { fetchWeather } = await import('@/lib/weatherService');
-        const data = await fetchWeather(Number(land.lat), Number(land.lng));
-        if (active) {
-          setWeather({ temp: data.temperature, humidity: data.humidity });
-        }
-      } catch (err) {
-        console.error("Failed to load weather for popup:", err);
-      } finally {
-        if (active) setLoading(false);
-      }
+    if (land.lat && land.lng) {
+      fetchWeatherForLocation(Number(land.lat), Number(land.lng));
     }
-    loadWeather();
-    return () => {
-      active = false;
-    };
-  }, [land]);
+  }, [land, fetchWeatherForLocation]);
 
   return (
     <div className="p-2 min-w-[160px] max-w-[240px] space-y-2 text-zinc-900 dark:text-zinc-100 font-sans">
@@ -107,13 +92,13 @@ function LandWeatherPopup({ land }: { land: Partial<Land> }) {
       <div className="flex items-center justify-between text-[11px] font-bold pt-0.5">
         <span className="text-zinc-500 dark:text-zinc-400">Sıcaklık:</span>
         <span className="text-zinc-800 dark:text-zinc-100 font-black">
-          {loading ? '...' : weather.temp !== null ? `${weather.temp}°C` : '--'}
+          {loading ? '...' : weather?.temperature !== undefined && weather?.temperature !== null ? `${weather.temperature}°C` : '--'}
         </span>
       </div>
       <div className="flex items-center justify-between text-[11px] font-bold">
         <span className="text-zinc-500 dark:text-zinc-400">Nem Oranı:</span>
         <span className="text-zinc-800 dark:text-zinc-100 font-black">
-          {loading ? '...' : weather.humidity !== null ? `${weather.humidity}%` : '--'}
+          {loading ? '...' : weather?.humidity !== undefined && weather?.humidity !== null ? `${weather.humidity}%` : '--'}
         </span>
       </div>
     </div>
@@ -139,6 +124,18 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
   const [boundaries, setBoundaries] = useState<GeoJSON.GeoJsonObject | null>(null);
   const drawGroupRef = useRef<L.FeatureGroup>(null);
   const mapRef = useRef<L.Map | null>(null);
+
+  const { ndviData, fetchNDVI, loadingNdvi } = useAgroMonitoring();
+
+  useEffect(() => {
+    if (activeLayer === 'ndvi' && lands) {
+      lands.forEach(land => {
+        if (land.agromonitoring_polygon_id && land.agromonitoring_polygon_id !== 'none') {
+          fetchNDVI(land.agromonitoring_polygon_id);
+        }
+      });
+    }
+  }, [activeLayer, lands, fetchNDVI]);
 
   useEffect(() => {
     return () => {
@@ -460,17 +457,23 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
     const lng = Number(land?.lng ?? 35.0);
     const baseValue = Math.abs(Math.sin(lat * 1000 + lng * 1000) * 20);
     if (activeLayer === 'ndvi') {
-      const ndvi = land?.is_irrigated ? 0.75 + (baseValue / 200) : 0.60 + (baseValue / 200);
+      const polyId = land?.agromonitoring_polygon_id || '';
+      const hasRealNdvi = polyId && ndviData[polyId] !== undefined;
+      const ndvi = hasRealNdvi ? ndviData[polyId] : (land?.is_irrigated ? 0.75 + (baseValue / 200) : 0.60 + (baseValue / 200));
+      
       let fillColor = '#ff9800';
-      if (ndvi > 0.8) fillColor = '#1b5e20';
-      else if (ndvi > 0.7) fillColor = '#4caf50';
-      else if (ndvi > 0.6) fillColor = '#8bc34a';
+      // Adjust color thresholds based on common NDVI ranges
+      if (ndvi > 0.6) fillColor = '#1b5e20';
+      else if (ndvi > 0.4) fillColor = '#4caf50';
+      else if (ndvi > 0.2) fillColor = '#8bc34a';
+      else fillColor = '#ffeb3b'; // low vegetation
+
       return {
         fillColor: fillColor,
-        fillOpacity: 0.6,
+        fillOpacity: loadingNdvi[polyId] ? 0.3 : 0.6,
         color: '#2e7d32',
         weight: 1.5,
-        dashArray: '3'
+        dashArray: loadingNdvi[polyId] ? '5, 5' : '3'
       };
     } else {
       const moisture = land?.is_irrigated ? 55 + baseValue : 35 + baseValue;

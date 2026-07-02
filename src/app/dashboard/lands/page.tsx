@@ -10,6 +10,7 @@ import {
   TrendingUp, TrendingDown
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useWeather } from '@/hooks/useWeather';
 
 import EmptyState from '@/components/EmptyState';
 import { CardSkeleton } from '@/components/Skeleton';
@@ -84,6 +85,7 @@ export default function LandsPage() {
     }
   }, [selectedLand]);
 
+  const { fetchWeatherForLocation } = useWeather();
   const [realtimeData, setRealtimeData] = useState<{
     humidity: number | null;
     healthIndex: number | null;
@@ -108,9 +110,8 @@ export default function LandsPage() {
 
       setRealtimeData(prev => ({ ...prev, loading: true }));
       try {
-        const { fetchWeather } = await import('@/lib/weatherService');
-        const data = await fetchWeather(lat, lng);
-        if (active) {
+        const data = await fetchWeatherForLocation(lat, lng);
+        if (active && data) {
           // Generate a dynamic but consistent NDVI index based on coordinates & irrigation status
           const derivedHealth = selectedLand.is_irrigated 
             ? 80 + Math.round((lat * 100 + lng * 100) % 15) 
