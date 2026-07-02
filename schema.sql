@@ -446,3 +446,114 @@ BEGIN
     RETURN jsonb_build_object('success', true, 'transaction_id', v_tx_id);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- =========================================================================
+-- EKLENEN EKSİK TABLOLAR (TASK 3)
+-- =========================================================================
+
+-- SEASONS
+CREATE TABLE public.seasons (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  org_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  start_date DATE NOT NULL,
+  end_date DATE,
+  crop_type TEXT,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE public.seasons ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "seasons_owner" ON public.seasons
+  USING (org_id::text = auth.uid()::text);
+CREATE INDEX idx_seasons_org_id ON public.seasons(org_id);
+
+-- NDVI_SNAPSHOTS
+CREATE TABLE public.ndvi_snapshots (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  land_id UUID NOT NULL REFERENCES public.lands(id) ON DELETE CASCADE,
+  org_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  mean_ndvi NUMERIC(4,3),
+  min_ndvi NUMERIC(4,3),
+  max_ndvi NUMERIC(4,3),
+  captured_at TIMESTAMPTZ DEFAULT NOW(),
+  source TEXT CHECK (source IN ('agromonitoring', 'simulated')) DEFAULT 'simulated'
+);
+ALTER TABLE public.ndvi_snapshots ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "ndvi_owner" ON public.ndvi_snapshots
+  USING (org_id::text = auth.uid()::text);
+CREATE INDEX idx_ndvi_land_id ON public.ndvi_snapshots(land_id, captured_at DESC);
+
+-- AI_INSIGHTS_HISTORY
+CREATE TABLE public.ai_insights_history (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  land_id UUID REFERENCES public.lands(id) ON DELETE CASCADE,
+  org_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  insight TEXT NOT NULL,
+  recommended_action TEXT,
+  urgency TEXT CHECK (urgency IN ('düşük', 'orta', 'yüksek')),
+  weather_snapshot JSONB,
+  model_used TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE public.ai_insights_history ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "insights_owner" ON public.ai_insights_history
+  USING (org_id::text = auth.uid()::text);
+CREATE INDEX idx_insights_org_id ON public.ai_insights_history(org_id, created_at DESC);
+
+-- PUSH_SUBSCRIPTIONS
+CREATE TABLE public.push_subscriptions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  org_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  endpoint TEXT NOT NULL UNIQUE,
+  p256dh TEXT NOT NULL,
+  auth TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE public.push_subscriptions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "push_owner" ON public.push_subscriptions
+  USING (org_id::text = auth.uid()::text);
+
+
+-- =========================================================================
+-- PAYMENT STATUS GÜNCELLEMESİ (TASK 7)
+-- =========================================================================
+ALTER TABLE public.profiles 
+  DROP CONSTRAINT IF EXISTS profiles_payment_status_check;
+
+ALTER TABLE public.profiles 
+  ADD CONSTRAINT profiles_payment_status_check 
+  CHECK (payment_status IN (
+    'free',
+    'pending_approval',
+    'approved',
+    'expired',
+    'cancelled',
+    'suspended',
+    'refunded'
+  ));
+
+
+-- =========================================================================
+-- ENGINEER CLIENT STATUS GÜNCELLEMESİ (TASK 10)
+-- =========================================================================
+ALTER TABLE public.engineer_clients 
+  DROP CONSTRAINT IF EXISTS engineer_clients_status_check;
+
+ALTER TABLE public.engineer_clients 
+  ADD CONSTRAINT engineer_clients_status_check 
+  CHECK (status IN ('pending', 'approved', 'rejected', 'terminated'));
+
+
+-- =========================================================================
+-- SOFT DELETE GÜNCELLEMESİ (TASK 14)
+-- =========================================================================
+ALTER TABLE public.lands ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ DEFAULT NULL;
+
+-- Mevcut politikayı düşür ve yenisini oluştur
+DROP POLICY IF EXISTS "lands_owner" ON public.lands;
+
+CREATE POLICY "lands_owner" ON public.lands
+  FOR ALL
+  USING (org_id::text = auth.uid()::text AND deleted_at IS NULL)
+  WITH CHECK (org_id::text = auth.uid()::text AND deleted_at IS NULL);
+

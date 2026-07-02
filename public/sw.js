@@ -36,24 +36,54 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // 1. ASLA CACHE'E DOKUNMAYACAK KESİN KORUMA ALANLARI
-  if (
-    event.request.method !== 'GET' ||
-    url.pathname.startsWith('/api') ||
-    url.hostname.includes('supabase') ||
-    url.searchParams.has('_rsc') ||
-    url.pathname.includes('_rsc=') ||
-    url.pathname.startsWith('/_next')
-  ) {
+  // 1. ASLA CACHE'E DOKUNMAYACAK KESİN KORUMA ALANLARI (POST, PUT vs)
+  if (event.request.method !== 'GET') {
     event.respondWith(fetch(event.request));
     return;
   }
 
-  // 2. Sadece statik varlıklar ve navigasyon için kontrollü akış
+  // 2. NetworkFirst: API ve Supabase istekleri
+  if (
+    url.pathname.startsWith('/api') ||
+    url.hostname.includes('supabase') ||
+    url.searchParams.has('_rsc') ||
+    url.pathname.includes('_rsc=')
+  ) {
+    event.respondWith(
+      fetch(event.request).then((networkResponse) => {
+        return networkResponse;
+      }).catch(async () => {
+        // Çevrimdışıysak cache'den vermeyi dene, yoksa fallback
+        const cachedResponse = await caches.match(event.request);
+        return cachedResponse || new Response(JSON.stringify({ error: 'Çevrimdışı (Offline)' }), {
+          status: 503, headers: { 'Content-Type': 'application/json' }
+        });
+      })
+    );
+    return;
+  }
+
+  // 3. CacheFirst: Next.js statik dosyaları (_next) ve görseller
+  if (url.pathname.startsWith('/_next') || url.pathname.match(/\.(png|jpg|jpeg|svg|webp|ico)$/)) {
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) return cachedResponse;
+        return fetch(event.request).then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
+          }
+          return networkResponse;
+        });
+      })
+    );
+    return;
+  }
+
+  // 4. Stale-While-Revalidate: Navigasyon ve diğerleri
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       const fetchPromise = fetch(event.request).then((networkResponse) => {
-        // Sadece başarılı ve standart istekleri cache'e güvenle yaz
         if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -66,7 +96,6 @@ self.addEventListener('fetch', (event) => {
           return caches.match(OFFLINE_URL);
         }
       });
-
       return cachedResponse || fetchPromise;
     })
   );

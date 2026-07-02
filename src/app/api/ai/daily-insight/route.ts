@@ -4,6 +4,7 @@ import { GoogleGenAI } from '@google/genai';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { z } from 'zod';
+import { checkRateLimit } from '@/lib/rateLimit';
 
 const DailyInsightSchema = z.object({
   prompt: z.string().min(1, "Analiz için geçerli bir prompt gönderilmelidir.")
@@ -24,6 +25,13 @@ export async function POST(req: NextRequest) {
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    if (!checkRateLimit(session.user.id, 10, 60_000)) {
+      return NextResponse.json(
+        { error: 'Çok fazla istek. Lütfen 1 dakika bekleyin.' },
+        { status: 429 }
+      );
+    }
 
     let body;
     try {

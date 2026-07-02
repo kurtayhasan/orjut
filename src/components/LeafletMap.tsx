@@ -14,6 +14,7 @@ import { EditControl } from 'react-leaflet-draw';
 import * as turf from '@turf/turf';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import { landSchema } from '@/lib/schemas/land.schema';
+import type { Land } from '@/types';
 
 // Fix Leaflet default icon issues in Next.js
 if (typeof window !== 'undefined') {
@@ -34,7 +35,7 @@ const CROP_TYPES = [
 
 // MapClickHandler removed in favor of EditControl
 
-function MapController({ selectedLand, searchResult }: { selectedLand: any, searchResult: L.LatLng | null }) {
+function MapController({ selectedLand, searchResult }: { selectedLand: Partial<Land> | null | undefined, searchResult: L.LatLng | null }) {
   const map = useMap();
 
   useEffect(() => {
@@ -46,8 +47,8 @@ function MapController({ selectedLand, searchResult }: { selectedLand: any, sear
   
   useEffect(() => {
     if (selectedLand) {
-      const lat = parseFloat(selectedLand.lat as any);
-      const lng = parseFloat(selectedLand.lng as any);
+      const lat = parseFloat(selectedLand.lat as unknown as string);
+      const lng = parseFloat(selectedLand.lng as unknown as string);
       if (typeof lat === 'number' && !isNaN(lat) && typeof lng === 'number' && !isNaN(lng)) {
         map.flyTo([lat, lng], 16, { animate: true, duration: 1.5 });
       }
@@ -56,8 +57,8 @@ function MapController({ selectedLand, searchResult }: { selectedLand: any, sear
 
   useEffect(() => {
     if (searchResult) {
-      const lat = parseFloat(searchResult.lat as any);
-      const lng = parseFloat(searchResult.lng as any);
+      const lat = parseFloat(searchResult.lat as unknown as string);
+      const lng = parseFloat(searchResult.lng as unknown as string);
       if (typeof lat === 'number' && !isNaN(lat) && typeof lng === 'number' && !isNaN(lng)) {
         map.flyTo([lat, lng], 14, { animate: true, duration: 2 });
       }
@@ -67,7 +68,7 @@ function MapController({ selectedLand, searchResult }: { selectedLand: any, sear
   return null;
 }
 
-function LandWeatherPopup({ land }: { land: any }) {
+function LandWeatherPopup({ land }: { land: Partial<Land> }) {
   const [weather, setWeather] = useState<{ temp: number | null, humidity: number | null }>({ temp: null, humidity: null });
   const [loading, setLoading] = useState(true);
 
@@ -77,7 +78,7 @@ function LandWeatherPopup({ land }: { land: any }) {
       if (!land.lat || !land.lng) return;
       try {
         const { fetchWeather } = await import('@/lib/weatherService');
-        const data = await fetchWeather(parseFloat(land.lat), parseFloat(land.lng));
+        const data = await fetchWeather(Number(land.lat), Number(land.lng));
         if (active) {
           setWeather({ temp: data.temperature, humidity: data.humidity });
         }
@@ -119,7 +120,7 @@ function LandWeatherPopup({ land }: { land: any }) {
   );
 }
 
-export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, editLand?: any }) {
+export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partial<Land>, editLand?: Partial<Land> }) {
   const { addLand, updateLand, lands, userProfile, isDarkMode, triggerUpsell, isPremium } = useAppContext();
   
   if (typeof window === 'undefined') {
@@ -135,7 +136,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
   const [markerPosition, setMarkerPosition] = useState<L.LatLng | null>(null);
   const [showCropSelector, setShowCropSelector] = useState(false);
   const [editingLandId, setEditingLandId] = useState<string | null>(null);
-  const [boundaries, setBoundaries] = useState<any>(null);
+  const [boundaries, setBoundaries] = useState<GeoJSON.GeoJsonObject | null>(null);
   const drawGroupRef = useRef<L.FeatureGroup>(null);
   const mapRef = useRef<L.Map | null>(null);
 
@@ -177,8 +178,8 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
   const cities = useMemo(() => selectedStateCode ? City.getCitiesOfState(selectedCountryCode, selectedStateCode) : [], [selectedCountryCode, selectedStateCode]);
 
   const mapCenter: [number, number] = useMemo(() => {
-    const parseCoord = (val: any) => {
-      const parsed = parseFloat(val);
+    const parseCoord = (val: unknown) => {
+      const parsed = parseFloat(val as string);
       return typeof parsed === 'number' && !isNaN(parsed) ? parsed : null;
     };
     const focusLat = parseCoord(focusLand?.lat);
@@ -209,10 +210,10 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
     }
   }, [editLand]);
 
-  const onCreated = async (e: any) => {
-    const { layerType, layer } = e;
+  const onCreated = async (e: unknown) => {
+    const { layerType, layer } = e as { layerType: string, layer: L.Polygon };
     if (layerType === 'polygon') {
-      const geojson = layer.toGeoJSON();
+      const geojson = layer.toGeoJSON() as GeoJSON.Feature<GeoJSON.Polygon>;
       const areaSqm = turf.area(geojson);
       
       // KESİN LİMİT: 500 Dekar (500,000 m²)
@@ -240,8 +241,8 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
 
       // Coordinate truncation for polygon vertices (Phase 3 Optimization)
       if (geojson.geometry.type === 'Polygon') {
-        geojson.geometry.coordinates = geojson.geometry.coordinates.map((ring: any) =>
-          ring.map((coord: any) => [Number(coord[0].toFixed(6)), Number(coord[1].toFixed(6))])
+        geojson.geometry.coordinates = geojson.geometry.coordinates.map((ring: GeoJSON.Position[]) =>
+          ring.map((coord: GeoJSON.Position) => [Number(coord[0].toFixed(6)), Number(coord[1].toFixed(6))])
         );
       }
 
@@ -258,7 +259,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
       }
 
       try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+        const res = await fetch(`/api/geocode?type=reverse&lat=${lat}&lon=${lng}`);
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
         if (data && data.address) {
@@ -297,8 +298,8 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
     }
   };
 
-  const handleEditPlot = (land: any) => {
-    setEditingLandId(land.id);
+  const handleEditPlot = (land: Partial<Land>) => {
+    setEditingLandId(land.id || null);
     setCity(land.city || '');
     setDistrict(land.district || '');
     setNeighborhood(land.neighborhood || '');
@@ -337,7 +338,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
   };
 
   const handleSavePlot = async () => {
-    const landData: any = {
+    const landData: Partial<Land> = {
       city, district, neighborhood, block_no: blockNo, parcel_no: parcelNo, 
       size_decare: Number(plotSize), crop_type: selectedCrop, 
       planting_date: plantingDate,
@@ -345,7 +346,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
       environment_type: environmentType,
       size_sqm: sizeSqm,
       lat: markerPosition?.lat, lng: markerPosition?.lng,
-      boundaries: boundaries
+      boundaries: boundaries as GeoJSON.GeoJsonObject | undefined
     };
 
     const validation = landSchema.safeParse(landData);
@@ -409,7 +410,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
     if (!searchQuery.trim()) return;
     setIsSearching(true);
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`);
+      const res = await fetch(`/api/geocode?type=search&q=${encodeURIComponent(searchQuery)}`);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
       if (data && data.length > 0) {
@@ -437,7 +438,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
   // select class helper
   const selectClass = "w-full px-3 py-3 bg-zinc-50 dark:bg-zinc-800 border-2 border-zinc-100 dark:border-zinc-700 rounded-xl outline-none focus:border-primary focus:bg-white dark:focus:bg-zinc-700 transition-all text-sm font-semibold appearance-none cursor-pointer text-zinc-900 dark:text-zinc-100";
 
-  const getLandStyle = (land: any) => {
+  const getLandStyle = (land: Partial<Land>) => {
     if (activeLayer === 'normal') {
       return {
         fillColor: '#2e7d32',
@@ -455,8 +456,8 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
         weight: 1
       };
     }
-    const lat = parseFloat(land?.lat ?? '37.0');
-    const lng = parseFloat(land?.lng ?? '35.0');
+    const lat = Number(land?.lat ?? 37.0);
+    const lng = Number(land?.lng ?? 35.0);
     const baseValue = Math.abs(Math.sin(lat * 1000 + lng * 1000) * 20);
     if (activeLayer === 'ndvi') {
       const ndvi = land?.is_irrigated ? 0.75 + (baseValue / 200) : 0.60 + (baseValue / 200);
@@ -578,7 +579,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
         center={mapCenter}
         zoom={13} 
         scrollWheelZoom={true} 
-        {...({ tap: false } as any)}
+        {...({ tap: false } as Record<string, unknown>)}
         style={{ height: '100%', width: '100%', zIndex: 0, touchAction: 'none' }}
         className="rounded-3xl overflow-hidden shadow-inner"
       >
@@ -645,7 +646,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
                         triggerUpsell();
                         return;
                       }
-                      setActiveLayer(layer.id as any);
+                      setActiveLayer(layer.id as 'normal' | 'ndvi' | 'moisture');
                       setIsNDVIActive(layer.id !== 'normal');
                       
                       const hasPolygon = focusLand?.agromonitoring_polygon_id && focusLand?.agromonitoring_polygon_id !== 'none';
@@ -672,15 +673,15 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
         </div>
 
         {/* Render markers for all saved lands */}
-        {lands.map((land: any) => (
+        {lands.map((land: Land) => (
           <React.Fragment key={land.id}>
             {land.boundaries ? (
               <GeoJSON 
                 key={"orjut-ndvi-sync-" + activeLayer + "-" + land.id}
-                data={land.boundaries} 
+                data={land.boundaries as GeoJSON.GeoJsonObject} 
                 style={() => getLandStyle(land)}
                 eventHandlers={{
-                  click: (e: any) => {
+                  click: (e: unknown) => {
                     handleEditPlot(land);
                   }
                 }}
@@ -695,7 +696,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
                   key={"orjut-ndvi-sync-" + activeLayer + "-" + land.id}
                   position={[land.lat, land.lng]}
                   eventHandlers={{
-                    click: (e: any) => {
+                    click: (e: unknown) => {
                       handleEditPlot(land);
                     }
                   }}
@@ -711,6 +712,33 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: any, e
 
         {markerPosition && !editingLandId && <Marker position={markerPosition} />}
       </MapContainer>
+
+      {!isPremium && (
+        <div className="absolute top-6 left-6 z-[1000] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border border-zinc-200 dark:border-zinc-800 p-4 rounded-2xl shadow-xl flex flex-col gap-2 pointer-events-auto w-48">
+          <div className="flex justify-between items-center">
+            <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500 flex items-center gap-1"><Layers size={12}/> Arazi</span>
+            <span className="text-xs font-black text-primary">{lands.length} / 3</span>
+          </div>
+          <div className="w-full h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+            <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${Math.min((lands.length / 3) * 100, 100)}%` }} />
+          </div>
+          
+          {(() => {
+            const totalDecare = lands.reduce((sum, l) => sum + (l.size_decare || 0), 0);
+            return (
+              <>
+                <div className="flex justify-between items-center mt-1">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500 flex items-center gap-1"><Activity size={12}/> Alan</span>
+                  <span className="text-[10px] font-bold text-zinc-700 dark:text-zinc-300">{Math.round(totalDecare)} / 100 Dn</span>
+                </div>
+                <div className="w-full h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                  <div className={`h-full rounded-full transition-all ${totalDecare >= 100 ? 'bg-red-500' : 'bg-amber-500'}`} style={{ width: `${Math.min((totalDecare / 100) * 100, 100)}%` }} />
+                </div>
+              </>
+            );
+          })()}
+        </div>
+      )}
 
       {isNDVIActive && (
         <div className="absolute bottom-6 right-6 z-[1000] bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-white/20 dark:border-zinc-800 p-4 rounded-2xl shadow-2xl max-w-[220px] pointer-events-none select-none">

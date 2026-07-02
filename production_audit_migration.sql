@@ -232,3 +232,38 @@ DROP POLICY IF EXISTS "Admins see all profiles" ON public.profiles;
 -- VERIFICATION
 -- ============================================================
 SELECT 'Orjut 360° Production Audit Migration Complete ✅' AS status;
+
+-- =========================================================================
+-- TEMEL DATABASE INDEXLERI (TASK 4)
+-- =========================================================================
+
+-- Transactions: en sık org_id + tarih filtresi
+CREATE INDEX IF NOT EXISTS idx_transactions_org_date 
+  ON public.transactions(org_id, date DESC);
+CREATE INDEX IF NOT EXISTS idx_transactions_land_id 
+  ON public.transactions(land_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_season_id 
+  ON public.transactions(season_id);
+
+-- Lands: org_id ve konum bazlı sorgular
+CREATE INDEX IF NOT EXISTS idx_lands_org_id 
+  ON public.lands(org_id);
+CREATE INDEX IF NOT EXISTS idx_lands_location 
+  ON public.lands(lat, lng);
+
+-- Field operations
+CREATE INDEX IF NOT EXISTS idx_field_ops_org_land 
+  ON public.field_operations(org_id, land_id);
+
+-- Scouting logs
+CREATE INDEX IF NOT EXISTS idx_scouting_org_land 
+  ON public.scouting_logs(org_id, land_id);
+CREATE INDEX IF NOT EXISTS idx_scouting_prescription 
+  ON public.scouting_logs(org_id, is_prescription_applied);
+
+-- Engineer clients
+CREATE INDEX IF NOT EXISTS idx_eng_clients_engineer 
+  ON public.engineer_clients(engineer_id, status);
+CREATE INDEX IF NOT EXISTS idx_eng_clients_farmer 
+  ON public.engineer_clients(farmer_id, status);
+

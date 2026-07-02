@@ -2,13 +2,22 @@ import type { LucideIcon } from 'lucide-react';
 
 // ─── Domain Models ────────────────────────────────────────────────────────────
 
+export type PaymentStatus =
+  | 'free'
+  | 'pending_approval'
+  | 'approved'
+  | 'expired'
+  | 'cancelled'
+  | 'suspended'
+  | 'refunded';
+
 export interface Profile {
   id:             string;
   phone:          string;
   first_name:     string;
   last_name:      string;
   is_premium:     boolean;
-  payment_status?: 'free' | 'pending_approval' | 'approved';
+  payment_status?: PaymentStatus;
   avatar_url?:    string;
   role?:          'farmer' | 'engineer' | 'admin';
   created_at?:    string;
@@ -35,12 +44,13 @@ export interface Land {
   soil_type?:                string;
   lat:                       number;
   lng:                       number;
-  boundaries?:               GeoJSON.Geometry;
+  boundaries?:               GeoJSON.GeoJsonObject;
   planting_date?:            string;
   expected_yield?:           number;
   expected_price?:           number;
   expected_yield_per_decare?:number;
   expected_sell_price_unit?: number;
+  agromonitoring_polygon_id?: string;
   created_at?:               string;
   updated_at?:               string;
 }

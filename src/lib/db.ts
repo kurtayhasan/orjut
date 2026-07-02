@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { Land, Transaction, Season, InventoryItem, ScoutingLog, Profile } from '@/types';
+import type { Land, Transaction, Season, InventoryItem, ScoutingLog, Profile, PaymentStatus } from '@/types';
 
 // ─────────────────────────────────────────────
 // Generic query helper — eliminates boilerplate
@@ -10,6 +10,21 @@ type Table = 'profiles' | 'lands' | 'transactions' | 'seasons' | 'irrigation_log
 
 function from(table: Table) {
   return supabase.from(table);
+}
+
+export function isPremiumActive(status?: PaymentStatus | null): boolean {
+  return status === 'approved';
+}
+
+export function getPremiumBlockReason(status?: PaymentStatus | null): string | null {
+  if (!status) return null;
+  const reasons: Partial<Record<PaymentStatus, string>> = {
+    expired: 'Aboneliğiniz süresi dolmuş. Yenilemek için Ayarlar > Abonelik sayfasını ziyaret edin.',
+    cancelled: 'Aboneliğiniz iptal edilmiş.',
+    suspended: 'Ödeme başarısız. Lütfen ödeme bilgilerinizi güncelleyin.',
+    refunded: 'Aboneliğiniz iade edilmiş.',
+  };
+  return reasons[status] ?? null;
 }
 
 // ─────────────────────────────────────────────
@@ -55,14 +70,28 @@ export const db = {
   getLands: (userId: string) =>
     from('lands').select('*').eq('org_id', userId),
 
-  insertLand: (land: Omit<Land, 'id'>) =>
-    from('lands').insert([land]).select().single(),
+  insertLand: async (land: Omit<Land, 'id'>) => {
+    // Premium kontrolü (API seviyesi)
+    const { data: profile } = await from('profiles').select('is_premium, payment_status').eq('id', land.org_id).single();
+    const isPremiumUser = profile?.is_premium || isPremiumActive(profile?.payment_status as PaymentStatus);
+    
+    if (!isPremiumUser) {
+      const { count } = await from('lands').select('*', { count: 'exact', head: true }).eq('org_id', land.org_id);
+      if (count !== null && count >= 3) {
+        throw new Error("Ücretsiz sürümde en fazla 3 arazi ekleyebilirsiniz. Lütfen Hasat Pro'ya yükseltin.");
+      }
+      if (land.size_decare && land.size_decare > 100) {
+        throw new Error("Ücretsiz sürümde maksimum 100 dekar arazi ekleyebilirsiniz.");
+      }
+    }
+    return from('lands').insert([land]).select().single();
+  },
 
   updateLand: (id: string, updates: Partial<Land>) =>
     from('lands').update(updates).eq('id', id),
 
   deleteLand: (id: string) =>
-    from('lands').delete().eq('id', id),
+    from('lands').update({ deleted_at: new Date().toISOString() }).eq('id', id),
 
   /* ── Transactions ─────────────────────── */
   getTransactions: (userId: string, limit?: number) => {
@@ -177,6 +206,24 @@ export const db = {
       .select('*, engineer:profiles!engineer_id(*)')
       .eq('farmer_id', farmerId)
       .eq('status', 'pending'),
+
+  terminateClientRequest: (requestId: string) =>
+    from('engineer_clients').update({ status: 'terminated' }).eq('id', requestId),
+
+  switchEngineer: async (farmerId: string, newEngineerId: string) => {
+    // 1. Terminate all active approved connections
+    await from('engineer_clients')
+      .update({ status: 'terminated' })
+      .eq('farmer_id', farmerId)
+      .eq('status', 'approved');
+      
+    // 2. Insert new pending request
+    return from('engineer_clients').insert([{
+      engineer_id: newEngineerId,
+      farmer_id: farmerId,
+      status: 'pending'
+    }]);
+  },
 
   /* ── AI Insights History ──────────────── */
   getAiInsightsHistory: (landId: string) =>

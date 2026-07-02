@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { buildMinifiedRAGContext } from '@/lib/ragEngine';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { z } from 'zod';
+import { checkRateLimit } from '@/lib/rateLimit';
 
 const AnalyzeSchema = z.object({
   landId: z.string().uuid("Geçersiz arazi kimliği (UUID)."),
@@ -24,6 +25,13 @@ export async function POST(req: Request) {
     // Verify auth session
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    if (!checkRateLimit(session.user.id, 10, 60_000)) {
+      return NextResponse.json(
+        { error: 'Çok fazla istek. Lütfen 1 dakika bekleyin.' },
+        { status: 429 }
+      );
+    }
 
     let body;
     try {
@@ -70,11 +78,7 @@ export async function POST(req: Request) {
     }
 
     // 3. Call Gemini AI with forced JSON mode
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash", // Using 1.5 flash for reliable JSON mode
-      generationConfig: { responseMimeType: "application/json" }
-    });
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
     const prompt = `Sen kıdemli bir ziraat mühendisisin. Bu ultra-sıkıştırılmış (minified) veriyi analiz et:
     LAND: {C:Ürün, S:Alan, E:A(Açık)/S(Sera)}
@@ -96,8 +100,12 @@ export async function POST(req: Request) {
 
     let analysis;
     try {
-      const result = await model.generateContent(prompt);
-      const responseText = result.response.text();
+      const response = await ai.models.generateContent({
+        model: 'gemini-1.5-flash',
+        contents: prompt,
+        config: { responseMimeType: 'application/json' }
+      });
+      const responseText = response.text ?? '';
       analysis = JSON.parse(responseText || '{}');
     } catch (geminiError) {
       console.error('GEMINI_FATAL:', geminiError);

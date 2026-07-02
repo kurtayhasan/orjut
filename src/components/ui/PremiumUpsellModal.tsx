@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Crown, Satellite, Bot, Sparkles, Zap } from 'lucide-react';
-import Link from 'next/link';
 import { useAppContext } from '@/context/AppContext';
 import { createPortal } from 'react-dom';
+import { getPremiumBlockReason } from '@/lib/db';
+import Link from 'next/link';
 
 interface PremiumUpsellModalProps {
   isOpen: boolean;
@@ -12,7 +13,7 @@ interface PremiumUpsellModalProps {
 }
 
 export default function PremiumUpsellModal({ isOpen, onClose }: PremiumUpsellModalProps) {
-  const { isPremium } = useAppContext();
+  const { isPremium, userProfile } = useAppContext();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
   const [mounted, setMounted] = useState(false);
 
@@ -72,9 +73,15 @@ export default function PremiumUpsellModal({ isOpen, onClose }: PremiumUpsellMod
             <h2 className="text-2xl font-black text-center text-white tracking-tight mb-2">
               Bu Özellik Hasat Pro Paketine Dâhildir
             </h2>
-            <p className="text-sm text-zinc-400 text-center font-medium mb-8 leading-relaxed">
+            <p className="text-sm text-zinc-400 text-center font-medium mb-4 leading-relaxed">
               Ayda sadece birkaç litre mazot parasına sınırsız uydu röntgeni, yapay zeka danışmanı ve mühendis desteği alın. <span className="text-emerald-400 font-bold">(Pro Hasat paketi 5.000 dekar ile sınırlıdır)</span>
             </p>
+
+            {getPremiumBlockReason(userProfile?.payment_status) && (
+              <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 rounded-xl text-sm mb-6 text-center font-medium">
+                {getPremiumBlockReason(userProfile?.payment_status)}
+              </div>
+            )}
 
             {/* Features */}
             <div className="space-y-3 mb-8">
