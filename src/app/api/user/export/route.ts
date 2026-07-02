@@ -4,7 +4,13 @@ import { cookies } from 'next/headers';
 import { checkRateLimit } from '@/lib/rateLimit';
 
 export async function GET(req: Request) {
-  const supabase = createRouteHandlerClient({ cookies });
+  let cookieStore;
+  try {
+    cookieStore = await cookies();
+  } catch {
+    cookieStore = cookies();
+  }
+  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
   
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) {
@@ -13,20 +19,20 @@ export async function GET(req: Request) {
 
   const userId = session.user.id;
 
-  if (!checkRateLimit(userId, 5, 3600_000)) {
+  if (!(await checkRateLimit(userId, 5, 3600_000))) {
     return NextResponse.json({ error: 'Too many export requests. Try again later.' }, { status: 429 });
   }
 
   try {
     const [profile, lands, transactions, seasons, fieldOps, scouting, irrigation, inventory] = await Promise.all([
       supabase.from('profiles').select('*').eq('id', userId).single(),
-      supabase.from('lands').select('*').eq('org_id', userId),
-      supabase.from('transactions').select('*').eq('org_id', userId),
-      supabase.from('seasons').select('*').eq('org_id', userId),
-      supabase.from('field_operations').select('*').eq('org_id', userId),
-      supabase.from('scouting_logs').select('*').eq('org_id', userId),
-      supabase.from('irrigation_logs').select('*').eq('org_id', userId),
-      supabase.from('inventory').select('*').eq('org_id', userId),
+      supabase.from('lands').select('*').eq('org_id', userId).limit(1000),
+      supabase.from('transactions').select('*').eq('org_id', userId).limit(5000),
+      supabase.from('seasons').select('*').eq('org_id', userId).limit(1000),
+      supabase.from('field_operations').select('*').eq('org_id', userId).limit(5000),
+      supabase.from('scouting_logs').select('*').eq('org_id', userId).limit(5000),
+      supabase.from('irrigation_logs').select('*').eq('org_id', userId).limit(5000),
+      supabase.from('inventory').select('*').eq('org_id', userId).limit(1000),
     ]);
 
     const exportData = {

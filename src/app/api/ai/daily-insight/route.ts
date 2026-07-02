@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    if (!checkRateLimit(session.user.id, 10, 60_000)) {
+    if (!(await checkRateLimit(session.user.id, 10, 60_000))) {
       return NextResponse.json(
         { error: 'Çok fazla istek. Lütfen 1 dakika bekleyin.' },
         { status: 429 }

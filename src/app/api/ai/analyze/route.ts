@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    if (!checkRateLimit(session.user.id, 10, 60_000)) {
+    if (!(await checkRateLimit(session.user.id, 10, 60_000))) {
       return NextResponse.json(
         { error: 'Çok fazla istek. Lütfen 1 dakika bekleyin.' },
         { status: 429 }
@@ -46,13 +46,16 @@ export async function POST(req: Request) {
         error: parseResult.error.issues[0]?.message || "Geçersiz parametreler." 
       }, { status: 200 });
     }
-    const { landId, userId } = parseResult.data;
+    const { landId } = parseResult.data;
+    
+    // FIX IDOR: Always use the authenticated user's ID
+    const authUserId = session.user.id;
 
     // 1. Verify Premium Status
     const { data: profile } = await supabase
       .from('profiles')
       .select('is_premium')
-      .eq('id', userId)
+      .eq('id', authUserId)
       .single();
 
     if (!profile?.is_premium) {

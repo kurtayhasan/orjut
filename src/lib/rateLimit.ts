@@ -1,14 +1,22 @@
-// Basit in-memory rate limiter (Tek instance icin gecerli - Vercel Edge'de ideal degildir ama dev/test icin yeterli)
-const requestCounts = new Map<string, { count: number; resetAt: number }>();
+import { supabase } from './supabase';
 
-export function checkRateLimit(userId: string, limit = 10, windowMs = 60_000): boolean {
-  const now = Date.now();
-  const entry = requestCounts.get(userId);
-  if (!entry || now > entry.resetAt) {
-    requestCounts.set(userId, { count: 1, resetAt: now + windowMs });
+export async function checkRateLimit(userId: string, limit = 10, windowMs = 60_000): Promise<boolean> {
+  try {
+    const { data, error } = await supabase.rpc('increment_rate_limit', {
+      p_user_id: userId,
+      p_limit_val: limit,
+      p_window_val: windowMs
+    });
+    
+    if (error) {
+      console.error("Rate limit check error:", error);
+      // Fallback to true if database fails so we don't break the app, but log it
+      return true;
+    }
+    
+    return data === true;
+  } catch (err) {
+    console.error("Unexpected rate limit error:", err);
     return true;
   }
-  if (entry.count >= limit) return false;
-  entry.count++;
-  return true;
 }

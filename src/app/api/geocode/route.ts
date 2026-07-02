@@ -1,6 +1,29 @@
 import { NextResponse } from 'next/server';
-
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
+import { checkRateLimit } from '@/lib/rateLimit';
 export async function GET(req: Request) {
+  let cookieStore;
+  try {
+    cookieStore = await cookies();
+  } catch {
+    cookieStore = cookies();
+  }
+  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // Rate Limit: Geocode max 5 requests per minute
+  if (!(await checkRateLimit(session.user.id, 5, 60_000))) {
+    return NextResponse.json(
+      { error: 'Çok fazla istek. Lütfen biraz bekleyin.' },
+      { status: 429 }
+    );
+  }
+
   const { searchParams } = new URL(req.url);
   const type = searchParams.get('type') || 'search';
   const q = searchParams.get('q');

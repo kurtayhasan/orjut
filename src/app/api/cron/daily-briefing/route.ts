@@ -6,16 +6,18 @@ import { createClient } from '@supabase/supabase-js';
 import { getSupabaseServer } from '@/lib/supabaseServer';
 
 export async function GET(req: NextRequest) {
-  // Verify the request is from Vercel Cron (optional security) or has an active session
+  // 1. Verify Vercel Cron Authentication
   const authHeader = req.headers.get('authorization');
-  const isCronTokenValid = !!(authHeader && authHeader === `Bearer ${process.env.CRON_SECRET}` && process.env.CRON_SECRET);
+  
+  if (!process.env.CRON_SECRET) {
+    console.error('CRON_SECRET is missing in environment variables');
+    return NextResponse.json({ error: 'Cron is not properly configured' }, { status: 500 });
+  }
+
+  const isCronTokenValid = authHeader === `Bearer ${process.env.CRON_SECRET}`;
 
   if (!isCronTokenValid) {
-    const supabaseRoute = getSupabaseServer();
-    const { data: { session } } = await supabaseRoute.auth.getSession();
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    return NextResponse.json({ error: 'Unauthorized: Invalid CRON secret' }, { status: 401 });
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
@@ -23,10 +25,15 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'GEMINI_API_KEY is not set' }, { status: 500 });
   }
 
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('SUPABASE_SERVICE_ROLE_KEY is missing');
+    return NextResponse.json({ error: 'Service role key is missing' }, { status: 500 });
+  }
+
   const ai = new GoogleGenAI({ apiKey });
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+    process.env.SUPABASE_SERVICE_ROLE_KEY
   );
 
   try {
