@@ -11,6 +11,7 @@ import {
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 export default function LandingPage() {
   const router = useRouter();
@@ -174,9 +175,12 @@ export default function LandingPage() {
           {/* DASHBOARD MOCKUP - Real Generated UI Screenshot */}
           <div className="mt-20 hidden md:block w-full max-w-5xl mx-auto rounded-3xl border-8 border-white/10 shadow-2xl overflow-hidden relative group">
              <div className="absolute -inset-1 bg-gradient-to-r from-primary to-emerald-500 rounded-3xl blur opacity-20 group-hover:opacity-30 transition duration-1000" />
-             <img 
+             <Image 
                src="/orjut_dashboard_mockup.png" 
                alt="Orjut ZiraiAsistan Dashboard Mockup" 
+               width={1000}
+               height={600}
+               priority
                className="relative w-full h-auto rounded-2xl object-cover" 
              />
           </div>

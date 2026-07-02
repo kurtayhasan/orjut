@@ -10,7 +10,6 @@ const nextConfig = {
     serverComponentsExternalPackages: ['@google/genai'],
   },
   images: {
-    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
