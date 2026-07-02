@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { buildMinifiedRAGContext } from '@/lib/ragEngine';
 import { GoogleGenAI } from '@google/genai';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { getSupabaseServer } from '@/lib/supabaseServer';
 import { z } from 'zod';
 import { checkRateLimit } from '@/lib/rateLimit';
 
@@ -15,13 +14,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
-    let cookieStore;
-    try {
-      cookieStore = await cookies();
-    } catch {
-      cookieStore = cookies();
-    }
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+    const supabase = getSupabaseServer();
     // Verify auth session
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
