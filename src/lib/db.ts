@@ -55,7 +55,7 @@ export const db = {
 
   /* ── Profiles ─────────────────────────── */
   getProfile: (userId: string) =>
-    from('profiles').select('*').eq('id', userId).single(),
+    from('profiles').select('*').eq('id', userId).maybeSingle(),
 
   getAllProfiles: () =>
     from('profiles').select('*').order('created_at', { ascending: false }),

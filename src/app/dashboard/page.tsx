@@ -99,7 +99,7 @@ export default function DashboardPage() {
     return { lastOp, lastSc };
   };
 
-  if (isLoadingProfile || !userProfile) {
+  if (isLoadingProfile) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />

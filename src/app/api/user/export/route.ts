@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
   try {
-    const supabase = getSupabaseServer();
+    const supabase = await getSupabaseServer();
     
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {

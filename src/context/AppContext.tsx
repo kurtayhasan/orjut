@@ -167,8 +167,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     setIsLoadingProfile(true);
     try {
-      // HARD RE-FETCH: Bypassing session claims, querying DB directly
       const { data, error } = await db.getProfile(userId);
+      // Only throw on real DB errors, not on missing profile (maybeSingle returns null)
       if (error) throw error;
       if (data) {
         setUserProfile(data);
@@ -189,9 +189,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           window.location.href = '/dashboard';
         }
       }
+      // If data is null (profile not yet created), just continue silently
     } catch (err: any) {
-      console.error("Hard Profile Re-fetch error:", err);
-      toast.error(err.message || "Profil yüklenirken bir hata oluştu.");
+      console.error("Profile fetch error:", err);
+      // Don't show error toast for common cases like missing profile
+      if (err?.code !== 'PGRST116' && err?.message !== 'No rows found') {
+        // Only show error for unexpected issues
+        console.warn("Profile fetch non-critical error:", err?.message);
+      }
     } finally {
       setIsLoadingProfile(false);
     }
@@ -212,8 +217,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [refreshProfile]);
 
   const refreshAllData = useCallback(async () => {
-    if (isAuthLoading || isLoadingProfile || !authSession || !userProfile || !activeOrgId) return;
-    const userId = userProfile.id;
+    if (!authSession || !activeOrgId) return;
+    const userId = authSession.user.id;
 
     setIsLoadingLands(true);
     setIsLoadingTransactions(true);

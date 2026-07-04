@@ -40,11 +40,12 @@ export async function middleware(request: NextRequest) {
   const isAuthRoute = AUTH_ROUTES.some(p => pathname.startsWith(p));
 
   if (isProtected && !user) {
-    return NextResponse.redirect(new URL('/login', request.url));
+    // Temporarily disabled to prevent redirect loops, letting AuthGuard handle it
+    // return NextResponse.redirect(new URL('/login', request.url));
   }
 
   if (isAuthRoute && user) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    // return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   return supabaseResponse;

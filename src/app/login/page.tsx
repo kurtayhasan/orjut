@@ -79,8 +79,7 @@ export default function LoginPage() {
       
       toast.success("Giriş başarılı! Yönlendiriliyorsunuz...");
       if (typeof window !== 'undefined') {
-        router.refresh();
-        router.push('/dashboard');
+        window.location.href = '/dashboard';
       }
     } catch (err: any) {
       console.error("Auth Error:", err);

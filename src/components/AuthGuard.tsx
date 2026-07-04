@@ -23,38 +23,43 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Check if a valid Supabase auth session exists first (when online)
         if (navigator.onLine) {
-          const { data: { session } } = await supabase.auth.getSession();
+          // 1. Get Supabase session (source of truth)
+          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+          if (sessionError) {
+            console.error('Session error:', sessionError);
+          }
+
           if (!session) {
+            // No session — clear stale cache and redirect
             clearAuthCache();
             router.push('/login');
             return;
           }
-        }
 
-        const userId = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
-
-        if (!userId) {
-          router.push('/login');
-          return;
-        }
-
-        // Online: verify user still exists in DB
-        if (navigator.onLine) {
-          const { data, error } = await db.getProfile(userId);
-          if (error || !data) {
-            // Invalid user_id — clear and redirect
-            clearAuthCache();
-            router.push('/login');
-            return;
+          // 2. Session is valid — sync user_id to localStorage
+          const userId = session.user.id;
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('user_id', userId);
           }
-          // Sync role from DB to localStorage for freshness
-          if (data.role) {
-            localStorage.setItem('user_role', data.role);
+
+          // 3. Try to fetch profile for role sync (best-effort, not blocking)
+          let cachedRole = localStorage.getItem('user_role') || 'farmer';
+          try {
+            const { data: profileData, error: profileErr } = await db.getProfile(userId);
+            if (!profileErr && profileData) {
+              if (profileData.role) {
+                localStorage.setItem('user_role', profileData.role);
+                cachedRole = profileData.role;
+              }
+            }
+          } catch (profileFetchErr) {
+            // Profile fetch failed (RLS, network, etc.) — still allow authenticated user through
+            console.warn('Profile fetch failed in AuthGuard, using cached role:', profileFetchErr);
           }
-          
-          // Auto-bind pending engineer invite if present
+
+          // 4. Auto-bind pending engineer invite if present
           const pendingInvite = localStorage.getItem('pending_invite_engineer_id');
           if (pendingInvite) {
             try {
@@ -74,61 +79,75 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
                 });
               }
             } catch (err) {
-              console.error("Auto bind failed:", err);
+              console.error('Auto bind failed:', err);
             } finally {
               localStorage.removeItem('pending_invite_engineer_id');
             }
           }
-          const actualRole = data.role || 'farmer';
+
+          // 5. Role-based access control
           const overrideRole = localStorage.getItem('user_role_override');
-          let baseRole = actualRole;
+          let baseRole = cachedRole;
           if (overrideRole) {
-            if (actualRole === 'admin') {
+            if (cachedRole === 'admin') {
               baseRole = overrideRole;
-            } else if (actualRole === 'engineer' && overrideRole !== 'admin') {
+            } else if (cachedRole === 'engineer' && overrideRole !== 'admin') {
               baseRole = overrideRole;
             }
           }
-          if (baseRole === 'admin' || baseRole === 'engineer') {
-            setIsAuthenticated(true);
-          } else {
-            if (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/engineer')) {
+
+          if (baseRole === 'farmer') {
+            if (
+              window.location.pathname.startsWith('/admin') ||
+              window.location.pathname.startsWith('/engineer')
+            ) {
               router.push('/dashboard');
               return;
             }
-            setIsAuthenticated(true);
           }
+
+          setIsAuthenticated(true);
+
         } else {
-          // Offline: trust cached user_id and roles
-          const actualRole = localStorage.getItem('user_role') || 'farmer';
+          // OFFLINE: Trust cached user_id and role
+          const userId = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
+          if (!userId) {
+            router.push('/login');
+            return;
+          }
+
+          const cachedRole = localStorage.getItem('user_role') || 'farmer';
           const overrideRole = localStorage.getItem('user_role_override');
-          let baseRole = actualRole;
+          let baseRole = cachedRole;
           if (overrideRole) {
-            if (actualRole === 'admin') {
+            if (cachedRole === 'admin') {
               baseRole = overrideRole;
-            } else if (actualRole === 'engineer' && overrideRole !== 'admin') {
+            } else if (cachedRole === 'engineer' && overrideRole !== 'admin') {
               baseRole = overrideRole;
             }
           }
-          if (baseRole === 'admin' || baseRole === 'engineer') {
-            setIsAuthenticated(true);
-          } else {
-            if (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/engineer')) {
+
+          if (baseRole === 'farmer') {
+            if (
+              window.location.pathname.startsWith('/admin') ||
+              window.location.pathname.startsWith('/engineer')
+            ) {
               router.push('/dashboard');
               return;
             }
-            setIsAuthenticated(true);
           }
-          
+
+          setIsAuthenticated(true);
+
           import('sonner').then(({ toast }) => {
-            toast.info("Çevrimiçi Değilsiniz", {
-              description: "Verileriniz bağlantı gelince eşitlenecektir.",
+            toast.info('Çevrimiçi Değilsiniz', {
+              description: 'Verileriniz bağlantı gelince eşitlenecektir.',
               duration: 5000,
             });
           });
         }
       } catch (error) {
-        console.error("Auth check failed:", error);
+        console.error('Auth check failed:', error);
         if (navigator.onLine) {
           router.push('/login');
         } else {
@@ -143,12 +162,11 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
     checkAuth();
 
-    // Listen for online/offline events
     const handleOnline = () => {
-      import('sonner').then(({ toast }) => toast.success("Tekrar Çevrimiçisiniz!"));
+      import('sonner').then(({ toast }) => toast.success('Tekrar Çevrimiçisiniz!'));
     };
     const handleOffline = () => {
-      import('sonner').then(({ toast }) => toast.info("Bağlantı Kesildi - Çevrimdışı Mod"));
+      import('sonner').then(({ toast }) => toast.info('Bağlantı Kesildi - Çevrimdışı Mod'));
     };
 
     window.addEventListener('online', handleOnline);
@@ -163,7 +181,12 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   if (loading) {
     return (
       <div className="h-screen w-screen flex items-center justify-center bg-[#050505]">
-        <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest animate-pulse">
+            Oturum Doğrulanıyor...
+          </p>
+        </div>
       </div>
     );
   }
