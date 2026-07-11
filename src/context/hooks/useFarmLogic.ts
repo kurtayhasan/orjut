@@ -4,6 +4,12 @@ import { db } from '@/lib/db';
 import { fetchWeather, WeatherData } from '@/lib/weatherService';
 import { buildAIPrompt, LandContext } from '@/lib/aiActionEngine';
 import { Land, Season, IrrigationLog, FieldOperation, ScoutingLog, InventoryItem, Profile } from '@/types';
+import {
+  enqueue,
+  newClientId,
+  isLikelyOfflineError,
+  type PendingType,
+} from '@/lib/offlineQueue';
 
 export function useFarmLogic(
   activeOrgId: string | null, 
@@ -76,22 +82,75 @@ export function useFarmLogic(
     };
   }, [lands, activeOrgId, userProfile]);
 
+  /** Enqueue create + optimistic row when offline / network failure. */
+  const saveOfflineCreate = useCallback(
+    (
+      type: PendingType,
+      payload: Record<string, unknown>,
+      applyOptimistic: (clientId: string) => void
+    ): boolean => {
+      if (!activeOrgId) return false;
+      const clientId = newClientId();
+      const enq = enqueue({
+        clientId,
+        orgId: activeOrgId,
+        type,
+        payload: { ...payload, org_id: activeOrgId },
+      });
+      if (!enq.ok) {
+        toast.error(enq.reason);
+        return false;
+      }
+      applyOptimistic(clientId);
+      toast.success('Çevrimdışı kaydedildi. Bağlantı gelince senkronize edilecek.');
+      return true;
+    },
+    [activeOrgId]
+  );
+
   const addLand = useCallback(async (land: any) => {
     if (!activeOrgId) return;
-    try {
-      const { data, error } = await db.insertLand({ ...land, org_id: activeOrgId });
+    // Avoid queueing multi-MB polygons offline
+    const { geometry, boundaries, ...landSlim } = land || {};
+    const payload = { ...landSlim, org_id: activeOrgId };
+
+    const tryOnline = async () => {
+      const full = { ...land, org_id: activeOrgId };
+      const { data, error } = await db.insertLand(full);
       if (error) throw error;
       if (data) {
         setLands(prev => [...prev, data]);
-        setTotalArea(prev => prev + Number(land.size_decare));
-        toast.success("Arazi başarıyla kaydedildi");
+        setTotalArea(prev => prev + Number(land.size_decare || 0));
+        toast.success('Arazi başarıyla kaydedildi');
       }
+    };
+
+    try {
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        throw new Error('Failed to fetch');
+      }
+      await tryOnline();
     } catch (err: any) {
-      toast.error("Hata: " + err.message);
+      if (!isLikelyOfflineError(err)) {
+        toast.error(err?.message ? `Arazi kaydedilemedi: ${err.message}` : 'Arazi kaydedilemedi.');
+        return;
+      }
+      // Offline: store slim payload (no geometry/boundaries) to respect storage limits
+      saveOfflineCreate('insert_land', payload, (clientId) => {
+        setLands(prev => [
+          ...prev,
+          { ...payload, id: clientId, isPending: true } as Land,
+        ]);
+        setTotalArea(prev => prev + Number(land.size_decare || 0));
+      });
     }
-  }, [activeOrgId]);
+  }, [activeOrgId, saveOfflineCreate]);
 
   const updateLand = useCallback(async (land: any) => {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      toast.error('Arazi güncelleme çevrimdışı desteklenmiyor. Bağlantı gelince tekrar deneyin.');
+      return;
+    }
     const { id, ...updateData } = land;
     try {
       const { error } = await db.updateLand(id, updateData);
@@ -99,11 +158,21 @@ export function useFarmLogic(
       setLands(prev => prev.map(l => l.id === id ? { ...l, ...updateData } : l));
       toast.success("Arazi güncellendi");
     } catch (err: any) {
-      toast.error("Güncelleme başarısız oldu. Lütfen internet bağlantınızı kontrol edip tekrar deneyiniz.");
+      if (isLikelyOfflineError(err)) {
+        toast.error('Arazi güncelleme çevrimdışı desteklenmiyor. Bağlantı gelince tekrar deneyin.');
+        return;
+      }
+      toast.error(err?.message
+        ? `Güncelleme başarısız: ${err.message}`
+        : 'Güncelleme başarısız oldu. Lütfen internet bağlantınızı kontrol edip tekrar deneyiniz.');
     }
   }, []);
 
   const deleteLand = useCallback(async (id: string) => {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      toast.error('Arazi silme çevrimdışı desteklenmiyor. Bağlantı gelince tekrar deneyin.');
+      return;
+    }
     try {
       const land = lands.find(l => l.id === id);
       if (!land) return;
@@ -127,65 +196,135 @@ export function useFarmLogic(
       
       toast.success("Arazi ve bağlı tüm veriler silindi");
     } catch (err: any) {
-      toast.error("Silme işlemi gerçekleştirilemedi. Lütfen daha sonra tekrar deneyiniz.");
+      if (isLikelyOfflineError(err)) {
+        toast.error('Arazi silme çevrimdışı desteklenmiyor. Bağlantı gelince tekrar deneyin.');
+        return;
+      }
+      toast.error(err?.message
+        ? `Silme başarısız: ${err.message}`
+        : 'Silme işlemi gerçekleştirilemedi. Lütfen daha sonra tekrar deneyiniz.');
     }
   }, [lands]);
 
   const addFieldOperation = useCallback(async (op: any) => {
     if (!activeOrgId) return;
-    try {
-      const { data, error } = await db.insertFieldOperation({ ...op, org_id: activeOrgId });
+    const payload = { ...op, org_id: activeOrgId };
+
+    const tryOnline = async () => {
+      const { data, error } = await db.insertFieldOperation(payload);
       if (error) throw error;
       if (data) {
         setFieldOperations(prev => [data, ...prev]);
         if (op.inventory_id) {
           const item = inventory.find(i => i.id === op.inventory_id);
-          if (item) updateInventoryItem(item.id, { quantity: Math.max(0, item.quantity - op.amount) });
+          if (item) {
+            await updateInventoryItem(item.id, {
+              quantity: Math.max(0, item.quantity - op.amount),
+            });
+          }
         }
-        toast.success("İşlem kaydedildi");
+        toast.success('İşlem kaydedildi');
       }
-    } catch (err) {
-      toast.error("Tarla işlemi kaydedilemedi. Lütfen bilgileri kontrol edip tekrar deneyiniz.");
+    };
+
+    try {
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        throw new Error('Failed to fetch');
+      }
+      await tryOnline();
+    } catch (err: any) {
+      if (!isLikelyOfflineError(err)) {
+        toast.error(
+          err?.message
+            ? `Tarla işlemi kaydedilemedi: ${err.message}`
+            : 'Tarla işlemi kaydedilemedi. Lütfen bilgileri kontrol edip tekrar deneyiniz.'
+        );
+        return;
+      }
+      // Offline: no inventory deduction (avoid double-deduct on flush)
+      saveOfflineCreate('insert_field_operation', payload, (clientId) => {
+        setFieldOperations(prev => [
+          { ...payload, id: clientId, isPending: true } as FieldOperation,
+          ...prev,
+        ]);
+      });
+      if (op.inventory_id) {
+        toast.info('Stok düşümü online senkron sonrası uygulanır.');
+      }
     }
-  }, [activeOrgId, inventory, updateInventoryItem]);
+  }, [activeOrgId, inventory, updateInventoryItem, saveOfflineCreate]);
 
   const deleteFieldOperation = useCallback(async (id: string) => {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      toast.error('Tarla işlemi silme çevrimdışı desteklenmiyor. Bağlantı gelince tekrar deneyin.');
+      return;
+    }
     try {
       const { error } = await db.deleteFieldOperation(id);
       if (error) throw error;
       setFieldOperations(prev => prev.filter(o => o.id !== id));
       toast.success("Silindi");
-    } catch (err) {
-      toast.error("Tarla işlemi silinemedi. Lütfen tekrar deneyiniz.");
+    } catch (err: any) {
+      if (isLikelyOfflineError(err)) {
+        toast.error('Tarla işlemi silme çevrimdışı desteklenmiyor. Bağlantı gelince tekrar deneyin.');
+        return;
+      }
+      toast.error(err?.message || 'Tarla işlemi silinemedi. Lütfen tekrar deneyiniz.');
     }
   }, []);
 
   const addScoutingLog = useCallback(async (log: any) => {
     if (!activeOrgId) return;
+    const payload = { ...log, org_id: activeOrgId };
+
     try {
-      const { data, error } = await db.insertScoutingLog({ ...log, org_id: activeOrgId });
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        throw new Error('Failed to fetch');
+      }
+      const { data, error } = await db.insertScoutingLog(payload);
       if (error) throw error;
       if (data) {
         setScoutingLogs(prev => [data, ...prev]);
-        toast.success("Gözlem eklendi");
+        toast.success('Gözlem eklendi');
       }
-    } catch (err) {
-      toast.error("Gözlem kaydı eklenemedi.");
+    } catch (err: any) {
+      if (!isLikelyOfflineError(err)) {
+        toast.error(err?.message || 'Gözlem kaydı eklenemedi.');
+        return;
+      }
+      saveOfflineCreate('insert_scouting', payload, (clientId) => {
+        setScoutingLogs(prev => [
+          { ...payload, id: clientId, isPending: true } as ScoutingLog,
+          ...prev,
+        ]);
+      });
     }
-  }, [activeOrgId]);
+  }, [activeOrgId, saveOfflineCreate]);
 
   const updateScoutingLog = useCallback(async (id: string, updates: Partial<ScoutingLog>) => {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      toast.error('Gözlem güncelleme çevrimdışı desteklenmiyor. Bağlantı gelince tekrar deneyin.');
+      return;
+    }
     try {
       const { error } = await db.updateScoutingLog(id, updates);
       if (error) throw error;
       setScoutingLogs(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l));
       toast.success("Gözlem güncellendi");
-    } catch (err) {
-      toast.error("Güncellenemedi.");
+    } catch (err: any) {
+      if (isLikelyOfflineError(err)) {
+        toast.error('Gözlem güncelleme çevrimdışı desteklenmiyor. Bağlantı gelince tekrar deneyin.');
+        return;
+      }
+      toast.error(err?.message || 'Gözlem güncellenemedi.');
     }
   }, []);
 
   const updateScoutingPrescription = useCallback(async (id: string, isApplied: boolean, text?: string) => {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      toast.error('Reçete güncelleme çevrimdışı desteklenmiyor. Bağlantı gelince tekrar deneyin.');
+      return;
+    }
     try {
       const updates: any = { prescription_applied: isApplied };
       if (text !== undefined) updates.prescription = text;
@@ -193,44 +332,80 @@ export function useFarmLogic(
       if (error) throw error;
       setScoutingLogs(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l));
       toast.success("Reçete durumu güncellendi");
-    } catch (err) {
-      toast.error("Güncellenemedi.");
+    } catch (err: any) {
+      if (isLikelyOfflineError(err)) {
+        toast.error('Reçete güncelleme çevrimdışı desteklenmiyor. Bağlantı gelince tekrar deneyin.');
+        return;
+      }
+      toast.error(err?.message || 'Reçete güncellenemedi.');
     }
   }, []);
 
   const deleteScoutingLog = useCallback(async (id: string) => {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      toast.error('Gözlem silme çevrimdışı desteklenmiyor. Bağlantı gelince tekrar deneyin.');
+      return;
+    }
     try {
       const { error } = await db.deleteScoutingLog(id);
       if (error) throw error;
       setScoutingLogs(prev => prev.filter(s => s.id !== id));
       toast.success("Gözlem silindi");
-    } catch (err) {
-      toast.error("Silinemedi.");
+    } catch (err: any) {
+      if (isLikelyOfflineError(err)) {
+        toast.error('Gözlem silme çevrimdışı desteklenmiyor. Bağlantı gelince tekrar deneyin.');
+        return;
+      }
+      toast.error(err?.message || 'Gözlem silinemedi.');
     }
   }, []);
 
   const addIrrigationLog = useCallback(async (log: any) => {
     if (!activeOrgId) return;
+    const payload = { ...log, org_id: activeOrgId };
+
     try {
-      const { data, error } = await db.insertIrrigationLog({ ...log, org_id: activeOrgId });
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        throw new Error('Failed to fetch');
+      }
+      const { data, error } = await db.insertIrrigationLog(payload);
       if (error) throw error;
       if (data) {
         setIrrigationLogs(prev => [data, ...prev]);
-        toast.success("Sulama eklendi");
+        toast.success('Sulama eklendi');
       }
-    } catch (err) {
-      toast.error("Sulama kaydı eklenemedi. Lütfen tekrar deneyiniz.");
+    } catch (err: any) {
+      if (!isLikelyOfflineError(err)) {
+        toast.error(
+          err?.message || 'Sulama kaydı eklenemedi. Lütfen tekrar deneyiniz.'
+        );
+        return;
+      }
+      saveOfflineCreate('insert_irrigation', payload, (clientId) => {
+        setIrrigationLogs(prev => [
+          { ...payload, id: clientId, isPending: true } as IrrigationLog,
+          ...prev,
+        ]);
+      });
     }
-  }, [activeOrgId]);
+  }, [activeOrgId, saveOfflineCreate]);
 
   const deleteIrrigationLog = useCallback(async (id: string) => {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      toast.error('Sulama silme çevrimdışı desteklenmiyor. Bağlantı gelince tekrar deneyin.');
+      return;
+    }
     try {
       const { error } = await db.deleteIrrigationLog(id);
       if (error) throw error;
       setIrrigationLogs(prev => prev.filter(l => l.id !== id));
       toast.success("Silindi");
-    } catch (err) {
-      toast.error("Sulama kaydı silinemedi. Lütfen tekrar deneyiniz.");
+    } catch (err: any) {
+      if (isLikelyOfflineError(err)) {
+        toast.error('Sulama silme çevrimdışı desteklenmiyor. Bağlantı gelince tekrar deneyin.');
+        return;
+      }
+      toast.error(err?.message || 'Sulama kaydı silinemedi. Lütfen tekrar deneyiniz.');
     }
   }, []);
 

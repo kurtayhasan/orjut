@@ -1,6 +1,7 @@
 import { useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { db } from '@/lib/db';
+import { writeSyncCache, readSyncCache, formatCacheAge } from '@/lib/offlineCache';
 
 export function useAppSync(
   activeOrgId: string | null,
@@ -82,47 +83,58 @@ export function useAppSync(
         setDailySpent(allTx.filter((tx: any) => tx.date === todayStr && tx.type === 'expense').reduce((sum: number, tx: any) => sum + Number(tx.amount || 0), 0));
       }
 
-      const cacheKey = `orjut_sync_${activeOrgId}`;
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(cacheKey, JSON.stringify({
-          lands: l.data || [],
-          transactions: t.data || [],
-          seasons: s.data || [],
-          irrigationLogs: i.data || [],
-          fieldOperations: fo.data || [],
-          scoutingLogs: sl.data || [],
-          inventory: inv.data || []
-        }));
-      }
+      // Slim offline snapshot (no geometry/boundaries; capped logs; quota-safe)
+      writeSyncCache(activeOrgId, {
+        lands: l.data || [],
+        transactions: t.data || [],
+        seasons: s.data || [],
+        irrigationLogs: i.data || [],
+        fieldOperations: fo.data || [],
+        scoutingLogs: sl.data || [],
+        inventory: inv.data || [],
+      });
 
     } catch (e: any) {
       console.error("Critical Data Fetch Error:", e);
-      const cacheKey = `orjut_sync_${activeOrgId}`;
       let loadedFromCache = false;
-      if (typeof window !== 'undefined') {
-        const cachedStr = localStorage.getItem(cacheKey);
-        if (cachedStr) {
-          try {
-            const cached = JSON.parse(cachedStr);
-            setLands(cached.lands || []);
-            setTransactions(cached.transactions || []);
-            setSeasons(cached.seasons || []);
-            if (cached.seasons && cached.seasons.length > 0) setActiveSeason(cached.seasons.find((ss: any) => ss.is_active) || cached.seasons[0]);
-            setIrrigationLogs(cached.irrigationLogs || []);
-            setFieldOperations(cached.fieldOperations || []);
-            setScoutingLogs(cached.scoutingLogs || []);
-            setInventory(cached.inventory || []);
-            loadedFromCache = true;
-          } catch (err) {}
+      let cacheAgeLabel: string | null = null;
+
+      const cached = readSyncCache(activeOrgId);
+      if (cached) {
+        const lands = cached.lands || [];
+        setLands(lands);
+        setTotalArea(
+          lands.reduce(
+            (sum: number, land: any) => sum + Number(land?.size_decare || 0),
+            0
+          )
+        );
+        setTransactions(cached.transactions || []);
+        setSeasons(cached.seasons || []);
+        if (cached.seasons && cached.seasons.length > 0) {
+          setActiveSeason(
+            (cached.seasons as any[]).find((ss: any) => ss.is_active) ||
+              (cached.seasons as any[])[0]
+          );
         }
+        setIrrigationLogs(cached.irrigationLogs || []);
+        setFieldOperations(cached.fieldOperations || []);
+        setScoutingLogs(cached.scoutingLogs || []);
+        setInventory(cached.inventory || []);
+        loadedFromCache = true;
+        cacheAgeLabel = formatCacheAge(cached.cachedAt);
       }
-      
+
       if (loadedFromCache) {
-        toast.error("İnternet bağlantınız koptu. Çevrimdışı modda eski veriler gösteriliyor.");
+        toast.error(
+          cacheAgeLabel
+            ? `Bağlantı yok. Çevrimdışı veriler gösteriliyor (son senkron: ${cacheAgeLabel}).`
+            : 'Bağlantı yok. Çevrimdışı modda eski veriler gösteriliyor.'
+        );
       } else {
-        const errorMessage = e.message?.includes('FetchError') || e.message?.includes('Failed to fetch') 
-          ? "Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol edin." 
-          : e.message || "Veriler yüklenirken bir hata oluştu.";
+        const errorMessage = e.message?.includes('FetchError') || e.message?.includes('Failed to fetch')
+          ? 'Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol edin.'
+          : e.message || 'Veriler yüklenirken bir hata oluştu.';
         toast.error(errorMessage);
       }
     } finally {
@@ -136,6 +148,24 @@ export function useAppSync(
     if (activeOrgId) {
       refreshAllData();
     }
+  }, [activeOrgId, refreshAllData]);
+
+  // After offline queue flush, re-hydrate from Supabase (replace temp_* rows)
+  useEffect(() => {
+    const onFlushed = (ev: Event) => {
+      const detail = (ev as CustomEvent)?.detail as
+        | { success?: number }
+        | undefined;
+      if (!activeOrgId) return;
+      if (detail && typeof detail.success === 'number' && detail.success === 0) {
+        return;
+      }
+      void refreshAllData();
+    };
+    window.addEventListener('orjut:offline-queue-flushed', onFlushed);
+    return () => {
+      window.removeEventListener('orjut:offline-queue-flushed', onFlushed);
+    };
   }, [activeOrgId, refreshAllData]);
 
   return { refreshAllData };

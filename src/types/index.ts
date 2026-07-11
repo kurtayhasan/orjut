@@ -53,6 +53,8 @@ export interface Land {
   agromonitoring_polygon_id?: string;
   created_at?:               string;
   updated_at?:               string;
+  /** Optimistic UI — offline queue, not sent to DB */
+  isPending?:                boolean;
 }
 
 export interface Transaction {
@@ -102,6 +104,8 @@ export interface ScoutingLog {
   prescription_notes?:  string;
   prescription_text?:   string;
   is_prescription_applied?: boolean;
+  /** Optimistic UI — offline queue, not sent to DB */
+  isPending?:       boolean;
 }
 
 export interface FieldOperation {
@@ -115,6 +119,8 @@ export interface FieldOperation {
   unit?:          string; // Added for UI compatibility
   notes?:         string; // Added for UI compatibility
   inventory_id?:  string;
+  /** Optimistic UI — offline queue, not sent to DB */
+  isPending?:     boolean;
 }
 
 export interface IrrigationLog {
@@ -128,6 +134,8 @@ export interface IrrigationLog {
   unit:             'lt' | 'm3' | 'saat' | 'mm'; // Strict union type for SaaS hardening
   method:           string; // New UI field
   notes?:           string; // New UI field
+  /** Optimistic UI — offline queue, not sent to DB */
+  isPending?:       boolean;
 }
 
 export interface Season {
