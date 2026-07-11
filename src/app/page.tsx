@@ -309,7 +309,7 @@ export default function LandingPage() {
                      💡 5000 Dönüm üzeri araziler için özel kurumsal fiyatlandırma uygulanmaktadır.
                   </div>
                 </div>
-                <Button fullWidth onClick={() => router.push('/login')}>Pro'ya Geç</Button>
+                <Button fullWidth onClick={() => router.push('/login')}>Pro&apos;ya Geç</Button>
              </Card>
           </div>
         </div>

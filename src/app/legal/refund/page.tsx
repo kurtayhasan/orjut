@@ -26,7 +26,7 @@ export default function RefundPage() {
             <p>
               Kurtay Bilişim, elektronik ortamda anında ifa edilen bir SaaS (Software as a Service) hizmetidir. 
               6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği uyarınca; 
-              <strong> "Elektronik ortamda anında ifa edilen hizmetler ve tüketiciye anında teslim edilen gayrimaddi mallar"</strong> cayma hakkı kapsamı dışındadır.
+              <strong> &quot;Elektronik ortamda anında ifa edilen hizmetler ve tüketiciye anında teslim edilen gayrimaddi mallar&quot;</strong> cayma hakkı kapsamı dışındadır.
             </p>
             <p>
               Hizmetin kullanımı, kullanıcı girişi yapıldığı ve dijital içeriklere (analizler, stok takibi, uydu verileri vb.) erişildiği andan itibaren başlamış kabul edilir.
@@ -36,7 +36,7 @@ export default function RefundPage() {
           <section>
             <h2 className="text-2xl font-black text-white mb-4">2. Abonelik İptali</h2>
             <p>
-              Kullanıcılar, yıllık veya aylık aboneliklerini istedikleri zaman "Hesap Ayarları" paneli üzerinden iptal edebilirler. 
+              Kullanıcılar, yıllık veya aylık aboneliklerini istedikleri zaman &quot;Hesap Ayarları&quot; paneli üzerinden iptal edebilirler. 
               İptal işlemi, o anki fatura döneminin sonuna kadar olan erişiminizi etkilemez.
             </p>
           </section>

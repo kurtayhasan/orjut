@@ -33,21 +33,21 @@ export default function DistanceSellingPage() {
           <section>
             <h2 className="text-2xl font-black text-white mb-4">2. KONU</h2>
             <p>
-              İşbu Sözleşme'nin konusu, ALICI'nın SATICI'ya ait internet sitesi üzerinden elektronik ortamda siparişini yaptığı aşağıda nitelikleri ve satış ücreti belirtilen hizmetin satışı ve teslimi ile ilgili olarak 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği hükümleri gereğince tarafların hak ve yükümlülüklerinin saptanmasıdır.
+              İşbu Sözleşme&apos;nin konusu, ALICI&apos;nın SATICI&apos;ya ait internet sitesi üzerinden elektronik ortamda siparişini yaptığı aşağıda nitelikleri ve satış ücreti belirtilen hizmetin satışı ve teslimi ile ilgili olarak 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği hükümleri gereğince tarafların hak ve yükümlülüklerinin saptanmasıdır.
             </p>
           </section>
 
           <section>
             <h2 className="text-2xl font-black text-white mb-4">3. HİZMETİN TESLİMİ</h2>
             <p>
-              Sözleşme konusu hizmet, ALICI'nın ödeme işlemini başarıyla tamamlamasının ardından anında ALICI'nın kullanımına açılır. Hizmetin teslimi dijital ortamda gerçekleştiği için fiziksel bir kargo teslimatı söz konusu değildir.
+              Sözleşme konusu hizmet, ALICI&apos;nın ödeme işlemini başarıyla tamamlamasının ardından anında ALICI&apos;nın kullanımına açılır. Hizmetin teslimi dijital ortamda gerçekleştiği için fiziksel bir kargo teslimatı söz konusu değildir.
             </p>
           </section>
 
           <section>
             <h2 className="text-2xl font-black text-white mb-4">4. CAYMA HAKKI</h2>
             <p>
-              Mesafeli Sözleşmeler Yönetmeliği'nin 15. maddesinin (ğ) bendi uyarınca; <strong>"Elektronik ortamda anında ifa edilen hizmetler veya tüketiciye anında teslim edilen gayrimaddi mallara ilişkin sözleşmeler"</strong> kapsamında cayma hakkı kullanılamaz. 
+              Mesafeli Sözleşmeler Yönetmeliği&apos;nin 15. maddesinin (ğ) bendi uyarınca; <strong>&quot;Elektronik ortamda anında ifa edilen hizmetler veya tüketiciye anında teslim edilen gayrimaddi mallara ilişkin sözleşmeler&quot;</strong> kapsamında cayma hakkı kullanılamaz. 
               ALICI, hizmetin satın alınmasıyla birlikte bu koşulu kabul etmiş sayılır.
             </p>
           </section>
@@ -56,14 +56,14 @@ export default function DistanceSellingPage() {
             <h2 className="text-2xl font-black text-white mb-4">5. GENEL HÜKÜMLER</h2>
             <ul className="list-disc pl-6 space-y-2">
               <li>ALICI, internet sitesinde sözleşme konusu hizmetin temel nitelikleri, satış fiyatı ve ödeme şekli ile teslimata ilişkin ön bilgileri okuyup bilgi sahibi olduğunu ve elektronik ortamda gerekli teyidi verdiğini beyan eder.</li>
-              <li>Sözleşme konusu hizmetin ifası için işbu Sözleşme'nin elektronik ortamda teyit edilmesi ve satış bedelinin ALICI'nın tercih ettiği ödeme şekli ile ödenmiş olması şarttır.</li>
+              <li>Sözleşme konusu hizmetin ifası için işbu Sözleşme&apos;nin elektronik ortamda teyit edilmesi ve satış bedelinin ALICI&apos;nın tercih ettiği ödeme şekli ile ödenmiş olması şarttır.</li>
             </ul>
           </section>
 
           <section>
             <h2 className="text-2xl font-black text-white mb-4">6. YETKİLİ MAHKEME</h2>
             <p>
-              İşbu sözleşmenin uygulanmasında, Gümrük ve Ticaret Bakanlığınca ilan edilen değere kadar Tüketici Hakem Heyetleri ile SATICI'nın yerleşim yerindeki Tüketici Mahkemeleri yetkilidir.
+              İşbu sözleşmenin uygulanmasında, Gümrük ve Ticaret Bakanlığınca ilan edilen değere kadar Tüketici Hakem Heyetleri ile SATICI&apos;nın yerleşim yerindeki Tüketici Mahkemeleri yetkilidir.
             </p>
           </section>
         </div>

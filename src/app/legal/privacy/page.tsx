@@ -24,7 +24,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-2xl font-black text-white mb-4">1. Veri Toplama ve Kullanımı</h2>
             <p>
-              Kurtay Bilişim ("Hizmet"), çiftçilik operasyonlarınızı optimize etmek amacıyla arazileriniz, finansal işlemleriniz ve envanter verilerinizi toplar. 
+              Kurtay Bilişim (&quot;Hizmet&quot;), çiftçilik operasyonlarınızı optimize etmek amacıyla arazileriniz, finansal işlemleriniz ve envanter verilerinizi toplar. 
               Bu veriler, Supabase altyapısı üzerinde güvenli bir şekilde saklanır ve yalnızca size hizmet sunmak, analizler (NDVI, AI Danışmanlık) üretmek için kullanılır.
             </p>
           </section>

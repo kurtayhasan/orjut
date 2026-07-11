@@ -262,7 +262,7 @@ export default function FinancePage() {
                         🌱
                      </div>
                      <span className="font-black text-text-primary text-lg leading-tight uppercase">Gübreleme</span>
-                     <span className="text-xs font-bold text-text-muted mt-1">Giderlerin %42'sini oluşturuyor</span>
+                     <span className="text-xs font-bold text-text-muted mt-1">Giderlerin %42&apos;sini oluşturuyor</span>
                   </div>
                </div>
             </Card>

@@ -32,7 +32,7 @@ export default function EnglishTermsPage() {
           <section>
             <h2 className="text-2xl font-black text-white mb-4">2. Subscription and Payments</h2>
             <p>
-              "KOBI Pro" and "Business" packages operate on an annual subscription model. 
+              &quot;KOBI Pro&quot; and &quot;Business&quot; packages operate on an annual subscription model. 
               Payments are securely processed via Sanal POS. In case of cancellation, no refunds are provided for the remaining period, but access remains until the end of the term.
             </p>
           </section>

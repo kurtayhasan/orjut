@@ -24,7 +24,7 @@ export default function EnglishPrivacyPage() {
           <section>
             <h2 className="text-2xl font-black text-white mb-4">1. Data Collection and Usage</h2>
             <p>
-              Orjut AgTech OS ("the Service") collects data regarding your lands, financial transactions, and inventory to optimize your farming operations. 
+              Orjut AgTech OS (&quot;the Service&quot;) collects data regarding your lands, financial transactions, and inventory to optimize your farming operations.
               This data is securely stored on Supabase infrastructure and is used solely to provide services and generate analysis (NDVI, AI Consulting) for you.
             </p>
           </section>

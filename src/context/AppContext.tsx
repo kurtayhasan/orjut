@@ -137,7 +137,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setUserProfile(null);
   }, []);
 
-  const t = (key: keyof typeof translations['en']) => translations[lang][key] || key;
+  const t = useCallback((key: keyof typeof translations['en']) => translations[lang][key] || key, [lang]);
 
   const activeOrgId = useMemo(() => {
     if (isAuthLoading || isLoadingProfile || !userProfile) return null;
@@ -291,7 +291,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setIsLoadingTransactions(false);
       setIsLoadingInventory(false);
     }
-  }, [activeOrgId]);
+  }, [activeOrgId, authSession]);
 
   useEffect(() => {
     // Check initial session
@@ -439,7 +439,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return () => {
       active = false;
     };
-  }, [lands, activeOrgId]);
+  }, [lands, activeOrgId, isLoadingProfile, userProfile]);
 
   useEffect(() => {
     if (isDarkMode) {

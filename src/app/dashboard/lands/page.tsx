@@ -136,7 +136,7 @@ export default function LandsPage() {
     return () => {
       active = false;
     };
-  }, [selectedLand]);
+  }, [selectedLand, fetchWeatherForLocation]);
 
   const handleSaveMetrics = () => {
     if (!selectedLand) return;

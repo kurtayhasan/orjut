@@ -194,7 +194,7 @@ export default function OperationsPage() {
                             {op.amount} <span className="text-sm font-bold text-text-muted">{op.unit}</span>
                          </div>
                          {op.notes && (
-                           <p className="text-[10px] font-bold text-text-muted italic truncate max-w-[150px]">"{op.notes}"</p>
+                           <p className="text-[10px] font-bold text-text-muted italic truncate max-w-[150px]">&quot;{op.notes}&quot;</p>
                          )}
                       </div>
                       <div className="flex items-center gap-2">

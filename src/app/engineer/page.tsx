@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useAppContext } from '@/context/AppContext';
 import { useRouter } from 'next/navigation';
 import { db } from '@/lib/db';
-import { 
-  Users, ArrowLeft, Search, Plus, MapPin, 
-  Sprout, Coins, ClipboardCheck, Activity, 
-  CheckCircle2, Info, Loader2 
+import {
+  Users, ArrowLeft, Search, Plus, MapPin,
+  Sprout, Coins, ClipboardCheck, Activity,
+  CheckCircle2, Info, Loader2
 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -23,7 +23,7 @@ export default function EngineerDashboard() {
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   // Invitation Modal State
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
@@ -36,7 +36,7 @@ export default function EngineerDashboard() {
   const [prescriptionText, setPrescriptionText] = useState('');
   const [isSubmittingLog, setIsSubmittingLog] = useState(false);
 
-  const fetchClients = async () => {
+  const fetchClients = useCallback(async () => {
     if (!userProfile?.id) return;
     try {
       const { data, error } = await db.getClients(userProfile.id);
@@ -48,7 +48,7 @@ export default function EngineerDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userProfile?.id]);
 
   useEffect(() => {
     if (isLoadingProfile) return;
@@ -59,7 +59,7 @@ export default function EngineerDashboard() {
     }
 
     fetchClients();
-  }, [userRole, isLoadingProfile, router, userProfile?.id]);
+  }, [userRole, isLoadingProfile, router, userProfile?.id, fetchClients]);
 
   if (isLoadingProfile) {
     return (
@@ -125,7 +125,7 @@ export default function EngineerDashboard() {
     const c = link.farmer;
     if (!c) return false;
     return (
-      c.first_name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      c.first_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.last_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.phone?.includes(searchQuery)
     );
@@ -135,12 +135,12 @@ export default function EngineerDashboard() {
     <div className="p-8 max-w-5xl mx-auto space-y-8 min-h-screen bg-zinc-50 dark:bg-black">
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             onClick={() => {
               localStorage.setItem('user_role_override', 'farmer');
               window.location.href = '/dashboard';
-            }} 
+            }}
             leftIcon={<ArrowLeft size={18} />}
           >
             Kendi Panelime Dön
@@ -149,7 +149,7 @@ export default function EngineerDashboard() {
             <Users className="text-indigo-500" /> Danışan Çiftçilerim
           </h1>
         </div>
-        <Button 
+        <Button
           leftIcon={<Plus size={18} />}
           onClick={() => setIsInviteModalOpen(true)}
         >
@@ -159,8 +159,8 @@ export default function EngineerDashboard() {
 
       <Card className="p-6 border-none shadow-xl">
         <div className="mb-6">
-          <Input 
-            placeholder="İsim veya telefon numarası ile çiftçi ara..." 
+          <Input
+            placeholder="İsim veya telefon numarası ile çiftçi ara..."
             leftIcon={<Search size={18} />}
             value={searchQuery}
             onChange={(e: any) => setSearchQuery(e.target.value)}
@@ -173,11 +173,11 @@ export default function EngineerDashboard() {
           </div>
         ) : filteredClients.length === 0 ? (
           <div className="py-12">
-            <EmptyState 
-              title={searchQuery ? "Sonuç Bulunamadı" : "Henüz Danışan Çiftçiniz Bulunmuyor"} 
-              description={searchQuery 
-                ? "Arama kriterlerinizi değiştirin." 
-                : "Sisteme henüz atanmış bir çiftçiniz bulunmuyor. Yeni çiftçi davet etmek için yukarıdaki butonu kullanabilirsiniz."} 
+            <EmptyState
+              title={searchQuery ? "Sonuç Bulunamadı" : "Henüz Danışan Çiftçiniz Bulunmuyor"}
+              description={searchQuery
+                ? "Arama kriterlerinizi değiştirin."
+                : "Sisteme henüz atanmış bir çiftçiniz bulunmuyor. Yeni çiftçi davet etmek için yukarıdaki butonu kullanabilirsiniz."}
               emoji={searchQuery ? "🔍" : "👨‍🌾"}
             />
           </div>
@@ -186,7 +186,7 @@ export default function EngineerDashboard() {
             {filteredClients.map(link => {
               const client = link.farmer;
               if (!client) return null;
-              
+
               // Hydrated statistics
               const farmerLands = client.lands || [];
               const farmerTransactions = client.transactions || [];
@@ -195,8 +195,8 @@ export default function EngineerDashboard() {
                 .reduce((sum: number, tx: any) => sum + Number(tx.amount || 0), 0);
 
               return (
-                <div 
-                  key={client.id} 
+                <div
+                  key={client.id}
                   className="p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-indigo-500/50 hover:shadow-lg transition-all cursor-pointer flex flex-col gap-5 group"
                   onClick={() => handleSelectClient(client.id, `${client.first_name} ${client.last_name}`)}
                 >
@@ -248,8 +248,8 @@ export default function EngineerDashboard() {
                             .reduce((sum: number, tx: any) => sum + Number(tx.amount || 0), 0);
 
                           return (
-                            <div 
-                              key={land.id} 
+                            <div
+                              key={land.id}
                               className="p-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 hover:border-indigo-500/30 rounded-xl flex items-center justify-between gap-4 transition-all"
                               onClick={(e) => {
                                 e.stopPropagation(); // Avoid triggering client panel navigation
@@ -268,8 +268,8 @@ export default function EngineerDashboard() {
                                 </p>
                               </div>
 
-                              <Button 
-                                size="sm" 
+                              <Button
+                                size="sm"
                                 variant="outline"
                                 className="min-h-[32px] px-2.5 text-[10px] font-black uppercase tracking-wider text-indigo-600 hover:text-white hover:bg-indigo-600"
                                 onClick={(e) => handleOpenPrescriptionModal(land, e)}
@@ -292,17 +292,17 @@ export default function EngineerDashboard() {
       {/* ──────────────────────────────────────────────────────────── */}
       {/* 1. INVITATION LINK MODAL */}
       {/* ──────────────────────────────────────────────────────────── */}
-      <BaseModal 
-        isOpen={isInviteModalOpen} 
+      <BaseModal
+        isOpen={isInviteModalOpen}
         onClose={() => setIsInviteModalOpen(false)}
         title="Çiftçi Davet Arayüzü"
       >
         <div className="py-4 space-y-4">
           <InviteCollaborator engineerId={userProfile?.id || ''} />
-          <Button 
-            fullWidth 
-            variant="ghost" 
-            className="min-h-[48px]" 
+          <Button
+            fullWidth
+            variant="ghost"
+            className="min-h-[48px]"
             onClick={() => setIsInviteModalOpen(false)}
           >
             Kapat
@@ -328,9 +328,9 @@ export default function EngineerDashboard() {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Input 
-              as="select" 
-              label="Bitki Sağlık Durumu" 
+            <Input
+              as="select"
+              label="Bitki Sağlık Durumu"
               value={healthStatus}
               onChange={(e: any) => setHealthStatus(e.target.value)}
               required
@@ -340,9 +340,9 @@ export default function EngineerDashboard() {
               <option value="zararli">🔴 Zararlı / Hasarlı</option>
             </Input>
 
-            <Input 
-              as="select" 
-              label="Gelişim Evresi" 
+            <Input
+              as="select"
+              label="Gelişim Evresi"
               value={growthStage}
               onChange={(e: any) => setGrowthStage(e.target.value)}
               required
@@ -354,7 +354,7 @@ export default function EngineerDashboard() {
             </Input>
           </div>
 
-          <Input 
+          <Input
             as="textarea"
             label="Gözlem Notları"
             placeholder="Bitki sağlığı, toprak durumu ve arazi genel gözlemlerinizi buraya yazın..."
@@ -364,7 +364,7 @@ export default function EngineerDashboard() {
             rows={3}
           />
 
-          <Input 
+          <Input
             as="textarea"
             label="Zirai Reçete & Öneri (Opsiyonel)"
             placeholder="Çiftçinin uygulayacağı gübreleme, ilaçlama veya sulama reçetesini buraya yazın..."
@@ -379,9 +379,9 @@ export default function EngineerDashboard() {
           </div>
 
           <div className="flex gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
-            <Button 
-              variant="ghost" 
-              fullWidth 
+            <Button
+              variant="ghost"
+              fullWidth
               onClick={() => setActivePrescriptionLandId(null)}
               type="button"
               disabled={isSubmittingLog}
@@ -389,10 +389,10 @@ export default function EngineerDashboard() {
             >
               Vazgeç
             </Button>
-            <Button 
-              fullWidth 
-              type="submit" 
-              isLoading={isSubmittingLog} 
+            <Button
+              fullWidth
+              type="submit"
+              isLoading={isSubmittingLog}
               disabled={isSubmittingLog}
               className="min-h-[48px]"
             >

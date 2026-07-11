@@ -32,7 +32,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-black text-white mb-4">2. Abonelik ve Ödemeler</h2>
             <p>
-              Platformdaki "KOBİ Pro" ve "Kurumsal" paketler yıllık abonelik modeliyle çalışır. 
+              Platformdaki &quot;KOBİ Pro&quot; ve &quot;Kurumsal&quot; paketler yıllık abonelik modeliyle çalışır. 
               Ödemeler Sanal POS üzerinden güvenli bir şekilde alınır. Abonelik iptali durumunda, kalan süre için ücret iadesi yapılmaz ancak dönem sonuna kadar hizmete erişim devam eder.
             </p>
           </section>
@@ -56,7 +56,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-black text-white mb-4">5. Fikri Mülkiyet</h2>
             <p>
-              Yazılımın tüm hakları Kurtay Bilişim'e aittir. Yazılımın kopyalanması, tersine mühendislik yapılması veya izinsiz dağıtılması yasal işleme tabidir.
+              Yazılımın tüm hakları Kurtay Bilişim&apos;e aittir. Yazılımın kopyalanması, tersine mühendislik yapılması veya izinsiz dağıtılması yasal işleme tabidir.
             </p>
           </section>
         </div>

@@ -108,13 +108,10 @@ function LandWeatherPopup({ land }: { land: Partial<Land> }) {
 export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partial<Land>, editLand?: Partial<Land> }) {
   const { addLand, updateLand, lands, userProfile, isDarkMode, triggerUpsell, isPremium } = useAppContext();
   
-  if (typeof window === 'undefined') {
-    return (
-      <div className="flex h-full w-full items-center justify-center bg-surface-2 animate-skeleton-pulse animate-pulse">
-        <span className="text-sm text-text-muted font-bold">Harita Yükleniyor...</span>
-      </div>
-    );
-  }
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const [isNDVIActive, setIsNDVIActive] = useState(false);
   const [activeLayer, setActiveLayer] = useState<'normal' | 'ndvi' | 'moisture'>('normal');
@@ -498,6 +495,14 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
     }
     setIsNDVIActive(!isNDVIActive);
   };
+
+  if (!isMounted || typeof window === 'undefined') {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-surface-2 animate-skeleton-pulse animate-pulse">
+        <span className="text-sm text-text-muted font-bold">Harita Yükleniyor...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full h-full group">
