@@ -82,9 +82,49 @@ export function useAppSync(
         setDailySpent(allTx.filter((tx: any) => tx.date === todayStr && tx.type === 'expense').reduce((sum: number, tx: any) => sum + Number(tx.amount || 0), 0));
       }
 
+      const cacheKey = `orjut_sync_${activeOrgId}`;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(cacheKey, JSON.stringify({
+          lands: l.data || [],
+          transactions: t.data || [],
+          seasons: s.data || [],
+          irrigationLogs: i.data || [],
+          fieldOperations: fo.data || [],
+          scoutingLogs: sl.data || [],
+          inventory: inv.data || []
+        }));
+      }
+
     } catch (e: any) {
       console.error("Critical Data Fetch Error:", e);
-      toast.error(e.message || "Veriler yüklenirken bir hata oluştu.");
+      const cacheKey = `orjut_sync_${activeOrgId}`;
+      let loadedFromCache = false;
+      if (typeof window !== 'undefined') {
+        const cachedStr = localStorage.getItem(cacheKey);
+        if (cachedStr) {
+          try {
+            const cached = JSON.parse(cachedStr);
+            setLands(cached.lands || []);
+            setTransactions(cached.transactions || []);
+            setSeasons(cached.seasons || []);
+            if (cached.seasons && cached.seasons.length > 0) setActiveSeason(cached.seasons.find((ss: any) => ss.is_active) || cached.seasons[0]);
+            setIrrigationLogs(cached.irrigationLogs || []);
+            setFieldOperations(cached.fieldOperations || []);
+            setScoutingLogs(cached.scoutingLogs || []);
+            setInventory(cached.inventory || []);
+            loadedFromCache = true;
+          } catch (err) {}
+        }
+      }
+      
+      if (loadedFromCache) {
+        toast.error("İnternet bağlantınız koptu. Çevrimdışı modda eski veriler gösteriliyor.");
+      } else {
+        const errorMessage = e.message?.includes('FetchError') || e.message?.includes('Failed to fetch') 
+          ? "Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol edin." 
+          : e.message || "Veriler yüklenirken bir hata oluştu.";
+        toast.error(errorMessage);
+      }
     } finally {
       setIsLoadingLands(false);
       setIsLoadingTransactions(false);

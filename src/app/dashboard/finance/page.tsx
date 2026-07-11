@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import Image from 'next/image';
 import { useAppContext } from '@/context/AppContext';
 import { 
   Wallet, TrendingUp, TrendingDown, Filter, 
@@ -277,11 +278,14 @@ export default function FinancePage() {
       >
         <div className="flex flex-col items-center py-4">
            {viewerImage && (
-             <img 
-               src={viewerImage} 
-               alt="Belge" 
-               className="max-w-full rounded-lg shadow-2xl border-4 border-white"
-             />
+             <div className="relative w-full max-w-md h-96">
+               <Image 
+                 src={viewerImage} 
+                 alt="Belge" 
+                 fill
+                 className="rounded-lg shadow-2xl border-4 border-white object-contain"
+               />
+             </div>
            )}
            <div className="mt-6 flex gap-4 w-full">
               <Button variant="neutral" fullWidth onClick={() => window.open(viewerImage!, '_blank')}>Yeni Sekmede Aç</Button>

@@ -15,6 +15,7 @@ export interface LandContext {
 
 export interface AIActionPrompt {
   weather: WeatherData;
+  soil?: { temperature: number; moisture: number } | null;
   lands: LandContext[];     // sadece aktif araziler
   inventoryStatus: string[]; // Kritik veya azalan stoklar
   date: string;             // bugünün tarihi
@@ -42,10 +43,11 @@ ${landsText}
 
 ${inventoryText}
 
-HAVA DURUMU:
-- Sıcaklık: ${data.weather.temperature}°C
+HAVA VE TOPRAK DURUMU:
+- Hava Sıcaklığı: ${data.weather.temperature}°C
 - Rüzgar Hızı: ${data.weather.windSpeed}km/h
-- Nem: ${data.weather.humidity}%
+- Hava Nemi: ${data.weather.humidity}%
+${data.soil ? `- Toprak Yüzey Sıcaklığı: ${data.soil.temperature}°C\n- Toprak Nemi: %${data.soil.moisture}` : '- Toprak verisi alınamadı.'}
 
 TALİMATLAR:
 1. PROAKTİF OL: Sadece durumu söyleme, ne yapılması gerektiğini söyle. Örn: "Rüzgar çok sert, ilaçlama yapmayın" veya "Hava aşırı sıcak, akşam mısırları sulayın".

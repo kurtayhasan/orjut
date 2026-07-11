@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { Camera, Upload, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
@@ -68,7 +69,7 @@ export default function ReceiptUpload({ onUploadSuccess }: ReceiptUploadProps) {
   if (preview) {
     return (
       <div className="relative w-full h-32 rounded-xl overflow-hidden border-2 border-zinc-200">
-        <img src={preview} alt="Receipt preview" className="w-full h-full object-cover" />
+        <Image src={preview} alt="Receipt preview" fill className="object-cover" />
         <button 
           onClick={() => { setPreview(null); onUploadSuccess(''); }}
           className="absolute top-2 right-2 p-1.5 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors"

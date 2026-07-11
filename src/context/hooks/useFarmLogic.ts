@@ -57,8 +57,8 @@ export function useFarmLogic(
       }
 
       if (lat === null || lon === null) {
-        lat = 37.7478;
-        lon = 27.3971;
+        lat = Number(process.env.NEXT_PUBLIC_DEFAULT_LAT || 37.7478);
+        lon = Number(process.env.NEXT_PUBLIC_DEFAULT_LON || 27.3971);
       }
 
       try {
@@ -266,18 +266,25 @@ export function useFarmLogic(
     if (isAnalyzing || !activeOrgId) return;
     setIsAnalyzing(true);
     let lat = 37.7478, lon = 27.3971;
-    if (lands.length > 0) {
+      if (lands.length > 0) {
       const parsedLat = parseFloat(String(lands[0]?.lat ?? ''));
       const parsedLng = parseFloat(String(lands[0]?.lng ?? ''));
       if (!isNaN(parsedLat) && !isNaN(parsedLng)) {
         lat = parsedLat;
         lon = parsedLng;
       }
+    } else {
+      lat = Number(process.env.NEXT_PUBLIC_DEFAULT_LAT || 37.7478);
+      lon = Number(process.env.NEXT_PUBLIC_DEFAULT_LON || 27.3971);
     }
     toast.loading("Analiz ediliyor...", { id: 'ai-loading' });
     
     try {
-      const weather = await fetchWeather(lat, lon);
+      const { fetchOpenMeteoSoilData } = await import('@/services/agroService');
+      const [weather, soil] = await Promise.all([
+        fetchWeather(lat, lon),
+        fetchOpenMeteoSoilData(lat, lon)
+      ]);
       setWeatherData(weather);
       const landContexts: LandContext[] = lands.map(land => ({
         id: land.id,
@@ -303,7 +310,8 @@ export function useFarmLogic(
         .map(i => `${i.item_name || 'Ürün'} (${i.quantity || 0} ${i.unit || ''} kaldı)`);
 
       const prompt = buildAIPrompt({ 
-        weather, 
+        weather,
+        soil,
         lands: landContexts, 
         inventoryStatus,
         date: new Date().toLocaleDateString('tr-TR'),
