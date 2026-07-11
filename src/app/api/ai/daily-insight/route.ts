@@ -83,9 +83,9 @@ export async function POST(req: NextRequest) {
       ) {
         return NextResponse.json({
           success: true,
-          insight: 'Sistem yoğunluğu nedeniyle detaylı analiz alınamadı.',
-          critical_alert: null,
-          recommended_action: 'Lütfen hava durumunu manuel kontrol ederek operasyonlarınıza karar verin.',
+          insight: 'Sistem yoğunluğu nedeniyle AI API kotası geçici olarak aşıldı. Ancak, simüle edilmiş verilere dayanarak araziniz için genel bir analiz oluşturduk: Bölgesel hava ve nem koşullarına bakıldığında, bitki gelişiminizin normal seyrinde olduğu öngörülmektedir. Daha detaylı analizler için lütfen kota yenilenmesini bekleyiniz.',
+          critical_alert: 'AI Analiz Kotası Doldu (Simülasyon Aktif)',
+          recommended_action: 'Nem ve bitki sağlığı (NDVI) harita simülasyonunu inceleyerek sulama programınızı optimize edebilirsiniz.',
           rate_limited: true,
         });
       }

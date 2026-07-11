@@ -91,7 +91,7 @@ export const db = {
     from('lands').update(updates).eq('id', id),
 
   deleteLand: (id: string) =>
-    from('lands').update({ deleted_at: new Date().toISOString() }).eq('id', id),
+    from('lands').delete().eq('id', id),
 
   /* ── Transactions ─────────────────────── */
   getTransactions: (userId: string, limit?: number) => {

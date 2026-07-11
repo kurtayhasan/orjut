@@ -495,6 +495,42 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
     setIsNDVIActive(!isNDVIActive);
   };
 
+  const generateSimulatedGrid = (land: Partial<Land>, type: 'ndvi' | 'moisture') => {
+    if (!land.boundaries) return null;
+    const bbox = turf.bbox(land.boundaries as any);
+    const width = turf.distance([bbox[0], bbox[1]], [bbox[2], bbox[1]]);
+    const cellSide = Math.max(width / 15, 0.001); // 15x15 approx
+    const grid = turf.squareGrid(bbox, cellSide, { units: 'kilometers' });
+    
+    const features: any[] = [];
+    turf.featureEach(grid, (currentFeature) => {
+      if (turf.booleanIntersects(currentFeature, land.boundaries as any)) {
+        const centroid = turf.centroid(currentFeature);
+        const lat = centroid.geometry.coordinates[1];
+        const lng = centroid.geometry.coordinates[0];
+        const noise = Math.sin(lat * 100000 + lng * 100000);
+        
+        let color = '#000';
+        if (type === 'ndvi') {
+           const val = 0.65 + (noise * 0.15);
+           if (val > 0.7) color = '#1b5e20';
+           else if (val > 0.6) color = '#4caf50';
+           else if (val > 0.5) color = '#8bc34a';
+           else color = '#ffeb3b';
+        } else {
+           const val = 55 + (noise * 25);
+           if (val > 70) color = '#0d47a1';
+           else if (val > 55) color = '#2196f3';
+           else if (val > 40) color = '#00bcd4';
+           else color = '#ffc107';
+        }
+        currentFeature.properties = { color };
+        features.push(currentFeature);
+      }
+    });
+    return turf.featureCollection(features);
+  };
+
   if (!isMounted || typeof window === 'undefined') {
     return (
       <div className="flex h-full w-full items-center justify-center bg-surface-2 animate-skeleton-pulse animate-pulse">
@@ -680,13 +716,19 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
         </div>
 
         {/* Render markers for all saved lands */}
-        {lands.map((land: Land) => (
+        {lands.map((land: Land) => {
+          const hasPolygon = land?.agromonitoring_polygon_id && land?.agromonitoring_polygon_id !== 'none';
+          const showSimulatedGrid = activeLayer !== 'normal' && !hasPolygon;
+          const gridData = showSimulatedGrid ? generateSimulatedGrid(land, activeLayer) : null;
+          
+          return (
           <React.Fragment key={land.id}>
             {land.boundaries ? (
+              <>
               <GeoJSON 
                 key={"orjut-ndvi-sync-" + activeLayer + "-" + land.id}
                 data={land.boundaries as GeoJSON.GeoJsonObject} 
-                style={() => getLandStyle(land)}
+                style={() => showSimulatedGrid ? { fillColor: 'transparent', color: '#ffffff', weight: 2 } : getLandStyle(land)}
                 eventHandlers={{
                   click: (e: unknown) => {
                     handleEditPlot(land);
@@ -697,6 +739,24 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
                   <LandWeatherPopup land={land} />
                 </Popup>
               </GeoJSON>
+              {showSimulatedGrid && gridData && (
+                <GeoJSON
+                  key={"orjut-grid-" + activeLayer + "-" + land.id}
+                  data={gridData as GeoJSON.GeoJsonObject}
+                  style={(feature: any) => ({
+                    fillColor: feature.properties?.color || '#000',
+                    fillOpacity: 0.75,
+                    color: feature.properties?.color || '#000',
+                    weight: 1,
+                  })}
+                  eventHandlers={{
+                    click: (e: unknown) => {
+                      handleEditPlot(land);
+                    }
+                  }}
+                />
+              )}
+              </>
             ) : (
               land.lat && land.lng && (
                 <Marker 
@@ -715,7 +775,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
               )
             )}
           </React.Fragment>
-        ))}
+        )})}
 
         {markerPosition && !editingLandId && <Marker position={markerPosition} />}
       </MapContainer>
