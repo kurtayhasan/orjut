@@ -18,7 +18,7 @@ import Input from '@/components/ui/Input';
 import BaseModal from '@/components/ui/BaseModal';
 import { formatCurrency, formatDateShort } from '@/lib/utils';
 import { cn } from '@/lib/utils';
-import EmptyState from '@/components/EmptyState';
+import EmptyState from '@/components/shared/EmptyState';
 
 export default function FinancePage() {
   const { transactions, lands, totalExpenses, deleteExpense, updateExpense, setIsExpenseModalOpen } = useAppContext();

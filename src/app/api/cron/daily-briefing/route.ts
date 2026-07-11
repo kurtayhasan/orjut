@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { createClient } from '@supabase/supabase-js';
-import { getSupabaseServer } from '@/lib/supabaseServer';
+import { getSupabaseServer } from '@/lib/supabase/server';
 
 export async function GET(req: NextRequest) {
   // 1. Verify Vercel Cron Authentication

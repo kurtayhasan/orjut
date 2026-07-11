@@ -1,4 +1,4 @@
-import { WeatherData } from './weatherService';
+import { WeatherData } from '@/lib/weatherService';
 
 export interface LandContext {
   id: string;

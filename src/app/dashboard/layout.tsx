@@ -5,10 +5,10 @@ import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import BottomBar from '@/components/BottomBar';
 import AuthGuard from '@/components/AuthGuard';
-import ExpenseModal from '@/components/ExpenseModal';
+import ExpenseModal from '@/components/forms/ExpenseForm';
 import { useAppContext } from '@/context/AppContext';
 import { cn } from '@/lib/utils';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { isExpenseModalOpen, setIsExpenseModalOpen } = useAppContext();

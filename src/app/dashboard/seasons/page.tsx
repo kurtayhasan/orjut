@@ -8,7 +8,7 @@ import {
   X, Save, Archive, History,
   ChevronRight, ArrowRight, Sparkles
 } from 'lucide-react';
-import EmptyState from '@/components/EmptyState';
+import EmptyState from '@/components/shared/EmptyState';
 
 import { generateSeasonPDF, generateSeasonExcel, shareViaWhatsApp } from '@/lib/reportGenerator';
 import { toast } from 'sonner';

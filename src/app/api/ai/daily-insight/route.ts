@@ -1,7 +1,7 @@
 // OFFICIAL: @google/genai SDK — gemini-2.0-flash model
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
-import { getSupabaseServer } from '@/lib/supabaseServer';
+import { getSupabaseServer } from '@/lib/supabase/server';
 import { z } from 'zod';
 import { checkRateLimit } from '@/lib/rateLimit';
 
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     const ai = new GoogleGenAI({ apiKey });
 
     // RAG Semantic Search Phase
-    const { queryRAGDocuments } = await import('@/lib/ragEngine');
+    const { queryRAGDocuments } = await import('@/lib/ai/ragEngine');
     const ragDocs = await queryRAGDocuments(prompt, 2);
     
     let enhancedPrompt = prompt;

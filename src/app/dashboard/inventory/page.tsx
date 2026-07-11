@@ -9,7 +9,7 @@ import {
   AlertTriangle, Grid, List, Warehouse,
   ShoppingBag, Droplet
 } from 'lucide-react';
-import EmptyState from '@/components/EmptyState';
+import EmptyState from '@/components/shared/EmptyState';
 import { toast } from 'sonner';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';

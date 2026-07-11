@@ -19,7 +19,7 @@ export default function Sidebar({ className }: { className?: string }) {
   const { isSidebarOpen, setIsSidebarOpen, userRole, isPremium, userProfile, clearAllData } = useAppContext();
 
   const handleLogout = async () => {
-    const { supabase } = await import('@/lib/supabase');
+    const { supabase } = await import('@/lib/supabase/client');
     await supabase.auth.signOut();
     localStorage.clear();
     clearAllData();

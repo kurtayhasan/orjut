@@ -12,7 +12,7 @@ import {
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import EmptyState from '@/components/EmptyState';
+import EmptyState from '@/components/shared/EmptyState';
 import BaseModal from '@/components/ui/BaseModal';
 import InviteCollaborator from '@/components/collaborators/InviteCollaborator';
 import { toast } from 'sonner';

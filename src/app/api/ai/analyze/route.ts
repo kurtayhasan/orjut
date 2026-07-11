@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { buildMinifiedRAGContext } from '@/lib/ragEngine';
+import { buildMinifiedRAGContext } from '@/lib/ai/ragEngine';
 import { GoogleGenAI } from '@google/genai';
-import { getSupabaseServer } from '@/lib/supabaseServer';
+import { getSupabaseServer } from '@/lib/supabase/server';
 import { z } from 'zod';
 import { checkRateLimit } from '@/lib/rateLimit';
 
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
     // RAG Semantic Search Phase
-    const { queryRAGDocuments } = await import('@/lib/ragEngine');
+    const { queryRAGDocuments } = await import('@/lib/ai/ragEngine');
     const cropName = context?.LAND?.C || 'Tarım';
     const ragQuery = `${cropName} ürünlerinde güncel hava durumuna göre hastalık riskleri`;
     const ragDocs = await queryRAGDocuments(ragQuery, 1);

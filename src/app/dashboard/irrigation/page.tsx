@@ -11,7 +11,7 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import BaseModal from '@/components/ui/BaseModal';
-import EmptyState from '@/components/EmptyState';
+import EmptyState from '@/components/shared/EmptyState';
 import { cn, formatDateShort } from '@/lib/utils';
 
 export default function IrrigationPage() {

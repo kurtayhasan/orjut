@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '@/context/AppContext';
-import ReceiptUpload from './receipts/ReceiptUpload';
+import ReceiptUpload from '@/components/receipts/ReceiptUpload';
 import BaseModal from '@/components/ui/BaseModal';
-import Button from './ui/Button';
-import Input from './ui/Input';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 import { ExpenseModalProps } from '@/types';
 import { cn } from '@/lib/utils';
 import { 

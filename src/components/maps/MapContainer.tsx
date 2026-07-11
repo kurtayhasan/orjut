@@ -13,11 +13,11 @@ import { Country, State, City, ICountry, IState, ICity } from 'country-state-cit
 import { EditControl } from 'react-leaflet-draw';
 import * as turf from '@turf/turf';
 import 'leaflet-draw/dist/leaflet.draw.css';
-import { landSchema } from '@/lib/schemas/land.schema';
+import { landSchema } from '@/lib/validators/schemas';
 import { useWeather } from '@/hooks/useWeather';
-import { useAgroMonitoring } from './map/hooks/useAgroMonitoring';
+import { useAgroMonitoring } from './hooks/useAgroMonitoring';
 import type { Land } from '@/types';
-import LandFormModal from './map/LandFormModal';
+import LandFormModal from '@/components/forms/LandForm';
 import { fetchGeocodingReverse, fetchGeocodingSearch } from '@/services/geocoding';
 
 // Fix Leaflet default icon issues in Next.js

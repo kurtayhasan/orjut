@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAppContext } from '@/context/AppContext';
 import EndOfDayModal from './EndOfDayModal';
 import { Bell, Menu, User, Settings, ArrowLeft } from 'lucide-react';
-import NetworkStatus from './NetworkStatus';
+import NetworkStatus from '@/components/shared/OfflineIndicator';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';

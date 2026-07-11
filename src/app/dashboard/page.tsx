@@ -19,7 +19,7 @@ import {
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { cn, formatCurrency, formatDateShort } from '@/lib/utils';
-import EmptyState from '@/components/EmptyState';
+import EmptyState from '@/components/shared/EmptyState';
 
 // Skeleton Component
 const ListSkeleton = ({ count = 3 }: { count?: number }) => (

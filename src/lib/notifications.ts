@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
 // ─── VAPID key decoder ────────────────────────────────────────────────────────

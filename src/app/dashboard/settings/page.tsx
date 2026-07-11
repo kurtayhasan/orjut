@@ -76,7 +76,7 @@ export default function SettingsPage() {
   };
 
   const handleLogout = async () => {
-    const { supabase } = await import('@/lib/supabase');
+    const { supabase } = await import('@/lib/supabase/client');
     await supabase.auth.signOut();
     localStorage.clear();
     toast.success("Başarıyla çıkış yapıldı.");

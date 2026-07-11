@@ -1,20 +1,15 @@
-import { GoogleGenAI } from '@google/genai';
+import { getGeminiClient, GEMINI_MODELS } from '@/lib/ai/gemini';
 
 export async function generateEmbedding(text: string): Promise<number[]> {
   try {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      throw new Error('GEMINI_API_KEY is not defined in environment variables.');
-    }
-
-    const ai = new GoogleGenAI({ apiKey });
+    const ai = getGeminiClient();
 
     // Ensure text is clean and within limits
     const cleanText = text.replace(/\n/g, ' ').trim();
 
     // Call the embedding model (text-embedding-004 is recommended for general text)
     const response = await ai.models.embedContent({
-      model: 'text-embedding-004',
+      model: GEMINI_MODELS.embedding,
       contents: cleanText,
     });
 

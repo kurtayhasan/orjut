@@ -1,6 +1,6 @@
-import { supabase } from './supabase';
-import { fetchWeather } from './weatherService';
-import { generateEmbedding } from './embeddings';
+import { supabase } from '@/lib/supabase/client';
+import { fetchWeather } from '@/lib/weatherService';
+import { generateEmbedding } from '@/lib/ai/embeddings';
 
 export async function buildLandContext(landId: string) {
   try {

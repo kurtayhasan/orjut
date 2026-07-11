@@ -1,7 +1,7 @@
 import { useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { db } from '@/lib/db';
-import { writeSyncCache, readSyncCache, formatCacheAge } from '@/lib/offlineCache';
+import { writeSyncCache, readSyncCache, formatCacheAge } from '@/lib/offline/offlineCache';
 
 export function useAppSync(
   activeOrgId: string | null,

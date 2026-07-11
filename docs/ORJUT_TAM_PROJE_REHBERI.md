@@ -10,73 +10,57 @@
 
 ## Proje Dosya Yapısı (Canonical senkron — Son Güncelleme: 2026-07-11)
 
-> Bu bölüm production cleanup sonrası gerçek ağaçla güncellendi.  
-> **Kaynak kod konumu:** Next.js App Router `src/` altındadır (görev metnindeki `app/` kökü hedefi henüz **uygulanmadı** — büyük route/import refactor onaysız yapılmadı).  
-> Her büyük PR sonrası `Get-ChildItem -Recurse` / `find` ile kontrol et.
+> Production cleanup + kanonik `src/lib` & `src/components` taşımaları sonrası.  
+> **URL rotaları değiştirilmedi** (`/dashboard/*` aynı) — route group rename ayrı PR.  
+> Her büyük PR sonrası dosya ağacını kontrol et.
 
 ```
 orjut/
-├── .env.example                 # Commit'lenebilir örnek env (secret yok)
-├── .env.local                   # Gizli (dokunma / commit etme)
-├── .eslintrc.json
-├── .gitignore
-├── .npmrc
-├── README.md                    # Next.js bootstrap README (korundu)
-├── package.json
-├── package-lock.json
-├── next.config.mjs
-├── next-env.d.ts
-├── postcss.config.mjs
-├── tailwind.config.ts
-├── tsconfig.json
-├── tsconfig.tsbuildinfo
-├── vercel.json
+├── .env.example
+├── .env.local                          # gizli — commit etme
+├── README.md
+├── package.json | next.config.mjs | tailwind.config.ts | tsconfig.json | vercel.json
 │
 ├── docs/
-│   ├── ORJUT_TAM_PROJE_REHBERI.md   # TEK proje rehberi
-│   └── archive/                     # Cleanup arşivi (çalışan kod değil)
-│       ├── deploy.txt
-│       ├── resize.ps1
-│       ├── scratch/                 # Eski doğrulama scriptleri
-│       ├── sql/                     # Kökte dağınık eski SQL yedekleri
-│       └── supabase_migrations/     # Eski tek-off SQL
+│   ├── ORJUT_TAM_PROJE_REHBERI.md      # TEK proje rehberi
+│   └── archive/                        # SQL yedek, scratch, deploy notları
 │
-├── public/                          # DOKUNULMADI
-│   ├── sw.js
-│   ├── icon-*.png / icon.svg
-│   ├── screenshots / mockup
-│   └── .well-known/assetlinks.json
-│
+├── public/                             # sw.js, icons, screenshots
 ├── supabase/
-│   ├── migrations/                  # DOKUNULMADI (kanonik SQL pipeline)
-│   └── functions/                   # Edge: daily-briefing, fetch-market-prices
+│   ├── migrations/                     # production SQL pipeline
+│   └── functions/
 │
-└── src/                             # Asıl uygulama
+└── src/
     ├── middleware.ts
     ├── types/index.ts
-    ├── app/                         # App Router sayfalar + API
-    │   ├── layout.tsx | page.tsx | globals.css | manifest.ts
-    │   ├── login/ | invite/[token]/ | delete-account/
-    │   ├── dashboard/               # farmer paneli
-    │   ├── engineer/ | admin/
-    │   ├── legal/ | en/
-    │   └── api/ai|cron|geocode|user/
-    ├── components/                  # UI (ExpenseModal, LeafletMap vb. hâlâ eski adlar)
-    ├── context/                     # AppContext + hooks/*
+    ├── app/                            # App Router (login, dashboard, api, legal…)
+    ├── components/
+    │   ├── forms/                      # ExpenseForm, LandForm
+    │   ├── maps/                       # MapContainer, hooks/useAgroMonitoring
+    │   ├── shared/                     # OfflineIndicator, ErrorBoundary, EmptyState, LoadingSpinner
+    │   ├── ui/ | budget/ | lands/ | receipts/
+    │   └── AuthGuard, Header, Sidebar, …
+    ├── context/                        # AppContext + hooks (composition only in AppContext)
     ├── hooks/
-    ├── lib/                         # db, offline*, weather, schemas, supabase*
-    └── services/                    # agroService, geocoding
+    ├── lib/
+    │   ├── db.ts
+    │   ├── supabase/                   # client.ts, server.ts, middleware.ts
+    │   ├── offline/                    # offlineCache, offlineQueue, syncEngine
+    │   ├── ai/                         # gemini, prompts, embeddings, ragEngine
+    │   ├── geo/                        # turf, geometry
+    │   ├── validators/schemas.ts       # tüm Zod şemaları
+    │   ├── weatherService.ts | rateLimit | utils | translations…
+    └── services/                       # agroService, geocoding
 ```
 
-### Cleanup notu (2026-07-11)
+### Kanonik taşıma notu (2026-07-11 — onaylı)
 
-| Yapıldı | Yapılmadı (büyük refactor — onay + içerik değişikliği gerekir) |
-|---------|----------------------------------------------------------------|
-| Bakımsız root `*.md` silindi | `src/app` → route groups `(auth)/(dashboard)` |
-| Rehber → `docs/` | `ExpenseModal` → `forms/ExpenseForm` rename |
-| Dağınık SQL/scratch → `docs/archive/` | `LeafletMap` → maps/* split |
-| `.env.example` eklendi | `lib/supabase.ts` → `lib/supabase/*` taşıma |
-| | Tüm hook/AI/geo klasör yeniden düzeni |
+| Yapıldı | Bilinçli ertelendi |
+|---------|-------------------|
+| docs tek kaynak + archive | `src/app` route groups (`(auth)` / `ai-insight` URL rename) |
+| `lib/supabase/*`, `lib/offline/*`, `lib/ai/*`, `lib/geo/*`, `lib/validators` | MapDraw/MapView full split (MapContainer hâlâ monolit) |
+| forms/maps/shared klasörleri | Finance offline queue |
+| `.env.example` | Middleware redirect re-enable |
 
 ---
 
@@ -562,6 +546,40 @@ useFarmLogic: return []; // Mocked for now
 - `schemas/*` ile zod başlangıcı
 - API route’larda rate limit + session kontrolü (chat)
 - Domain types merkezi dosyada
+
+---
+
+## 17B. RLS Audit (P0 — 2026-07-11)
+
+**Kapsam:** `supabase/migrations/` okundu, **değiştirilmedi**. Arşiv SQL (`docs/archive/sql/security_risk_migration.sql`) karşılaştırıldı.
+
+### Bulgu (KRİTİK)
+
+`supabase/migrations/20260502120000_enable_rls.sql` RLS’i açıyor ancak policy şu:
+
+```sql
+using (auth.role() = 'authenticated')
+```
+
+Bu, **giriş yapmış her kullanıcının tüm org’ların lands/transactions/… verisini** okuyup yazabileceği anlamına gelir. Demo kilidi; production multi-tenant izolasyonu **değil**.
+
+### Arşivdeki daha sıkı patch
+
+`docs/archive/sql/security_risk_migration.sql` `profile_id = auth.uid()` + admin bypass kullanıyor.  
+Uygulama kodu çoğunlukla **`org_id`** ile filtreliyor — arşiv patch’i prod’a körlemesine basılmamalı; şema drift riski var.
+
+### Önerilen (henüz uygulanmadı — ayrı migration PR)
+
+1. Tüm tenant tablolarda `ENABLE ROW LEVEL SECURITY`
+2. Policy: `org_id = auth.uid()` (veya net org membership tablosu)
+3. Engineer: `engineer_clients` status=`approved` üzerinden SELECT
+4. Admin: recursion-safe helper (`SECURITY DEFINER` function) ile bypass
+5. `WITH CHECK` insert/update için aynı kural
+6. Staging’de policy test; sonra production
+
+### Middleware
+
+`src/middleware.ts` korumalı route redirect hâlâ **kapalı** (AuthGuard’a bırakılmış). RLS zayıfken client guard yeterli değil.
 
 ---
 

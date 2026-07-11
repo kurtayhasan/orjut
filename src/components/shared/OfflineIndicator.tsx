@@ -3,9 +3,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Wifi, WifiOff, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
-import { flushQueue, getQueueCount } from '@/lib/offlineQueue';
+import { flushQueue, getQueueCount } from '@/lib/offline/syncEngine';
 
-export default function NetworkStatus() {
+export default function OfflineIndicator() {
   const [isOnline, setIsOnline] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);

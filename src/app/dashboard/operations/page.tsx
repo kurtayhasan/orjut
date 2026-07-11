@@ -14,9 +14,9 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import BaseModal from '@/components/ui/BaseModal';
-import EmptyState from '@/components/EmptyState';
+import EmptyState from '@/components/shared/EmptyState';
 import { cn, formatDateShort } from '@/lib/utils';
-import { operationSchema } from '@/lib/schemas/operation.schema';
+import { operationSchema } from '@/lib/validators/schemas';
 
 export default function OperationsPage() {
   const { lands, fieldOperations, addFieldOperation, deleteFieldOperation, inventory, updateScoutingPrescription } = useAppContext();

@@ -12,8 +12,8 @@ import {
 import { toast } from 'sonner';
 import { useWeather } from '@/hooks/useWeather';
 
-import EmptyState from '@/components/EmptyState';
-import { CardSkeleton } from '@/components/Skeleton';
+import EmptyState from '@/components/shared/EmptyState';
+import { CardSkeleton } from '@/components/shared/LoadingSpinner';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -22,7 +22,7 @@ import LandMovementsModal from '@/components/lands/LandMovementsModal';
 import LandTimeline from '@/components/lands/LandTimeline';
 import { formatArea, cn } from '@/lib/utils';
 
-const DynamicLeafletMap = dynamic(() => import('@/components/LeafletMap'), { 
+const DynamicLeafletMap = dynamic(() => import('@/components/maps/MapContainer'), { 
   ssr: false,
   loading: () => (
     <div className="flex h-full w-full items-center justify-center bg-surface-2 animate-skeleton-pulse">

@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase } from '@/lib/supabase/client';
 
 export async function checkRateLimit(userId: string, limit = 10, windowMs = 60_000): Promise<boolean> {
   try {

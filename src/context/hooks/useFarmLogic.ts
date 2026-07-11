@@ -2,14 +2,14 @@ import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import { db } from '@/lib/db';
 import { fetchWeather, WeatherData } from '@/lib/weatherService';
-import { buildAIPrompt, LandContext } from '@/lib/aiActionEngine';
+import { buildAIPrompt, LandContext } from '@/lib/ai/prompts';
 import { Land, Season, IrrigationLog, FieldOperation, ScoutingLog, InventoryItem, Profile } from '@/types';
 import {
   enqueue,
   newClientId,
   isLikelyOfflineError,
   type PendingType,
-} from '@/lib/offlineQueue';
+} from '@/lib/offline/offlineQueue';
 
 export function useFarmLogic(
   activeOrgId: string | null, 

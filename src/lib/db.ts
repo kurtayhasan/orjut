@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase } from '@/lib/supabase/client';
 import type { Land, Transaction, Season, InventoryItem, ScoutingLog, Profile, PaymentStatus } from '@/types';
 
 // ─────────────────────────────────────────────
