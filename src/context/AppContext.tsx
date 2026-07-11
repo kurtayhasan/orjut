@@ -1,965 +1,135 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { createContext, useContext, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
-import PremiumUpsellModal from '@/components/ui/PremiumUpsellModal';
-import { fetchWeather, WeatherData } from '@/lib/weatherService';
-import { buildAIPrompt, LandContext } from '@/lib/aiActionEngine';
-import { Transaction, Land, Season, Profile, IrrigationLog, FieldOperation, ScoutingLog, InventoryItem } from '@/types';
-import { db } from '@/lib/db';
-import { translations, Language } from '@/lib/translations';
-import { supabase } from '@/lib/supabase';
 
-type AppContextType = {
-  lang: Language;
-  setLang: (lang: Language) => void;
-  t: (key: keyof typeof translations['en']) => string;
-  totalExpenses: number;
-  totalArea: number;
-  addExpense: (amount: number, category: string, date: string, land_id: string, description: string, receipt_url?: string, receipt_thumbnail_url?: string, inventoryData?: { name: string, type: string, quantity: number, unit: string, id?: string }, season_id?: string, hybridData?: { appliedAmount: number, landId: string, type: string }) => Promise<void>;
-  updateExpense: (id: string, updates: any) => Promise<void>;
-  deleteExpense: (id: string) => Promise<void>;
-  weather: { temp: number | null, windspeed: number | null, humidity: number | null, condition: string, loading: boolean, error: string | null };
-  dailyInsight: string | null;
-  criticalAlert: string | null;
-  totalSavings: number;
-  dailySpent: number;
-  lands: Land[];
-  transactions: Transaction[];
-  irrigationLogs: IrrigationLog[];
-  isLoadingLands: boolean;
-  isLoadingTransactions: boolean;
-  isLoadingProfile: boolean;
-  addLand: (land: any) => Promise<void>;
-  updateLand: (land: any) => Promise<void>;
-  deleteLand: (id: string) => Promise<void>;
-  addIrrigationLog: (log: any) => Promise<void>;
-  deleteIrrigationLog: (id: string) => Promise<void>;
-  logSaving: (amount: number, reason: string) => Promise<void>;
-  requestWeatherAndInsight: () => Promise<void>;
-  startNewSeason: (name: string, startDate: string, endDate: string) => Promise<void>;
-  isDemo: boolean;
-  isSidebarOpen: boolean;
-  setIsSidebarOpen: (isOpen: boolean) => void;
-  seasons: Season[];
-  activeSeason: Season | null;
-  setActiveSeason: (season: Season) => void;
-  toggleSeasonStatus: (id: string, currentStatus: boolean) => Promise<void>;
-  weatherData: WeatherData | null;
+import { useUILogic } from './hooks/useUILogic';
+import { useAuthLogic } from './hooks/useAuthLogic';
+import { useFarmLogic } from './hooks/useFarmLogic';
+import { useFinanceLogic } from './hooks/useFinanceLogic';
+import { useAppSync } from './hooks/useAppSync';
+
+import { translations, Language } from '@/lib/translations';
+import { Transaction, Land, Season, Profile, IrrigationLog, FieldOperation, ScoutingLog, InventoryItem } from '@/types';
+import { WeatherData } from '@/lib/weatherService';
+
+export type AppContextType = {
+  lang: Language; setLang: (lang: Language) => void; t: (key: keyof typeof translations['en']) => string;
+  isSidebarOpen: boolean; setIsSidebarOpen: (isOpen: boolean) => void;
+  isDarkMode: boolean; toggleDarkMode: () => void;
+  showUpsell: boolean; triggerUpsell: () => void; closeUpsell: () => void;
+  isExpenseModalOpen: boolean; setIsExpenseModalOpen: (isOpen: boolean) => void;
+
   currentUserRole: 'owner' | 'editor' | 'viewer';
+  isLoadingProfile: boolean;
   userProfile: Profile | null;
-  fieldOperations: FieldOperation[];
-  scoutingLogs: ScoutingLog[];
-  addFieldOperation: (op: any) => Promise<void>;
-  deleteFieldOperation: (id: string) => Promise<void>;
-  addScoutingLog: (log: any) => Promise<void>;
-  updateScoutingLog: (id: string, updates: Partial<ScoutingLog>) => Promise<void>;
-  updateScoutingPrescription: (id: string, isApplied: boolean, text?: string) => Promise<void>;
-  deleteScoutingLog: (id: string) => Promise<void>;
-  inventory: InventoryItem[];
-  isLoadingInventory: boolean;
-  addInventoryItem: (item: any) => Promise<void>;
-  updateInventoryItem: (id: string, updates: Partial<InventoryItem>) => Promise<void>;
-  deleteInventoryItem: (id: string) => Promise<void>;
-  isDarkMode: boolean;
-  toggleDarkMode: () => void;
-  calculateUnitCost: (amount: number, quantity: number) => number;
   userRole: 'farmer' | 'engineer' | 'admin';
-  selectedClientId: string | null;
-  setSelectedClientId: (id: string | null) => void;
+  selectedClientId: string | null; setSelectedClientId: (id: string | null) => void;
   activeOrgId: string | null;
   isPremium: boolean;
-  showUpsell: boolean;
-  triggerUpsell: () => void;
-  closeUpsell: () => void;
-  getAiHistory: (landId: string) => Promise<any[]>;
-  isExpenseModalOpen: boolean;
-  setIsExpenseModalOpen: (isOpen: boolean) => void;
-  clearAllData: () => void;
-  refreshProfile: () => Promise<void>;
+  isDemo: boolean;
+  refreshProfile: (force?: boolean) => Promise<void>;
   syncNow: () => Promise<void>;
+
+  lands: Land[]; addLand: (land: any) => Promise<void>; updateLand: (land: any) => Promise<void>; deleteLand: (id: string) => Promise<void>;
+  totalArea: number;
+  seasons: Season[]; activeSeason: Season | null; setActiveSeason: (season: Season) => void;
+  isLoadingLands: boolean;
+  weatherData: WeatherData | null;
+  weather: { temp: number | null, windspeed: number | null, humidity: number | null, condition: string, loading: boolean, error: string | null };
+  dailyInsight: string | null; criticalAlert: string | null;
   isAnalyzing: boolean;
+  fieldOperations: FieldOperation[]; addFieldOperation: (op: any) => Promise<void>; deleteFieldOperation: (id: string) => Promise<void>;
+  scoutingLogs: ScoutingLog[]; addScoutingLog: (log: any) => Promise<void>; updateScoutingLog: (id: string, updates: Partial<ScoutingLog>) => Promise<void>; updateScoutingPrescription: (id: string, isApplied: boolean, text?: string) => Promise<void>; deleteScoutingLog: (id: string) => Promise<void>;
+  irrigationLogs: IrrigationLog[]; addIrrigationLog: (log: any) => Promise<void>; deleteIrrigationLog: (id: string) => Promise<void>;
+  startNewSeason: (name: string, startDate: string, endDate: string) => Promise<void>; toggleSeasonStatus: (id: string, currentStatus: boolean) => Promise<void>;
+  requestWeatherAndInsight: () => Promise<void>; getAiHistory: (landId: string) => Promise<any[]>;
+
+  transactions: Transaction[]; addExpense: (amount: number, category: string, date: string, land_id: string, description: string, receipt_url?: string, receipt_thumbnail_url?: string, inventoryData?: { name: string, type: string, quantity: number, unit: string, id?: string }, season_id?: string, hybridData?: { appliedAmount: number, landId: string, type: string }) => Promise<void>; updateExpense: (id: string, updates: any) => Promise<void>; deleteExpense: (id: string) => Promise<void>;
+  totalExpenses: number; totalSavings: number; dailySpent: number;
+  inventory: InventoryItem[]; addInventoryItem: (item: any) => Promise<void>; updateInventoryItem: (id: string, updates: Partial<InventoryItem>) => Promise<void>; deleteInventoryItem: (id: string) => Promise<void>;
+  isLoadingTransactions: boolean; isLoadingInventory: boolean;
+  calculateUnitCost: (amount: number, quantity: number) => number;
+  logSaving: (amount: number, reason: string) => Promise<void>;
+  clearAllData: () => void;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLang] = useState<Language>('tr');
-  const [totalExpenses, setTotalExpenses] = useState<number>(0);
-  const [totalArea, setTotalArea] = useState<number>(0);
-  const [totalSavings, setTotalSavings] = useState<number>(0);
-  const [dailySpent, setDailySpent] = useState<number>(0);
-  const [dailyInsight, setDailyInsight] = useState<string | null>(null);
-  const [criticalAlert, setCriticalAlert] = useState<string | null>(null);
-  const [lands, setLands] = useState<Land[]>([]);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [irrigationLogs, setIrrigationLogs] = useState<IrrigationLog[]>([]);
-  const [seasons, setSeasons] = useState<Season[]>([]);
-  const [activeSeason, setActiveSeason] = useState<Season | null>(null);
-  const [currentUserRole, setCurrentUserRole] = useState<'owner' | 'editor' | 'viewer'>('owner');
-  const [isLoadingLands, setIsLoadingLands] = useState(true);
-  const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
-  const [isLoadingInventory, setIsLoadingInventory] = useState(true);
-  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
-  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [userProfile, setUserProfile] = useState<Profile | null>(null);
-  const [fieldOperations, setFieldOperations] = useState<FieldOperation[]>([]);
-  const [scoutingLogs, setScoutingLogs] = useState<ScoutingLog[]>([]);
-  const [inventory, setInventory] = useState<InventoryItem[]>([]);
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [userRole, setUserRole] = useState<'farmer' | 'engineer' | 'admin'>('farmer');
-  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
-  const [showUpsell, setShowUpsell] = useState(false);
-  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
-  const [authSession, setAuthSession] = useState<any>(null);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const ui = useUILogic();
+  const auth = useAuthLogic();
+  
+  // Finance needs Farm's addFieldOperation for hybrid transactions
+  // Farm needs Finance's inventory update for stock reduction
+  // We wire them up here to resolve circular dependencies:
+  
+  const finance = useFinanceLogic(auth.activeOrgId, null);
+  const farm = useFarmLogic(auth.activeOrgId, auth.userProfile, finance.inventory, finance.updateInventoryItem);
+  
+  const addExpenseWithHybrid = useCallback((amount: number, category: string, date: string, land_id: string, description: string, receipt_url?: string, receipt_thumbnail_url?: string, inventoryData?: any, season_id?: string, hybridData?: any) => {
+    return finance.addExpense(amount, category, date, land_id, description, receipt_url, receipt_thumbnail_url, inventoryData, season_id || farm.activeSeason?.id, hybridData, farm.addFieldOperation);
+  }, [finance, farm.activeSeason, farm.addFieldOperation]);
 
-  const triggerUpsell = useCallback(() => setShowUpsell(true), []);
-  const closeUpsell = useCallback(() => setShowUpsell(false), []);
+  // Sync Logic
+  useAppSync(
+    auth.activeOrgId, auth.authSession, 
+    auth.setUserProfile, auth.setUserRole,
+    farm.setLands, farm.setTotalArea, finance.setTransactions, farm.setSeasons, farm.setActiveSeason,
+    farm.setIrrigationLogs, farm.setFieldOperations, farm.setScoutingLogs, finance.setInventory,
+    finance.setTotalExpenses, finance.setDailySpent,
+    farm.setIsLoadingLands, finance.setIsLoadingTransactions, finance.setIsLoadingInventory
+  );
 
   const clearAllData = useCallback(() => {
-    setLands([]);
-    setTransactions([]);
-    setInventory([]);
-    setFieldOperations([]);
-    setScoutingLogs([]);
-    setIrrigationLogs([]);
-    setSeasons([]);
-    setActiveSeason(null);
-    setTotalExpenses(0);
-    setTotalArea(0);
-    setTotalSavings(0);
-    setDailySpent(0);
-    setDailyInsight(null);
-    setCriticalAlert(null);
-    setUserProfile(null);
-  }, []);
-
-  const t = useCallback((key: keyof typeof translations['en']) => translations[lang][key] || key, [lang]);
-
-  const activeOrgId = useMemo(() => {
-    if (isAuthLoading || isLoadingProfile || !userProfile) return null;
-    const myId = userProfile.id;
-    
-    // PHASE 3: Zero-UUID Protection & Auth Matching
-    if (!myId || myId === '00000000-0000-0000-0000-000000000000') return null;
-    
-    if (userRole === 'engineer' && selectedClientId) return selectedClientId;
-    return myId;
-  }, [userRole, selectedClientId, userProfile, isAuthLoading, isLoadingProfile]);
-
-  const lastProfileRefreshRef = useRef<number>(0);
-
-  const refreshProfile = useCallback(async (force = false) => {
-    const userId = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
-    if (!userId) {
-      setIsLoadingProfile(false);
-      return;
-    }
-
-    const now = Date.now();
-    if (!force && now - lastProfileRefreshRef.current < 30000) {
-      return; // Soften visibility/polling triggers to max once every 30 seconds
-    }
-    lastProfileRefreshRef.current = now;
-
-    setIsLoadingProfile(true);
-    try {
-      const { data, error } = await db.getProfile(userId);
-      // Only throw on real DB errors, not on missing profile (maybeSingle returns null)
-      if (error) throw error;
-      if (data) {
-        setUserProfile(data);
-        const actualRole = data.role || 'farmer';
-        const overrideRole = typeof window !== 'undefined' ? localStorage.getItem('user_role_override') : null;
-        let finalRole = actualRole;
-        if (overrideRole) {
-          if (actualRole === 'admin') {
-            finalRole = overrideRole;
-          } else if (actualRole === 'engineer' && overrideRole !== 'admin') {
-            finalRole = overrideRole;
-          }
-        }
-        setUserRole(finalRole as 'farmer' | 'engineer' | 'admin');
-        
-        // Auto-redirect logic: Only redirect farmer away from admin/engineer pages
-        if (finalRole === 'farmer' && typeof window !== 'undefined' && (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/engineer'))) {
-          window.location.href = '/dashboard';
-        }
-      }
-      // If data is null (profile not yet created), just continue silently
-    } catch (err: any) {
-      console.error("Profile fetch error:", err);
-      // Don't show error toast for common cases like missing profile
-      if (err?.code !== 'PGRST116' && err?.message !== 'No rows found') {
-        // Only show error for unexpected issues
-        console.warn("Profile fetch non-critical error:", err?.message);
-      }
-    } finally {
-      setIsLoadingProfile(false);
-    }
-  }, []);
+    farm.setLands([]);
+    finance.setTransactions([]);
+    finance.setInventory([]);
+    farm.setFieldOperations([]);
+    farm.setScoutingLogs([]);
+    farm.setIrrigationLogs([]);
+    farm.setSeasons([]);
+    farm.setActiveSeason(null);
+    finance.setTotalExpenses(0);
+    farm.setTotalArea(0);
+    finance.setTotalSavings(0);
+    finance.setDailySpent(0);
+    farm.setDailyInsight(null);
+    farm.setCriticalAlert(null);
+    auth.setUserProfile(null);
+  }, [farm, finance, auth]);
 
   const syncNow = useCallback(async () => {
     toast.loading("Veriler senkronize ediliyor...", { id: 'sync-now' });
     try {
-      await refreshProfile();
-      // We don't use refreshAllData directly here because we want a clean state
-      if (typeof window !== 'undefined') {
-        window.location.reload(); 
-      }
+      await auth.refreshProfile();
+      if (typeof window !== 'undefined') window.location.reload(); 
       toast.success("Senkronizasyon tamamlandı", { id: 'sync-now' });
     } catch (err) {
       toast.error("Senkronizasyon başarısız", { id: 'sync-now' });
     }
-  }, [refreshProfile]);
+  }, [auth]);
 
-  const refreshAllData = useCallback(async () => {
-    if (!authSession || !activeOrgId) return;
-    const userId = authSession.user.id;
-
-    setIsLoadingLands(true);
-    setIsLoadingTransactions(true);
-    setIsLoadingInventory(true);
-
-    try {
-      const [p, l, t, s, i, fo, sl, inv] = await Promise.all([
-        db.getProfile(userId),
-        db.getLands(activeOrgId),
-        db.getTransactions(activeOrgId, 20),
-        db.getSeasons(activeOrgId),
-        db.getIrrigationLogs(activeOrgId),
-        db.getFieldOperations(activeOrgId),
-        db.getScoutingLogs(activeOrgId),
-        db.getInventory(activeOrgId)
-      ]);
-
-      // PHASE 3: STRICT STATE RESET - If data is null/empty, state must be []
-      if (p.data) {
-        setUserProfile(p.data);
-        const actualRole = p.data.role || 'farmer';
-        const overrideRole = typeof window !== 'undefined' ? localStorage.getItem('user_role_override') : null;
-        let finalRole = actualRole;
-        if (overrideRole) {
-          if (actualRole === 'admin') {
-            finalRole = overrideRole;
-          } else if (actualRole === 'engineer' && overrideRole !== 'admin') {
-            finalRole = overrideRole;
-          }
-        }
-        setUserRole(finalRole as 'farmer' | 'engineer' | 'admin');
-
-        // Phase 6: Farmer Auto-Redirect (admin/engineer can view any page)
-        if (finalRole === 'farmer' && typeof window !== 'undefined' && (window.location.pathname.startsWith('/admin') || window.location.pathname.startsWith('/engineer'))) {
-          window.location.href = '/dashboard';
-        }
-      }
-      setLands(l.data || []);
-      if (l.data) {
-        setTotalArea(l.data.reduce((sum, land) => sum + Number(land.size_decare || 0), 0));
-      } else {
-        setTotalArea(0);
-      }
-
-      setTransactions(t.data || []);
-      if (s.data) {
-        setSeasons(s.data);
-        setActiveSeason(s.data.find((ss: any) => ss.is_active) || s.data[0] || null);
-      } else {
-        setSeasons([]);
-        setActiveSeason(null);
-      }
-      setIrrigationLogs(i.data || []);
-      setFieldOperations(fo.data || []);
-      setScoutingLogs(sl.data || []);
-      setInventory(inv.data || []);
-
-      const { data: allTx } = await db.getTransactions(activeOrgId);
-      if (allTx) {
-        setTotalExpenses(allTx.reduce((sum: number, tx: any) => sum + Number(tx.amount || 0), 0));
-        const todayStr = new Date().toISOString().split('T')[0];
-        setDailySpent(allTx.filter((tx: any) => tx.date === todayStr && tx.type === 'expense').reduce((sum: number, tx: any) => sum + Number(tx.amount || 0), 0));
-      }
-
-    } catch (e: any) {
-      console.error("Critical Data Fetch Error:", e);
-      toast.error(e.message || "Veriler yüklenirken bir hata oluştu.");
-    } finally {
-      setIsLoadingLands(false);
-      setIsLoadingTransactions(false);
-      setIsLoadingInventory(false);
-    }
-  }, [activeOrgId, authSession]);
-
-  useEffect(() => {
-    // Check initial session
-    const checkInitialSession = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setAuthSession(session);
-        if (session?.user?.id) {
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('user_id', session.user.id);
-          }
-          await refreshProfile(true);
-        } else {
-          setIsLoadingProfile(false);
-        }
-      } catch (err) {
-        console.error("Initial session check failed:", err);
-        setIsLoadingProfile(false);
-      } finally {
-        setIsAuthLoading(false);
-      }
+  const value = useMemo(() => {
+    return {
+      ...ui,
+      ...auth,
+      ...farm,
+      ...finance,
+      addExpense: addExpenseWithHybrid,
+      syncNow,
+      clearAllData,
+      weather: { temp: farm.weatherData?.temperature ?? null, windspeed: farm.weatherData?.windSpeed ?? null, humidity: farm.weatherData?.humidity ?? null, condition: farm.weatherData?.condition ?? 'Bilinmiyor', loading: false, error: null }
     };
-    checkInitialSession();
+  }, [ui, auth, farm, finance, addExpenseWithHybrid, syncNow, clearAllData]);
 
-    // 1. HARD RE-FETCH: Subscribe to auth changes
-    const { data: { subscription } } = db.onAuthStateChange(async (event, session) => {
-      setAuthSession(session);
-      const cachedUserId = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
-      if (session?.user?.id || cachedUserId) {
-        await refreshProfile(true);
-      } else {
-        setUserProfile(null);
-        setIsLoadingProfile(false);
-      }
-      setIsAuthLoading(false);
-    });
-
-    // 2. Tab Focus Real-time Sync (Immediate Sync when returning to tab)
-    let visibilityTimeout: NodeJS.Timeout;
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && (typeof window !== 'undefined' ? localStorage.getItem('user_id') : null)) {
-        clearTimeout(visibilityTimeout);
-        visibilityTimeout = setTimeout(() => {
-          refreshProfile();
-        }, 300);
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    // 3. Background Polling (Every 5 minutes silent sync)
-    const pollInterval = setInterval(() => {
-      if (typeof window !== 'undefined' && localStorage.getItem('user_id')) {
-        refreshProfile();
-      }
-    }, 300000); // 5 minutes
-
-    return () => {
-      subscription.unsubscribe();
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      clearTimeout(visibilityTimeout);
-      clearInterval(pollInterval);
-    };
-  }, [refreshProfile]);
-
-  useEffect(() => {
-    const savedTheme = typeof window !== 'undefined' ? localStorage.getItem('theme') : null;
-    setIsDarkMode(savedTheme === 'dark');
-  }, []);
-
-  useEffect(() => {
-    // PHASE 4: LOCAL CACHE SYNC / SECURITY PURGE
-    const checkCacheSync = () => {
-      const cachedId = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
-      if (cachedId && userProfile && cachedId !== userProfile.id) {
-        if (typeof window !== 'undefined') {
-          localStorage.clear();
-          window.location.reload();
-        }
-      }
-    };
-    checkCacheSync();
-  }, [userProfile]);
-
-  useEffect(() => {
-    if (activeOrgId) {
-      refreshAllData();
-    }
-  }, [activeOrgId, refreshAllData]);
-
-  // Load weather dynamically based on lands, browser geolocation, or fallback Söke/Aydın
-  useEffect(() => {
-    if (isLoadingProfile || !userProfile || !activeOrgId) return;
-    let active = true;
-    async function loadCurrentWeather() {
-      let lat: number | null = null;
-      let lon: number | null = null;
-
-      // 1. Try first land
-      if (lands.length > 0) {
-        const firstLand = lands[0];
-        const parsedLat = parseFloat(firstLand.lat as any);
-        const parsedLon = parseFloat(firstLand.lng as any);
-        if (typeof parsedLat === 'number' && !isNaN(parsedLat) && typeof parsedLon === 'number' && !isNaN(parsedLon)) {
-          lat = parsedLat;
-          lon = parsedLon;
-        }
-      }
-
-      // 2. Try browser geolocation if no land
-      if ((lat === null || lon === null) && typeof navigator !== 'undefined' && navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          async (position) => {
-            if (!active) return;
-            try {
-              const data = await fetchWeather(position.coords.latitude, position.coords.longitude);
-              if (active) setWeatherData(data);
-            } catch (err) {
-              console.error("Browser location weather failed:", err);
-            }
-          },
-          (err) => console.log("Geolocation permission denied or failed:", err),
-          { timeout: 5000 }
-        );
-        return;
-      }
-
-      // 3. Fallback to Söke/Aydın
-      if (lat === null || lon === null) {
-        lat = 37.7478;
-        lon = 27.3971;
-      }
-
-      try {
-        const data = await fetchWeather(lat, lon);
-        if (active) setWeatherData(data);
-      } catch (err) {
-        console.error("Default weather fetch failed:", err);
-      }
-    }
-
-    if (activeOrgId) {
-      loadCurrentWeather();
-    }
-
-    return () => {
-      active = false;
-    };
-  }, [lands, activeOrgId, isLoadingProfile, userProfile]);
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('theme', 'dark');
-      }
-    } else {
-      document.documentElement.classList.remove('dark');
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('theme', 'light');
-      }
-    }
-  }, [isDarkMode]);
-
-  const calculateUnitCost = useCallback((amount: number, quantity: number) => {
-    if (!quantity || quantity <= 0) return 0;
-    return amount / quantity;
-  }, []);
-
-  const addLand = useCallback(async (land: any) => {
-    if (!activeOrgId) return;
-    try {
-      const { data, error } = await db.insertLand({ ...land, org_id: activeOrgId });
-      if (error) throw error;
-      if (data) {
-        setLands(prev => [...prev, data]);
-        setTotalArea(prev => prev + Number(land.size_decare));
-        toast.success("Arazi başarıyla kaydedildi");
-      }
-    } catch (err: any) {
-      toast.error("Hata: " + err.message);
-    }
-  }, [activeOrgId]);
-
-  const updateLand = useCallback(async (land: any) => {
-    const { id, ...updateData } = land;
-    try {
-      const { error } = await db.updateLand(id, updateData);
-      if (error) throw error;
-      setLands(prev => prev.map(l => l.id === id ? { ...l, ...updateData } : l));
-      toast.success("Arazi güncellendi");
-    } catch (err: any) {
-      toast.error("Güncelleme başarısız oldu. Lütfen internet bağlantınızı kontrol edip tekrar deneyiniz.");
-    }
-  }, []);
-
-  const deleteLand = useCallback(async (id: string) => {
-    try {
-      const land = lands.find(l => l.id === id);
-      if (!land) return;
-
-      await Promise.all([
-        db.deleteTransactionsByLand(id),
-        db.deleteIrrigationLogsByLand(id),
-        db.deleteScoutingLogsByLand(id),
-        db.deleteFieldOperationsByLand(id)
-      ]);
-
-      const { error } = await db.deleteLand(id);
-      if (error) throw error;
-      
-      if (land) setTotalArea(prev => prev - Number(land.size_decare || 0));
-      setLands(prev => prev.filter(l => l.id !== id));
-      
-      setTransactions(prev => prev.filter(t => t.land_id !== id));
-      setIrrigationLogs(prev => prev.filter(l => l.land_id !== id));
-      setScoutingLogs(prev => prev.filter(s => s.land_id !== id));
-      setFieldOperations(prev => prev.filter(o => o.land_id !== id));
-      
-      toast.success("Arazi ve bağlı tüm veriler silindi");
-    } catch (err: any) {
-      toast.error("Silme işlemi gerçekleştirilemedi. Lütfen daha sonra tekrar deneyiniz.");
-    }
-  }, [lands]);
-
-  const updateInventoryItem = useCallback(async (id: string, updates: Partial<InventoryItem>) => {
-    try {
-      const { error } = await db.updateInventoryItem(id, updates);
-      if (error) throw error;
-      setInventory(prev => prev.map(item => item.id === id ? { ...item, ...updates } : item));
-    } catch (err) {
-      toast.error("Stok güncellenemedi. Lütfen tekrar deneyiniz.");
-    }
-  }, []);
-
-  const addFieldOperation = useCallback(async (op: any) => {
-    if (!activeOrgId) return;
-    try {
-      const { data, error } = await db.insertFieldOperation({ ...op, org_id: activeOrgId });
-      if (error) throw error;
-      if (data) {
-        setFieldOperations(prev => [data, ...prev]);
-        if (op.inventory_id) {
-          const item = inventory.find(i => i.id === op.inventory_id);
-          if (item) updateInventoryItem(item.id, { quantity: Math.max(0, item.quantity - op.amount) });
-        }
-        toast.success("İşlem kaydedildi");
-      }
-    } catch (err) {
-      toast.error("Tarla işlemi kaydedilemedi. Lütfen bilgileri kontrol edip tekrar deneyiniz.");
-    }
-  }, [activeOrgId, inventory, updateInventoryItem]);
-
-  const addExpense = useCallback(async (
-    amount: number, 
-    category: string, 
-    date: string, 
-    land_id: string, 
-    description: string,
-    receipt_url?: string, 
-    receipt_thumbnail_url?: string, 
-    inventoryData?: { name: string, type: string, quantity: number, unit: string, id?: string }, 
-    season_id?: string,
-    hybridData?: { appliedAmount: number, landId: string, type: string }
-  ) => {
-    if (!activeOrgId) return;
-    const newTx: any = { 
-      amount, description: description || category, date, type: 'expense', category, land_id, org_id: activeOrgId,
-      quantity: inventoryData?.quantity, unit: inventoryData?.unit, receipt_url, receipt_thumbnail_url,
-      season_id: season_id || activeSeason?.id
-    };
-    try {
-      const { data, error } = await db.insertTransaction(newTx);
-      if (error) throw error;
-      if (data) {
-        setTransactions(prev => [data, ...prev]);
-        setTotalExpenses(prev => prev + amount);
-        
-        let targetInventoryId = inventoryData?.id;
-
-        if (inventoryData) {
-          const unitCost = calculateUnitCost(amount, inventoryData.quantity);
-          
-          if (inventoryData.id) {
-            // Update existing stock
-            const item = inventory.find(i => i.id === inventoryData.id);
-            if (item) {
-              const newQty = item.quantity + inventoryData.quantity;
-              await updateInventoryItem(item.id, { 
-                quantity: newQty,
-                unit_cost: unitCost,
-                last_purchase_date: date
-              });
-              toast.success("Harcama kaydedildi ve mevcut stok güncellendi");
-            }
-          } else {
-            // New stock entry
-            const { data: invItem } = await db.insertInventoryItem({ 
-              org_id: activeOrgId,
-              item_name: inventoryData.name, 
-              type: inventoryData.type as any, 
-              quantity: inventoryData.quantity, 
-              unit: inventoryData.unit, 
-              unit_cost: unitCost, 
-              last_purchase_date: date 
-            });
-            if (invItem) {
-              setInventory(prev => [invItem, ...prev]);
-              targetInventoryId = invItem.id;
-              toast.success("Harcama kaydedildi ve yeni stok oluşturuldu");
-            }
-          }
-
-          // Handle Hybrid Application (Phase 2 Smart Flow)
-          if (hybridData && targetInventoryId) {
-            await addFieldOperation({
-              land_id: hybridData.landId,
-              type: hybridData.type as any,
-              date,
-              amount: hybridData.appliedAmount,
-              unit: inventoryData.unit,
-              method: 'Satın alma sonrası doğrudan uygulama',
-              notes: 'Satın alınan miktarın bir kısmı arazide kullanıldı.',
-              inventory_id: targetInventoryId
-            });
-            // Stock is automatically subtracted by addFieldOperation in our context logic
-            toast.success("Hibrit işlem: Alım yapıldı ve araziye uygulandı.");
-          }
-        } else {
-          toast.success("Masraf başarıyla kaydedildi");
-        }
-      }
-    } catch (err: any) {
-      toast.error("Hata: " + err.message);
-    }
-  }, [activeOrgId, activeSeason, inventory, updateInventoryItem, addFieldOperation, calculateUnitCost]);
-
-  const updateExpense = useCallback(async (id: string, updates: any) => {
-    try {
-      const { error } = await db.updateTransaction(id, updates);
-      if (error) throw error;
-      setTransactions(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
-      toast.success("İşlem güncellendi");
-    } catch (err: any) {
-      toast.error("Masraf güncellenemedi. Lütfen tekrar deneyiniz.");
-    }
-  }, []);
-
-  const deleteExpense = useCallback(async (id: string) => {
-    try {
-      const tx = transactions.find(t => t.id === id);
-      const { error } = await db.deleteTransaction(id);
-      if (error) throw error;
-      if (tx) setTotalExpenses(prev => prev - Number(tx.amount || 0));
-      setTransactions(prev => prev.filter(t => t.id !== id));
-      toast.success("İşlem silindi");
-    } catch (err: any) {
-      toast.error("Masraf silinemedi. Lütfen tekrar deneyiniz.");
-    }
-  }, [transactions]);
-
-  const startNewSeason = useCallback(async (name: string, startDate: string, endDate: string) => {
-    if (!activeOrgId) return;
-    const year = new Date(startDate).getFullYear();
-    try {
-      if (activeSeason) await db.updateSeason(activeSeason.id, { is_active: false });
-      const { data, error } = await db.insertSeason({ org_id: activeOrgId, name, start_date: startDate, end_date: endDate, year, is_active: true });
-      if (error) throw error;
-      if (data && data[0]) {
-        setSeasons(prev => [data[0], ...prev.map(s => ({ ...s, is_active: false }))]);
-        setActiveSeason(data[0]);
-        toast.success("Yeni sezon başlatıldı");
-      }
-    } catch (err: any) {
-      toast.error("Hata: " + err.message);
-    }
-  }, [activeOrgId, activeSeason]);
-
-  const toggleSeasonStatus = useCallback(async (id: string, currentStatus: boolean) => {
-    try {
-      const { error } = await db.updateSeason(id, { is_active: !currentStatus });
-      if (error) throw error;
-      setSeasons(prev => prev.map(s => s.id === id ? { ...s, is_active: !currentStatus } : s));
-      toast.success(`Sezon ${!currentStatus ? 'açıldı' : 'kapatıldı'}`);
-    } catch (err) {
-      toast.error("Sezon durumu güncellenemedi. Lütfen tekrar deneyiniz.");
-    }
-  }, []);
-
-  const addInventoryItem = useCallback(async (item: any) => {
-    if (!activeOrgId) return;
-    try {
-      const { data, error } = await db.insertInventoryItem({ ...item, org_id: activeOrgId });
-      if (error) throw error;
-      if (data) setInventory(prev => [...prev, data]);
-    } catch (err: any) {
-      console.error("Inventory error:", err);
-      toast.error(err.message || "Stok eklenirken bir hata oluştu.");
-    }
-  }, [activeOrgId]);
-
-  const deleteInventoryItem = useCallback(async (id: string) => {
-    try {
-      const { error } = await db.deleteInventoryItem(id);
-      if (error) throw error;
-      setInventory(prev => prev.filter(i => i.id !== id));
-      toast.success("Silindi");
-    } catch (err) {
-      toast.error("Stok silinemedi. Lütfen tekrar deneyiniz.");
-    }
-  }, []);
-
-  const addIrrigationLog = useCallback(async (log: any) => {
-    if (!activeOrgId) return;
-    try {
-      const { data, error } = await db.insertIrrigationLog({ ...log, org_id: activeOrgId });
-      if (error) throw error;
-      if (data) {
-        setIrrigationLogs(prev => [data, ...prev]);
-        toast.success("Sulama eklendi");
-      }
-    } catch (err) {
-      toast.error("Sulama kaydı eklenemedi. Lütfen tekrar deneyiniz.");
-    }
-  }, [activeOrgId]);
-
-  const deleteIrrigationLog = useCallback(async (id: string) => {
-    try {
-      const { error } = await db.deleteIrrigationLog(id);
-      if (error) throw error;
-      setIrrigationLogs(prev => prev.filter(l => l.id !== id));
-      toast.success("Silindi");
-    } catch (err) {
-      toast.error("Sulama kaydı silinemedi. Lütfen tekrar deneyiniz.");
-    }
-  }, []);
-
-  const logSaving = useCallback(async (amount: number, reason: string) => {
-    const userId = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
-    if (!userId) return;
-    try {
-      await db.insertSavingLog({ user_id: userId, amount, reason });
-      setTotalSavings(prev => prev + amount);
-    } catch (err: any) {
-      console.error("Saving log error:", err);
-      toast.error(err.message || "Tasarruf günlüğü kaydedilirken bir hata oluştu.");
-    }
-  }, []);
-
-  const requestWeatherAndInsight = useCallback(async () => {
-    if (isAnalyzing) return;
-    if (isAuthLoading || isLoadingProfile || !userProfile || !activeOrgId) {
-      const cachedUserId = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
-      if (!cachedUserId && !activeOrgId) {
-        toast.error("Oturum henüz yüklenmedi, lütfen bekleyin...");
-        return;
-      }
-    }
-    setIsAnalyzing(true);
-    let lat = 37.7478, lon = 27.3971;
-    if (lands.length > 0) {
-      const parsedLat = parseFloat(String(lands[0]?.lat ?? ''));
-      const parsedLng = parseFloat(String(lands[0]?.lng ?? ''));
-      if (!isNaN(parsedLat) && !isNaN(parsedLng)) {
-        lat = parsedLat;
-        lon = parsedLng;
-      } else {
-        toast.error("Seçili arazinin coğrafi konum bilgileri geçersiz. Merkez koordinatlar kullanılıyor.");
-      }
-    }
-    toast.loading("Analiz ediliyor...", { id: 'ai-loading' });
-    
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 seconds timeout
-    
-    try {
-      const weather = await fetchWeather(lat, lon);
-      setWeatherData(weather);
-      const landContexts: LandContext[] = lands.map(land => ({
-        id: land.id,
-        cropName: land.crop_type || 'Ekin', 
-        sowingDate: land.planting_date || new Date().toISOString(),
-        currentDay: land.planting_date ? Math.floor((Date.now() - new Date(land.planting_date).getTime()) / 86400000) : 0,
-        totalArea: land.size_decare || 0,
-        lat: land.lat || 37.0,
-        lng: land.lng || 35.0,
-        soilType: (land as any).soil_type || 'Killi/Tınlı',
-        lastOperations: fieldOperations
-          .filter(o => o.land_id === land.id)
-          .slice(0, 3)
-          .map(o => `${o.date || 'Tarih'}: ${o.type || 'İşlem'} (${o.amount || 0} ${o.unit || ''})`),
-        scoutingNotes: scoutingLogs
-          .filter(s => s.land_id === land.id)
-          .slice(0, 3)
-          .map(s => `${s.date || 'Tarih'}: ${s.health_status || 'Durum'} - ${s.notes || ''}`)
-      }));
-
-      const inventoryStatus = inventory
-        .filter(i => i.quantity < 10)
-        .map(i => `${i.item_name || 'Ürün'} (${i.quantity || 0} ${i.unit || ''} kaldı)`);
-
-      const prompt = buildAIPrompt({ 
-        weather, 
-        lands: landContexts, 
-        inventoryStatus,
-        date: new Date().toLocaleDateString('tr-TR'),
-        timestamp: new Date().toISOString()
-      });
-      
-      const res = await fetch('/api/ai/daily-insight', { 
-        method: 'POST', 
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ prompt }),
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
-      
-      if (res.status === 401) {
-        toast.error("Yapay zeka servisine erişilemedi veya oturum senkronizasyonu hatası.", { id: 'ai-loading' });
-        throw new Error("Yapay zeka servisine erişilemedi veya oturum senkronizasyonu hatası.");
-      }
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
-      }
-      const data = await res.json();
-      if (data.success) {
-        try {
-          const parsed = typeof data.insight === 'string' && data.insight.startsWith('{') 
-            ? JSON.parse(data.insight) 
-            : data;
-            
-          setDailyInsight(parsed.insight || data.insight);
-          setCriticalAlert(parsed.critical_alert || null);
-        } catch (err) {
-          setDailyInsight(data.insight);
-          setCriticalAlert(null);
-        }
-        toast.success("Analiz tamamlandı", { id: 'ai-loading' });
-      } else throw new Error(data.error);
-    } catch (e: any) { 
-      clearTimeout(timeoutId);
-      if (e.name === 'AbortError') {
-        toast.error("Hata: Yapay zeka servis bağlantısı zaman aşımına uğradı (15s).", { id: 'ai-loading' });
-      } else {
-        toast.error("Hata: " + e.message, { id: 'ai-loading' });
-      }
-    } finally {
-      setIsAnalyzing(false);
-    }
-  }, [isAnalyzing, isAuthLoading, isLoadingProfile, userProfile, activeOrgId, lands, fieldOperations, scoutingLogs, inventory]);
-
-  const deleteFieldOperation = useCallback(async (id: string) => { 
-    try {
-      await db.deleteFieldOperation(id);
-      setFieldOperations(prev => prev.filter(o => o.id !== id));
-    } catch (err: any) {
-      toast.error("Tarla işlemi silinemedi: " + (err?.message || 'Bağlantı hatası.'));
-    }
-  }, []);
-
-  const addScoutingLog = useCallback(async (log: Omit<ScoutingLog, 'id'>) => { 
-    if (!activeOrgId) return; 
-    try {
-      const { data, error } = await db.insertScoutingLog({ ...log, org_id: activeOrgId }); 
-      if (error) throw error;
-      if (data) setScoutingLogs(prev => [data, ...prev]); 
-      toast.success("Gözlem raporu kaydedildi.");
-    } catch (err: any) {
-      toast.error("Gözlem kaydedilemedi: " + (err?.message || ''));
-      throw err;
-    }
-  }, [activeOrgId]);
-
-  const updateScoutingLog = useCallback(async (id: string, updates: Partial<ScoutingLog>) => { 
-    try {
-      const { error } = await db.updateScoutingLog(id, updates);
-      if (error) throw error;
-      setScoutingLogs(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
-      toast.success("Tavsiye kaydedildi");
-    } catch (err) {
-      toast.error("Tavsiye kaydedilemedi. Lütfen tekrar deneyiniz.");
-    }
-  }, []);
-
-  const updateScoutingPrescription = useCallback(async (id: string, isApplied: boolean, text?: string) => {
-    try {
-      const updates: Partial<ScoutingLog> = { is_prescription_applied: isApplied };
-      if (text) updates.prescription_text = text;
-      const { error } = await db.updateScoutingLog(id, updates);
-      if (error) throw error;
-      setScoutingLogs(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s));
-    } catch (err: any) {
-      console.error("Prescription update error:", err);
-      toast.error(err.message || "Reçete güncellenirken bir hata oluştu.");
-    }
-  }, []);
-
-  const deleteScoutingLog = useCallback(async (id: string) => { 
-    setScoutingLogs(prev => prev.filter(s => s.id !== id)); 
-    db.deleteScoutingLog(id); 
-  }, []);
-
-  const getAiHistory = useCallback(async (landId: string) => {
-    const { data, error } = await db.getAiInsightsHistory(landId);
-    if (error) return [];
-    return data || [];
-  }, []);
-
-  const value = useMemo(() => ({
-    lang, setLang, t, totalExpenses, totalArea, addExpense, updateExpense, deleteExpense,
-    weather: { 
-      temp: weatherData?.temperature ?? null, 
-      windspeed: weatherData?.windSpeed ?? null, 
-      humidity: weatherData?.humidity ?? null,
-      condition: weatherData?.condition ?? 'Hava Durumu Servisi',
-      loading: false, 
-      error: null 
-    },
-    dailyInsight, criticalAlert, totalSavings, dailySpent, lands, transactions, irrigationLogs,
-    isLoadingLands, isLoadingTransactions, addLand, updateLand, deleteLand,
-    addIrrigationLog, deleteIrrigationLog, logSaving,
-    requestWeatherAndInsight, startNewSeason, toggleSeasonStatus,
-    isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, setActiveSeason: (s: Season) => setActiveSeason(s),
-    weatherData, currentUserRole, userProfile, fieldOperations, scoutingLogs,
-    addFieldOperation,
-    deleteFieldOperation,
-    addScoutingLog,
-    updateScoutingLog,
-    updateScoutingPrescription,
-    deleteScoutingLog,
-    inventory, isLoadingInventory, addInventoryItem, updateInventoryItem, deleteInventoryItem,
-    isDarkMode, toggleDarkMode: () => setIsDarkMode(prev => !prev), calculateUnitCost,
-    userRole, selectedClientId, setSelectedClientId, activeOrgId,
-    isPremium: !!userProfile?.is_premium,
-    isDemo: false,
-    showUpsell, triggerUpsell, closeUpsell,
-    getAiHistory,
-    isExpenseModalOpen, setIsExpenseModalOpen, clearAllData,
-    refreshProfile, syncNow, isLoadingProfile, isAnalyzing
-  }), [
-    lang, setLang, t, totalExpenses, totalArea, addExpense, updateExpense, deleteExpense,
-    weatherData, dailyInsight, criticalAlert, totalSavings, dailySpent, lands, transactions, irrigationLogs,
-    isLoadingLands, isLoadingTransactions, addLand, updateLand, deleteLand,
-    addIrrigationLog, deleteIrrigationLog, logSaving,
-    requestWeatherAndInsight, startNewSeason, toggleSeasonStatus,
-    isSidebarOpen, setIsSidebarOpen, seasons, activeSeason, 
-    currentUserRole, userProfile, fieldOperations, scoutingLogs,
-    addFieldOperation, deleteFieldOperation, addScoutingLog, updateScoutingLog, updateScoutingPrescription, deleteScoutingLog,
-    inventory, isLoadingInventory, addInventoryItem, updateInventoryItem, deleteInventoryItem,
-    isDarkMode, setIsDarkMode, calculateUnitCost,
-    userRole, selectedClientId, setSelectedClientId, activeOrgId,
-    showUpsell, triggerUpsell, closeUpsell,
-    getAiHistory,
-    isExpenseModalOpen, setIsExpenseModalOpen, clearAllData,
-    refreshProfile, syncNow, isLoadingProfile, isAnalyzing
-  ]);
-
-  return (
-    <AppContext.Provider value={value}>
-      {children}
-      <PremiumUpsellModal isOpen={showUpsell} onClose={closeUpsell} />
-    </AppContext.Provider>
-  );
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
 
-export const useAppContext = () => {
+export function useAppContext() {
   const context = useContext(AppContext);
-  if (!context) throw new Error("useAppContext must be used within AppProvider");
+  if (context === undefined) {
+    throw new Error('useAppContext must be used within an AppProvider');
+  }
   return context;
-};
+}
