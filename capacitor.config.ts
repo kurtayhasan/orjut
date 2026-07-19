@@ -7,6 +7,13 @@ const config: CapacitorConfig = {
   server: {
     url: 'https://orjut.com',
     cleartext: true
+  },
+  plugins: {
+    Keyboard: {
+      resize: 'body',
+      style: 'DARK',
+      resizeOnFullScreen: true
+    }
   }
 };
 

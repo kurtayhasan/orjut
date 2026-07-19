@@ -11,6 +11,7 @@
   "dependencies": {
     "@capacitor/android": "^8.4.2",
     "@capacitor/core": "^8.4.2",
+    "@capacitor/keyboard": "^8.0.5",
     "@google/genai": "^1.51.0",
     "@hookform/resolvers": "^5.2.2",
     "@revenuecat/purchases-capacitor": "^13.2.3",
