@@ -176,6 +176,22 @@ export default function PremiumUpsellModal({ isOpen, onClose }: PremiumUpsellMod
                       }
                     }
                     console.log("[Mobile Sandbox] Triggering Play Store / App Store purchase flow stub");
+                    toast.info("Mobil ödeme sistemi simüle ediliyor...");
+                    
+                    try {
+                      const { supabase } = await import('@/lib/supabase/client');
+                      const { data: { user } } = await supabase.auth.getUser();
+                      if (user) {
+                        await supabase.from('profiles').update({ is_premium: true }).eq('id', user.id);
+                        toast.success("Mobil ödeme başarılı! Hasat Pro paketiniz aktif edildi.");
+                        onClose();
+                        window.location.reload();
+                        return;
+                      }
+                    } catch (err) {
+                      console.warn("Mobile sandbox local db unlock failed:", err);
+                    }
+                    
                     toast.success("Mobil ödeme sistemi simüle edildi!");
                     onClose();
                   } else {
