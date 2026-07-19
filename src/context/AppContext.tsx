@@ -113,6 +113,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [auth]);
 
+  const presentPaywallWrapper = useCallback(async () => {
+    const { isNative } = await import('@/lib/capacitor');
+    if (isNative()) {
+      return revenueCat.presentPaywall();
+    } else {
+      ui.triggerUpsell();
+    }
+  }, [revenueCat.presentPaywall, ui]);
+
   const value = useMemo(() => {
     return {
       ...ui,
@@ -120,13 +129,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       ...farm,
       ...finance,
       isPremium: revenueCat.isPro,
-      presentPaywall: revenueCat.presentPaywall,
+      presentPaywall: presentPaywallWrapper,
       addExpense: addExpenseWithHybrid,
       syncNow,
       clearAllData,
       weather: { temp: farm.weatherData?.temperature ?? null, windspeed: farm.weatherData?.windSpeed ?? null, humidity: farm.weatherData?.humidity ?? null, condition: farm.weatherData?.condition ?? 'Bilinmiyor', loading: false, error: null }
     };
-  }, [ui, auth, farm, finance, revenueCat.isPro, revenueCat.presentPaywall, addExpenseWithHybrid, syncNow, clearAllData]);
+  }, [ui, auth, farm, finance, revenueCat.isPro, presentPaywallWrapper, addExpenseWithHybrid, syncNow, clearAllData]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
