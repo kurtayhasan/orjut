@@ -7,6 +7,13 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+export async function GET() {
+  return NextResponse.json({ 
+    status: 'active', 
+    message: 'Orjut RevenueCat Webhook endpoint is running successfully.' 
+  });
+}
+
 export async function POST(req: Request) {
   try {
     // Optionally verify Authorization header if configured in RevenueCat dashboard
