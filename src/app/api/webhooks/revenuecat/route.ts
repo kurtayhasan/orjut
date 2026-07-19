@@ -1,11 +1,17 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-// Initialize Supabase Client with Service Role Key to bypass RLS for backend updates
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+// Lazily initialize Supabase client to prevent build-time crashes when env vars are absent
+const getSupabaseClient = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Supabase URL or Service Role Key is missing in environment variables');
+  }
+
+  return createClient(supabaseUrl, supabaseServiceKey);
+};
 
 export async function GET() {
   return NextResponse.json({ 
@@ -69,6 +75,7 @@ export async function POST(req: Request) {
     }
 
     // Update user profile
+    const supabase = getSupabaseClient();
     const { error } = await supabase
       .from('profiles')
       .update({ is_premium: isPremium })
