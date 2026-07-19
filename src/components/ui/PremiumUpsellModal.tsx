@@ -179,15 +179,37 @@ export default function PremiumUpsellModal({ isOpen, onClose }: PremiumUpsellMod
                     toast.success("Mobil ödeme sistemi simüle edildi!");
                     onClose();
                   } else {
-                    console.log("[Web Sandbox] Redirecting to PayTR Payment gateway stub");
+                    console.log("[Web Sandbox] Simulating PayTR checkout and database update");
                     toast.info("PayTR Ödeme sayfasına yönlendiriliyorsunuz (Simülasyon)...");
-                    setTimeout(() => {
-                      window.location.href = '/dashboard/settings?paytr_checkout=true';
-                    }, 1500);
+                    
+                    setTimeout(async () => {
+                      try {
+                        const { supabase } = await import('@/lib/supabase/client');
+                        const { data: { user } } = await supabase.auth.getUser();
+                        if (user) {
+                          const { error } = await supabase
+                            .from('profiles')
+                            .update({ is_premium: true })
+                            .eq('id', user.id);
+                            
+                          if (error) throw error;
+                          
+                          toast.success("Ödeme başarılı! Hasat Pro paketiniz aktif edildi.");
+                          onClose();
+                          // Reload page to refresh context state
+                          window.location.reload();
+                        } else {
+                          toast.error("Oturum bulunamadı. Lütfen giriş yapın.");
+                        }
+                      } catch (err) {
+                        console.error("Web simulation error:", err);
+                        toast.error("Ödeme simülasyonu başarısız oldu.");
+                      }
+                    }, 2000);
                   }
                 } catch (e) {
                   console.error("Payment flow initialization error:", e);
-                  window.location.href = '/dashboard/settings';
+                  toast.error("Ödeme başlatılamadı.");
                 }
               }}
               className="w-full py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-black rounded-2xl shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all text-base flex items-center justify-center gap-2"
