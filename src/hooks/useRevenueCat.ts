@@ -4,13 +4,7 @@ import { useState, useEffect } from 'react';
 import { RevenueCatService } from '@/services/RevenueCatService';
 import { CustomerInfo, PurchasesOffering } from '@revenuecat/purchases-capacitor';
 import { isNative } from '@/lib/capacitor';
-import { createClient } from '@supabase/supabase-js'; // Supabase istemcisi
-
-// Supabase istemcisini başlat (Next.js'in browser tarafında çalıştığından emin ol)
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { supabase } from '@/lib/supabase/client';
 
 export const useRevenueCat = () => {
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
