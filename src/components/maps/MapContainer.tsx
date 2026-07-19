@@ -74,12 +74,17 @@ function MapController({ selectedLand, searchResult }: { selectedLand: Partial<L
 
 function LandWeatherPopup({ land }: { land: Partial<Land> }) {
   const { weather, loading, fetchWeatherForLocation } = useWeather();
+  // Call useAgroMonitoring to get NDVI state for warnings
+  const { ndviData } = useAgroMonitoring();
 
   useEffect(() => {
     if (land.lat && land.lng) {
       fetchWeatherForLocation(Number(land.lat), Number(land.lng));
     }
   }, [land, fetchWeatherForLocation]);
+
+  const polyId = land?.agromonitoring_polygon_id || '';
+  const ndvi = polyId ? ndviData[polyId] : null;
 
   return (
     <div className="p-2 min-w-[160px] max-w-[240px] space-y-2 text-zinc-900 dark:text-zinc-100 font-sans">
@@ -91,6 +96,14 @@ function LandWeatherPopup({ land }: { land: Partial<Land> }) {
           {land.crop_type} • {land.size_decare} Dekar
         </p>
       </div>
+
+      {ndvi !== null && ndvi < 0.3 && (
+        <div className="bg-red-50 text-red-600 border border-red-200 p-2 rounded-lg text-[10px] font-bold leading-tight flex gap-1.5 my-2">
+          <AlertCircle size={14} className="shrink-0 mt-0.5" />
+          <span>Fotosentez aktivitesi düşük. Bu bölgede azot eksikliği veya su stresi olabilir. Lütfen fiziksel gözlem (scouting) planlayın.</span>
+        </div>
+      )}
+
       <div className="flex items-center justify-between text-[11px] font-bold pt-0.5">
         <span className="text-zinc-500 dark:text-zinc-400">Sıcaklık:</span>
         <span className="text-zinc-800 dark:text-zinc-100 font-black">

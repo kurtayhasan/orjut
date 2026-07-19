@@ -8,6 +8,7 @@ import { useAuthLogic } from './hooks/useAuthLogic';
 import { useFarmLogic } from './hooks/useFarmLogic';
 import { useFinanceLogic } from './hooks/useFinanceLogic';
 import { useAppSync } from './hooks/useAppSync';
+import { useRevenueCat } from '@/hooks/useRevenueCat';
 
 import { translations, Language } from '@/lib/translations';
 import { Transaction, Land, Season, Profile, IrrigationLog, FieldOperation, ScoutingLog, InventoryItem } from '@/types';
@@ -28,6 +29,7 @@ export type AppContextType = {
   activeOrgId: string | null;
   isPremium: boolean;
   isDemo: boolean;
+  presentPaywall?: () => Promise<any>;
   refreshProfile: (force?: boolean) => Promise<void>;
   syncNow: () => Promise<void>;
 
@@ -59,6 +61,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const ui = useUILogic();
   const auth = useAuthLogic();
+  const revenueCat = useRevenueCat();
   
   // Finance needs Farm's addFieldOperation for hybrid transactions
   // Farm needs Finance's inventory update for stock reduction
@@ -116,12 +119,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       ...auth,
       ...farm,
       ...finance,
+      isPremium: revenueCat.isPro,
+      presentPaywall: revenueCat.presentPaywall,
       addExpense: addExpenseWithHybrid,
       syncNow,
       clearAllData,
       weather: { temp: farm.weatherData?.temperature ?? null, windspeed: farm.weatherData?.windSpeed ?? null, humidity: farm.weatherData?.humidity ?? null, condition: farm.weatherData?.condition ?? 'Bilinmiyor', loading: false, error: null }
     };
-  }, [ui, auth, farm, finance, addExpenseWithHybrid, syncNow, clearAllData]);
+  }, [ui, auth, farm, finance, revenueCat.isPro, revenueCat.presentPaywall, addExpenseWithHybrid, syncNow, clearAllData]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

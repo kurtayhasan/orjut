@@ -9,8 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@capacitor/core": "^8.4.2",
     "@google/genai": "^1.51.0",
     "@hookform/resolvers": "^5.2.2",
+    "@revenuecat/purchases-capacitor": "^13.2.3",
+    "@revenuecat/purchases-capacitor-ui": "^13.2.3",
     "@supabase/auth-helpers-nextjs": "^0.15.0",
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.110.0",
@@ -40,6 +43,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.4.2",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

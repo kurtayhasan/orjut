@@ -17,7 +17,8 @@ serve(async (req: Request) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Normally fetch from an external API or scrape here
+    // GÖREV 4: Maliyet Optimizasyonu için Pazar Verileri Devre Dışı Bırakıldı
+    /*
     const crops = Object.keys(MOCK_PRICES);
     const inserts = crops.map(crop => ({
       crop_name: crop,
@@ -28,9 +29,10 @@ serve(async (req: Request) => {
 
     const { error } = await supabaseClient.from('market_prices').insert(inserts);
     if (error) throw error;
+    */
 
     return new Response(
-      JSON.stringify({ success: true, message: 'Market prices updated.' }),
+      JSON.stringify({ success: true, message: 'Market prices fetching is temporarily disabled for cost optimization.' }),
       { headers: { "Content-Type": "application/json" } }
     );
   } catch (error: any) {

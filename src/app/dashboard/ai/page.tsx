@@ -19,7 +19,7 @@ interface Message {
 }
 
 export default function AIPage() {
-  const { isPremium, triggerUpsell, lands, userProfile } = useAppContext();
+  const { isPremium, triggerUpsell, lands, userProfile, presentPaywall } = useAppContext();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -144,7 +144,7 @@ export default function AIPage() {
                       Tarlalarınızın verilerini analiz eden ve size özel öneriler sunan akıllı asistana sadece Premium üyeler erişebilir.
                    </p>
                 </div>
-                <Button fullWidth size="lg" className="bg-amber-400 text-[#1B2E1C] hover:bg-amber-500 border-none" onClick={triggerUpsell}>
+                <Button fullWidth size="lg" className="bg-amber-400 text-[#1B2E1C] hover:bg-amber-500 border-none" onClick={presentPaywall || triggerUpsell}>
                    <Crown size={20} className="mr-2" /> Premium&apos;a Yükselt
                 </Button>
              </Card>

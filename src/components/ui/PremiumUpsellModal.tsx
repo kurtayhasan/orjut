@@ -13,7 +13,7 @@ interface PremiumUpsellModalProps {
 }
 
 export default function PremiumUpsellModal({ isOpen, onClose }: PremiumUpsellModalProps) {
-  const { isPremium, userProfile } = useAppContext();
+  const { isPremium, userProfile, presentPaywall } = useAppContext();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
   const [mounted, setMounted] = useState(false);
 
@@ -163,9 +163,15 @@ export default function PremiumUpsellModal({ isOpen, onClose }: PremiumUpsellMod
 
             {/* CTA */}
             <button
-              onClick={() => {
-                // In future, redirect to payment
-                window.location.href = '/dashboard/settings';
+              onClick={async () => {
+                if (presentPaywall) {
+                  const result = await presentPaywall();
+                  if (result === 'PURCHASED' || result === 'RESTORED') {
+                    onClose();
+                  }
+                } else {
+                  window.location.href = '/dashboard/settings';
+                }
               }}
               className="w-full py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-black rounded-2xl shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all text-base flex items-center justify-center gap-2"
             >

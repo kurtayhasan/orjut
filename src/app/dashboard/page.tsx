@@ -393,6 +393,18 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
+
+          {/* BÖLÜM 6 — PAZAR VERİLERİ (PLACEHOLDER) */}
+          <Card padding="lg" className="border-2 border-dashed border-border bg-surface-2/50 relative overflow-hidden mt-6">
+             <div className="flex flex-col items-center justify-center text-center py-8 relative z-10">
+                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4 text-zinc-300">
+                   <TrendingUp size={32} />
+                </div>
+                <h3 className="text-xl font-black font-heading text-text-primary uppercase tracking-tight mb-2">Pazar Verileri Yakında!</h3>
+                <p className="text-sm font-bold text-text-muted max-w-md">Gerçek zamanlı borsa ve hal fiyatları, girdi maliyetleri analizleri çok yakında Orjut AgTech sistemine entegre edilecektir. Optimizasyon çalışmaları devam ediyor.</p>
+             </div>
+             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diagonal-stripes.png')] opacity-5 pointer-events-none" />
+          </Card>
         </>
       )}
     </div>

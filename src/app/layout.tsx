@@ -20,6 +20,7 @@ import { AppProvider } from "@/context/AppContext";
 import { Toaster } from 'sonner';
 import CookieConsent from '@/components/CookieConsent';
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
+import { RevenueCatInitProvider } from '@/components/RevenueCatInitProvider';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -77,9 +78,11 @@ export default function RootLayout({
       <body className="antialiased font-body bg-[#050505]">
         <ServiceWorkerRegister />
         <AppProvider>
-          <Toaster position="top-center" richColors theme="dark" closeButton style={{ zIndex: 10000 }} />
-          {children}
-          <CookieConsent />
+          <RevenueCatInitProvider>
+            <Toaster position="top-center" richColors theme="dark" closeButton style={{ zIndex: 10000 }} />
+            {children}
+            <CookieConsent />
+          </RevenueCatInitProvider>
         </AppProvider>
       </body>
     </html>
