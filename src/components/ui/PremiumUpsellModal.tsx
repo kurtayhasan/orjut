@@ -6,6 +6,7 @@ import { useAppContext } from '@/context/AppContext';
 import { createPortal } from 'react-dom';
 import { getPremiumBlockReason } from '@/lib/db';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 interface PremiumUpsellModalProps {
   isOpen: boolean;
@@ -164,12 +165,28 @@ export default function PremiumUpsellModal({ isOpen, onClose }: PremiumUpsellMod
             {/* CTA */}
             <button
               onClick={async () => {
-                if (presentPaywall) {
-                  const result = await presentPaywall();
-                  if (result === 'PURCHASED' || result === 'RESTORED') {
+                try {
+                  const { isNative } = await import('@/lib/capacitor');
+                  if (isNative()) {
+                    if (presentPaywall) {
+                      const result = await presentPaywall();
+                      if (result === 'PURCHASED' || result === 'RESTORED') {
+                        onClose();
+                        return;
+                      }
+                    }
+                    console.log("[Mobile Sandbox] Triggering Play Store / App Store purchase flow stub");
+                    toast.success("Mobil ödeme sistemi simüle edildi!");
                     onClose();
+                  } else {
+                    console.log("[Web Sandbox] Redirecting to PayTR Payment gateway stub");
+                    toast.info("PayTR Ödeme sayfasına yönlendiriliyorsunuz (Simülasyon)...");
+                    setTimeout(() => {
+                      window.location.href = '/dashboard/settings?paytr_checkout=true';
+                    }, 1500);
                   }
-                } else {
+                } catch (e) {
+                  console.error("Payment flow initialization error:", e);
                   window.location.href = '/dashboard/settings';
                 }
               }}

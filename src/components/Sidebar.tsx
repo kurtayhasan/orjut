@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
 export default function Sidebar({ className }: { className?: string }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { isSidebarOpen, setIsSidebarOpen, userRole, isPremium, userProfile, clearAllData } = useAppContext();
+  const { isSidebarOpen, setIsSidebarOpen, userRole, isPremium, userProfile, clearAllData, triggerUpsell } = useAppContext();
 
   const handleLogout = async () => {
     const { supabase } = await import('@/lib/supabase/client');
@@ -113,7 +113,13 @@ export default function Sidebar({ className }: { className?: string }) {
         {/* BOTTOM SECTION */}
         <div className="p-4 border-t border-white/5 space-y-2">
           {/* User Profile Summary */}
-          <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-white/5 mb-2">
+          <div 
+            onClick={!isPremium ? triggerUpsell : undefined}
+            className={cn(
+              "flex items-center gap-3 px-3 py-3 rounded-xl bg-white/5 mb-2",
+              !isPremium && "cursor-pointer hover:bg-white/10 transition-colors"
+            )}
+          >
             <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-black text-sm">
               {userProfile?.first_name?.[0] || 'U'}
             </div>

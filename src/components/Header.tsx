@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAppContext } from '@/context/AppContext';
 import EndOfDayModal from './EndOfDayModal';
-import { Bell, Menu, User, Settings, ArrowLeft } from 'lucide-react';
+import { Bell, Menu, User, Settings, ArrowLeft, Crown } from 'lucide-react';
 import NetworkStatus from '@/components/shared/OfflineIndicator';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 export default function Header() {
-  const { setIsSidebarOpen, userProfile, userRole } = useAppContext();
+  const { setIsSidebarOpen, userProfile, userRole, isPremium, triggerUpsell } = useAppContext();
   const [isEndModalOpen, setEndModalOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
@@ -87,6 +87,16 @@ export default function Header() {
 
         {/* RIGHT: ACTIONS */}
         <div className="flex items-center gap-2 md:gap-4">
+          {!isPremium && (
+            <button 
+              onClick={triggerUpsell}
+              className="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-[#1B2E1C] px-3 py-1.5 rounded-lg text-xs font-black transition-all active:scale-95 flex items-center gap-1.5 shadow-sm shadow-amber-500/20"
+            >
+              <Crown size={14} className="fill-[#1B2E1C]" />
+              <span className="hidden sm:inline">Premium&apos;a Geç</span>
+            </button>
+          )}
+
           <div className="hidden sm:block">
              <NetworkStatus />
           </div>
