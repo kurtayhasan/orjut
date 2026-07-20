@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "com.orjut.app"
+    namespace = "com.orjut.ziraiasistan"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.orjut.app"
+        applicationId "com.orjut.ziraiasistan"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 2

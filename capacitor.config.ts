@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.orjut.app',
+  appId: 'com.orjut.ziraiasistan',
   appName: 'Orjut',
   webDir: 'out',
   server: {
