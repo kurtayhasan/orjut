@@ -5,6 +5,11 @@ const config: CapacitorConfig = {
   appName: 'Orjut',
   webDir: 'out',
 
+  server: {
+    url: 'https://orjut.com',
+    cleartext: true,
+    allowNavigation: ['orjut.com']
+  },
   plugins: {
     Keyboard: {
       resize: 'body',
