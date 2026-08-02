@@ -17,6 +17,7 @@ export default function PremiumUpsellModal({ isOpen, onClose }: PremiumUpsellMod
   const { isPremium, userProfile, presentPaywall } = useAppContext();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
   const [mounted, setMounted] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -164,74 +165,66 @@ export default function PremiumUpsellModal({ isOpen, onClose }: PremiumUpsellMod
 
             {/* CTA */}
             <button
+              disabled={isProcessing}
               onClick={async () => {
+                if (isProcessing) return;
                 try {
+                  setIsProcessing(true);
                   const { isNative } = await import('@/lib/capacitor');
                   if (isNative()) {
                     if (presentPaywall) {
                       const result = await presentPaywall();
                       if (result === 'PURCHASED' || result === 'RESTORED') {
-                        onClose();
-                        return;
-                      }
-                    }
-                    console.log("[Mobile Sandbox] Triggering Play Store / App Store purchase flow stub");
-                    toast.info("Mobil ödeme sistemi simüle ediliyor...");
-                    
-                    try {
-                      const { supabase } = await import('@/lib/supabase/client');
-                      const { data: { user } } = await supabase.auth.getUser();
-                      if (user) {
-                        await supabase.from('profiles').update({ is_premium: true }).eq('id', user.id);
-                        toast.success("Mobil ödeme başarılı! Hasat Pro paketiniz aktif edildi.");
+                        toast.success("Hasat Pro paketiniz başarıyla aktif edildi!");
                         onClose();
                         window.location.reload();
                         return;
+                      } else {
+                        // User cancelled or paywall closed without purchase
+                        setIsProcessing(false);
+                        return;
                       }
-                    } catch (err) {
-                      console.warn("Mobile sandbox local db unlock failed:", err);
+                    } else {
+                      toast.error("Mobil ödeme sistemi şu anda kullanılamıyor.");
                     }
-                    
-                    toast.success("Mobil ödeme sistemi simüle edildi!");
-                    onClose();
                   } else {
-                    console.log("[Web Sandbox] Simulating PayTR checkout and database update");
-                    toast.info("PayTR Ödeme sayfasına yönlendiriliyorsunuz (Simülasyon)...");
+                    toast.info("Ödeme sayfasına yönlendiriliyorsunuz...");
                     
-                    setTimeout(async () => {
-                      try {
-                        const { supabase } = await import('@/lib/supabase/client');
-                        const { data: { user } } = await supabase.auth.getUser();
-                        if (user) {
-                          const { error } = await supabase
-                            .from('profiles')
-                            .update({ is_premium: true })
-                            .eq('id', user.id);
-                            
-                          if (error) throw error;
-                          
-                          toast.success("Ödeme başarılı! Hasat Pro paketiniz aktif edildi.");
-                          onClose();
-                          // Reload page to refresh context state
-                          window.location.reload();
-                        } else {
-                          toast.error("Oturum bulunamadı. Lütfen giriş yapın.");
-                        }
-                      } catch (err) {
-                        console.error("Web simulation error:", err);
-                        toast.error("Ödeme simülasyonu başarısız oldu.");
-                      }
-                    }, 2000);
+                    const response = await fetch('/api/payments/checkout', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({ packageId: billingCycle }),
+                    });
+
+                    if (!response.ok) {
+                      throw new Error('Ödeme başlatılamadı.');
+                    }
+
+                    const data = await response.json();
+                    
+                    if (data.checkoutUrl) {
+                      window.location.href = data.checkoutUrl;
+                    } else {
+                      throw new Error('Geçersiz ödeme bağlantısı.');
+                    }
                   }
                 } catch (e) {
                   console.error("Payment flow initialization error:", e);
-                  toast.error("Ödeme başlatılamadı.");
+                  toast.error("Ödeme başlatılamadı. Lütfen tekrar deneyin.");
+                } finally {
+                  setIsProcessing(false);
                 }
               }}
-              className="w-full py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-black rounded-2xl shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all text-base flex items-center justify-center gap-2"
+              className="w-full py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-black rounded-2xl shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all text-base flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:active:scale-100"
             >
-              <Crown size={18} />
-              Premium&apos;a Yükselt
+              {isProcessing ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <Crown size={18} />
+              )}
+              {isProcessing ? 'Lütfen Bekleyin...' : 'Premium\'a Yükselt'}
             </button>
 
             <p className="text-[10px] text-zinc-600 text-center mt-5 font-medium leading-relaxed px-4">

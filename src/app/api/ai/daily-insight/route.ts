@@ -1,4 +1,4 @@
-// OFFICIAL: @google/genai SDK — gemini-2.0-flash model
+// OFFICIAL: @google/genai SDK — gemini-3.5-flash model
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { getSupabaseServer } from '@/lib/supabase/server';
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
     try {
       // 2. Call the API using the latest official method
       response = await ai.models.generateContent({
-        model: 'gemini-2.0-flash',
+        model: 'gemini-3.5-flash',
         contents: enhancedPrompt,
       });
     } catch (geminiError: any) {

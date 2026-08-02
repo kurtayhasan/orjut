@@ -23,6 +23,7 @@ export default function AIPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isOffline, setIsOffline] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -33,6 +34,24 @@ export default function AIPage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    // Initial check
+    if (typeof window !== 'undefined') {
+      setIsOffline(!navigator.onLine);
+      
+      const handleOnline = () => setIsOffline(false);
+      const handleOffline = () => setIsOffline(true);
+
+      window.addEventListener('online', handleOnline);
+      window.addEventListener('offline', handleOffline);
+
+      return () => {
+        window.removeEventListener('online', handleOnline);
+        window.removeEventListener('offline', handleOffline);
+      };
+    }
+  }, []);
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -60,6 +79,7 @@ export default function AIPage() {
         body: JSON.stringify({
           message: userMessage.content,
           userId: localStorage.getItem('user_id'),
+          landId: lands[0]?.id,
           lands: lands.map(l => ({ crop_type: l.crop_type, city: l.city, size_decare: l.size_decare }))
         })
       });
@@ -151,6 +171,22 @@ export default function AIPage() {
           </div>
         )}
 
+         {isOffline && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center p-6 bg-surface/60 backdrop-blur-md rounded-2xl border border-border/50">
+             <Card padding="lg" className="max-w-md w-full text-center space-y-6 shadow-2xl border-rose-500/20">
+                <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
+                   <Lock size={32} />
+                </div>
+                <div>
+                   <h3 className="text-2xl font-black font-heading text-text-primary mb-2 tracking-tight">İnternet Bağlantısı Gerekiyor</h3>
+                   <p className="text-sm font-bold text-text-muted leading-relaxed">
+                      Yapay zeka asistanını kullanabilmek için internet bağlantısına ihtiyacınız var. Lütfen bağlantınızı kontrol edip tekrar deneyin.
+                   </p>
+                </div>
+             </Card>
+          </div>
+         )}
+
         <Card padding="none" className="h-full flex flex-col overflow-hidden border-border relative">
            {/* Messages Container */}
            <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-surface/50">
@@ -226,15 +262,15 @@ export default function AIPage() {
                    ref={inputRef}
                    type="text" 
                    className="flex-1 bg-surface-2 border border-border rounded-xl px-5 py-3.5 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-bold text-sm text-text-primary placeholder:text-text-muted disabled:opacity-50"
-                   placeholder={isPremium ? "Bir soru sorun (Örn: Domateste mildiyö için ne yapmalıyım?)" : "Sohbet için Premium'a geçin"}
+                   placeholder={isOffline ? "İnternet bağlantısı bekleniyor..." : (isPremium ? "Bir soru sorun (Örn: Domateste mildiyö için ne yapmalıyım?)" : "Sohbet için Premium'a geçin")}
                    value={input}
                    onChange={(e) => setInput(e.target.value)}
                    onKeyDown={handleKeyDown}
-                   disabled={!isPremium}
+                   disabled={!isPremium || isOffline}
                  />
                  <Button 
                    onClick={handleSend}
-                   disabled={!input.trim() || isLoading || !isPremium}
+                   disabled={!input.trim() || isLoading || !isPremium || isOffline}
                    className="shrink-0 px-6"
                  >
                     <Send size={20} />

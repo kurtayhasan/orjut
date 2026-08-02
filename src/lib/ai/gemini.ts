@@ -15,7 +15,7 @@ export function getGeminiClient(): GoogleGenAI {
 
 export const GEMINI_MODELS = {
   /** Dashboard chat / light completions */
-  flash: 'gemini-2.0-flash',
+  flash: 'gemini-3.5-flash',
   /** Embeddings */
-  embedding: 'text-embedding-004',
+  embedding: 'gemini-embedding-001',
 } as const;

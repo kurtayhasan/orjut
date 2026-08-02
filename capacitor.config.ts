@@ -6,7 +6,8 @@ const config: CapacitorConfig = {
   webDir: 'out',
   server: {
     url: 'https://orjut.com',
-    cleartext: true
+    cleartext: true,
+    allowNavigation: ['orjut.com']
   },
   plugins: {
     Keyboard: {

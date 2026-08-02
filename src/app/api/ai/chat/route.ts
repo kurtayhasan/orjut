@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
+
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/rateLimit';
 
@@ -15,33 +15,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Çok fazla istek. Lütfen biraz bekleyin.' }, { status: 429 });
     }
 
-    const { message, lands } = await req.json();
+    const { message, lands, landId } = await req.json();
 
     if (!message) {
       return NextResponse.json({ error: 'Mesaj boş olamaz' }, { status: 400 });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json({ error: 'Yapay zeka analiz motoru şu an yapılandırılmamış.' }, { status: 500 });
-    }
+    const { executeMultiStepRAG } = await import('@/lib/ai/ragEngine');
+    
+    // We already have supabase (which is getSupabaseServer). 
+    // Wait, the earlier code in route.ts created `const supabase = await getSupabaseServer();`.
+    const text = await executeMultiStepRAG(message, landId, supabase);
 
-    const ai = new GoogleGenAI({ apiKey });
-
-    const systemContext = `Sen profesyonel bir tarım danışmanısın. Çiftçilere, ziraat mühendislerine ve tarım işletmelerine yardımcı oluyorsun.
-Kullanıcının arazileri hakkında kısa bilgi: ${JSON.stringify(lands || [])}
-Kullanıcıya nazik, profesyonel, doğrudan ve bilimsel verilere dayanan kısa cevaplar ver. Uzun destanlar yazma, kolay okunabilir formatlar (maddeleme vb.) kullan.`;
-
-    const fullPrompt = `${systemContext}\n\nKullanıcı: ${message}`;
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
-      contents: fullPrompt,
-    });
-
-    let text = response.text || '';
-
-    return NextResponse.json({ text });
+    return NextResponse.json({ response: text });
   } catch (error: any) {
     console.error('Chat API Error:', error);
     return NextResponse.json({ error: 'AI servisi yanıt veremedi.' }, { status: 500 });

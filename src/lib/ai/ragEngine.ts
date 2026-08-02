@@ -1,6 +1,8 @@
 import { supabase } from '@/lib/supabase/client';
 import { fetchWeather } from '@/lib/weatherService';
 import { generateEmbedding } from '@/lib/ai/embeddings';
+import { getLandContextText } from './contextAggregator';
+import { GoogleGenAI } from '@google/genai';
 
 export async function buildLandContext(landId: string) {
   try {
@@ -216,4 +218,88 @@ export async function queryRAGDocuments(query: string, limit: number = 3) {
     console.error("Error in queryRAGDocuments:", error);
     return [];
   }
+}
+
+/**
+ * Context-Aware Multi-Step RAG Execution
+ * Adım A: Query Expansion (3 keywords)
+ * Adım B: Vector Embedding & RPC Search
+ * Adım C: System Prompt Assembly with Date
+ * Adım D: Final Generate & Log
+ */
+export async function executeMultiStepRAG(userQuery: string, landId: string, supabaseServer: any) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error('GEMINI_API_KEY is not set');
+  const ai = new GoogleGenAI({ apiKey });
+
+  // 1. Get Land Context
+  let landContext = '';
+  if (landId) {
+    landContext = await getLandContextText(landId);
+  } else {
+    landContext = 'Kullanıcıya ait spesifik bir tarla seçilmedi.';
+  }
+
+  // Adım A: Query Expansion
+  const expansionPrompt = `Sen bir ziraat mühendisisin. Kullanıcının sorusuna ve tarla bağlamına bakarak, Supabase pgvector veritabanında (resmi tarım dokümanları, PDF'ler) arama yapmak üzere tam 3 adet teknik arama kelimesi (veya kısa kelime öbeği) üret. 
+Sadece virgülle ayrılmış 3 terim döndür.
+Tarla Bağlamı: ${landContext}
+Kullanıcı Sorusu: ${userQuery}`;
+
+  const expansionRes = await ai.models.generateContent({
+    model: 'gemini-3.5-flash',
+    contents: expansionPrompt,
+  });
+  const keywords = (expansionRes.text || userQuery).split(',').map(k => k.trim()).join(' ');
+
+  // Adım B: Vector Embedding & RPC
+  const queryEmbedding = await generateEmbedding(keywords);
+  const { data: documents, error } = await supabaseServer.rpc('match_tarim_dokumanlari', {
+    query_embedding: queryEmbedding,
+    match_threshold: 0.50,
+    match_count: 3
+  });
+
+  if (error) {
+    console.error("RPC Error (match_tarim_dokumanlari):", error);
+  }
+
+  const docsText = (documents || []).map((d: any) => d.content || d.icerik).join('\n\n');
+
+  // Adım C: System Prompt Assembly
+  const localTime = new Date().toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' });
+  const systemPrompt = `Sen profesyonel bir tarım danışmanısın (Orjut ZiraiAsistan). Çiftçilere bilimsel ve pratik tavsiyeler veriyorsun.
+Şu anki yerel tarih ve saat: ${localTime}
+
+Aşağıdaki resmi doküman içeriklerini (RAG) ve kullanıcının tarla bağlamını (Context) kullanarak soruyu yanıtla. Yanıtın kısa, net ve maddeleme içerikli olsun. Eğer dokümanlarda cevap yoksa genel zirai bilgini kullan.
+
+[TARLA BAĞLAMI]
+${landContext}
+
+[RESMİ DOKÜMAN BULGULARI]
+${docsText}
+`;
+
+  const fullPrompt = `${systemPrompt}\n\nKullanıcı: ${userQuery}`;
+
+  // Adım D: Final Generate & Log
+  const finalRes = await ai.models.generateContent({
+    model: 'gemini-3.5-flash',
+    contents: fullPrompt,
+  });
+  
+  const responseText = finalRes.text || 'Yanıt üretilemedi.';
+
+  // Log to ai_logs table (if landId exists)
+  if (landId) {
+    await supabaseServer.from('ai_logs').insert([{
+      land_id: landId,
+      user_query: userQuery,
+      ai_response: responseText,
+      context_used: landContext,
+      created_at: new Date().toISOString()
+    }]);
+  }
+
+  return responseText;
 }
