@@ -47,7 +47,7 @@ export async function POST(req: Request) {
       });
     }
 
-    const merchant_oid = `ORDER_${Date.now()}_${user.id}`;
+    const merchant_oid = `ORDER${Date.now()}${user.id.replace(/[^a-zA-Z0-9]/g, '')}`;
     const email = user.email || 'musteri@orjut.com';
     const payment_amount = selectedPackage.price * 100; // PayTR kuruş bekler
     
