@@ -199,7 +199,8 @@ export default function PremiumUpsellModal({ isOpen, onClose }: PremiumUpsellMod
                     });
 
                     if (!response.ok) {
-                      throw new Error('Ödeme başlatılamadı.');
+                      const errorData = await response.json().catch(() => ({}));
+                      throw new Error(errorData.error || 'Ödeme başlatılamadı.');
                     }
 
                     const data = await response.json();
@@ -210,9 +211,9 @@ export default function PremiumUpsellModal({ isOpen, onClose }: PremiumUpsellMod
                       throw new Error('Geçersiz ödeme bağlantısı.');
                     }
                   }
-                } catch (e) {
+                } catch (e: any) {
                   console.error("Payment flow initialization error:", e);
-                  toast.error("Ödeme başlatılamadı. Lütfen tekrar deneyin.");
+                  toast.error(e.message || "Ödeme başlatılamadı. Lütfen tekrar deneyin.");
                 } finally {
                   setIsProcessing(false);
                 }
