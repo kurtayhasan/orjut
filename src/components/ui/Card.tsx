@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import { CardProps as BaseCardProps } from '@/types';
 
 const cardVariants = cva(
-  'bg-surface border border-border rounded-lg shadow-sm overflow-hidden',
+  'bg-surface/60 backdrop-blur-xl border border-white/5 rounded-lg shadow-sm overflow-hidden relative',
   {
     variants: {
       padding: {
@@ -13,7 +13,7 @@ const cardVariants = cva(
         lg:   'p-6',
       },
       hoverable: {
-        true:  'cursor-pointer transition-all duration-150 active:scale-[0.99] hover:shadow-md hover:border-primary/30',
+        true:  'cursor-pointer transition-all duration-300 active:scale-[0.99] hover:shadow-primary/10 hover:border-primary/30 hover:bg-surface/80',
         false: '',
       },
       status: {

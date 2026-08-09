@@ -52,14 +52,14 @@ export default function Sidebar({ className }: { className?: string }) {
       )}
       
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 w-60 bg-[#1B2E1C] flex flex-col shrink-0 h-full transform transition-transform duration-300 ease-out lg:relative lg:translate-x-0 lg:z-0 lg:flex-shrink-0 lg:h-screen",
+        "fixed inset-y-0 left-0 z-50 w-60 bg-[#06110D]/80 backdrop-blur-xl border-r border-white/5 flex flex-col shrink-0 h-full transform transition-transform duration-300 ease-out lg:relative lg:translate-x-0 lg:z-0 lg:flex-shrink-0 lg:h-screen",
         isSidebarOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full",
         className
       )}>
         {/* LOGO AREA */}
         <div className="h-[72px] flex items-center justify-between px-6 border-b border-white/5">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-white rounded-xl flex items-center justify-center text-[#1B2E1C]">
+            <div className="w-9 h-9 bg-primary/20 border border-primary/50 rounded-xl flex items-center justify-center text-primary shadow-[0_0_15px_rgba(0,230,118,0.3)]">
               <span className="font-black text-xl">O</span>
             </div>
             <div className="flex flex-col -space-y-1">
@@ -185,13 +185,13 @@ function SidebarItem({ icon: Icon, label, href, active, badge, onClick, classNam
       href={href} 
       onClick={onClick}
       className={cn(
-        "w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all text-sm font-bold",
+        "w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all text-sm font-bold group",
         active 
-          ? 'bg-primary text-white shadow-lg shadow-black/20' 
+          ? 'bg-primary/10 text-primary border border-primary/20 shadow-[inset_0_0_10px_rgba(0,230,118,0.1)]' 
           : cn('text-white/60 hover:bg-white/5 hover:text-white', className)
       )}
     >
-      <Icon size={20} className={active ? 'text-white' : 'text-white/40'} />
+      <Icon size={20} className={active ? 'text-primary' : 'text-white/40 group-hover:text-white/80 transition-colors'} />
       <span className="truncate">{label}</span>
       {badge && (
         <span className="ml-auto px-1.5 py-0.5 bg-amber-400 text-[#1B2E1C] text-[8px] font-black rounded uppercase tracking-wider flex items-center gap-0.5">

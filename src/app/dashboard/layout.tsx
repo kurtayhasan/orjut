@@ -20,16 +20,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Responsive Sidebar */}
         <Sidebar />
 
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-          <Header />
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative bg-bg">
+          {/* Decorative Blobs */}
+          <div className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] pointer-events-none z-0" />
+          <div className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none z-0" />
           
-          <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 pb-24 lg:pb-8 custom-scrollbar">
-            <div className="max-w-[1400px] mx-auto w-full">
-              <ErrorBoundary>
-                {children}
-              </ErrorBoundary>
-            </div>
-          </main>
+          <div className="relative z-10 flex flex-col h-full w-full">
+            <Header />
+            
+            <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 pb-24 lg:pb-8 custom-scrollbar">
+              <div className="max-w-[1400px] mx-auto w-full">
+                <ErrorBoundary>
+                  {children}
+                </ErrorBoundary>
+              </div>
+            </main>
+          </div>
 
           {/* Mobile Bottom Bar — hidden on desktop */}
           <BottomBar className="lg:hidden" />

@@ -50,13 +50,13 @@ export default function Header() {
 
   return (
     <>
-      <header className="h-[60px] md:h-[72px] bg-surface border-b border-border px-4 md:px-8 flex items-center justify-between sticky top-0 z-30">
+      <header className="h-[60px] md:h-[72px] bg-surface/60 backdrop-blur-xl border-b border-white/5 px-4 md:px-8 flex items-center justify-between sticky top-0 z-30">
         {/* LEFT: BACK BUTTON OR GREETING */}
         <div className="flex items-center gap-3">
           {isSubPage ? (
             <button 
               onClick={handleBack}
-              className="w-10 h-10 flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-surface-2 rounded-md transition-colors"
+              className="w-10 h-10 flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-white/5 rounded-md transition-colors"
               aria-label="Geri Dön"
             >
               <ArrowLeft size={24} />
@@ -64,7 +64,7 @@ export default function Header() {
           ) : (
             <button 
               onClick={() => setIsSidebarOpen(true)}
-              className="w-10 h-10 flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-surface-2 rounded-md lg:hidden transition-colors"
+              className="w-10 h-10 flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-white/5 rounded-md lg:hidden transition-colors"
               aria-label="Menüyü Aç"
             >
               <Menu size={24} />
@@ -110,7 +110,7 @@ export default function Header() {
           {/* Günü Kapat */}
           <button 
             onClick={() => setEndModalOpen(true)}
-            className="hidden sm:flex items-center gap-2 bg-surface-2 border border-border text-text-primary hover:bg-surface-3 px-4 py-2 rounded-md text-xs font-bold transition-all active:scale-95"
+            className="hidden sm:flex items-center gap-2 bg-white/5 border border-white/10 text-white hover:bg-white/10 px-4 py-2 rounded-md text-xs font-bold transition-all active:scale-95"
           >
             <span>🌙 Günü Kapat</span>
           </button>
@@ -118,7 +118,7 @@ export default function Header() {
           {/* Profile Link */}
           <Link
             href="/dashboard/settings"
-            className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white text-xs font-black border-2 border-surface shadow-md hover:scale-105 transition-all active:scale-95"
+            className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary text-xs font-black border-2 border-primary/50 shadow-[0_0_10px_rgba(0,230,118,0.3)] hover:scale-105 transition-all active:scale-95"
             aria-label="Profil ve Ayarlar"
           >
             {initials}
