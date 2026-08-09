@@ -1,6 +1,6 @@
 'use client';
 
-import { MapContainer, TileLayer, Marker, useMapEvents, useMap, Popup, FeatureGroup, GeoJSON } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap, Popup, FeatureGroup, GeoJSON, Polygon } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useAppContext } from '@/context/AppContext';
@@ -19,6 +19,7 @@ import { useAgroMonitoring } from './hooks/useAgroMonitoring';
 import type { Land } from '@/types';
 import LandFormModal from '@/components/forms/LandForm';
 import { fetchGeocodingReverse, fetchGeocodingSearch } from '@/services/geocoding';
+import Button from '@/components/ui/Button';
 
 // Fix Leaflet default icon issues in Next.js
 if (typeof window !== 'undefined') {
@@ -538,7 +539,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
 
         return (
           <Polygon 
-            positions={land.coordinates as any} 
+            positions={((land as any).coordinates || (land as any).polygon_coordinates || []) as any} 
             pathOptions={{ fillColor, fillOpacity: 0.7, color: fillColor, weight: 1 }} 
           />
         );
