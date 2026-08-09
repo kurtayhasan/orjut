@@ -24,8 +24,11 @@ export default function DistanceSellingPage() {
           <section>
             <h2 className="text-2xl font-black text-white mb-4">1. TARAFLAR</h2>
             <div className="bg-zinc-900/50 p-6 rounded-2xl border border-white/5 space-y-4">
-              <p><strong>SATICI:</strong> Kurtay Bilişim Teknoloji ve Yazılım A.Ş.</p>
-              <p><strong>E-POSTA:</strong> kurtayhasan[at]gmail.com</p>
+              <p><strong>SATICI:</strong> Kurtay Bilişim Zirai Araştırma (Hasan Kurtay)</p>
+              <p><strong>ADRES:</strong> TEPEBAŞI MAH. 603 SK. Kapı No:3/C KIZILTEPE/MARDİN</p>
+              <p><strong>TELEFON:</strong> 0543 814 04 49</p>
+              <p><strong>E-POSTA:</strong> kurtayhasan@gmail.com</p>
+              <p><strong>VERGİ NO:</strong> 5960556836</p>
               <p><strong>ALICI:</strong> Sitede sunulan hizmetlerden faydalanan ve ödeme yapan kullanıcı.</p>
             </div>
           </section>

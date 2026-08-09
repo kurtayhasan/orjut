@@ -364,11 +364,17 @@ export default function LandingPage() {
               <li><Link href="/legal/privacy" className="text-text-muted hover:text-white transition-colors text-sm font-bold">Gizlilik Politikası</Link></li>
               <li><Link href="/legal/refund" className="text-text-muted hover:text-white transition-colors text-sm font-bold">İptal ve İade Koşulları</Link></li>
               <li><Link href="/legal/distance-selling" className="text-text-muted hover:text-white transition-colors text-sm font-bold">Mesafeli Satış Sözleşmesi</Link></li>
+              <li><Link href="/legal/delivery" className="text-text-muted hover:text-white transition-colors text-sm font-bold">Teslimat Politikası</Link></li>
             </ul>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto pt-12 mt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-text-muted text-sm font-medium">
-           <p>© 2026 Kurtay Bilişim. Tüm hakları saklıdır.</p>
+        <div className="max-w-7xl mx-auto pt-12 mt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 text-text-muted text-sm font-medium">
+           <div className="flex flex-col gap-2">
+             <p className="font-bold text-white">Kurtay Bilişim Zirai Araştırma (Hasan Kurtay)</p>
+             <p>Adres: TEPEBAŞI MAH. 603 SK. Kapı No:3/C KIZILTEPE/MARDİN</p>
+             <p>Tel: 0543 814 04 49 | Vergi No: 5960556836</p>
+             <p className="mt-2 text-xs">© 2026 Tüm hakları saklıdır.</p>
+           </div>
            <div className="flex gap-6">
               <a href="mailto:kurtayhasan@gmail.com" className="hover:text-white transition-colors">Bize Ulaşın</a>
               <Link href="/" className="hover:text-white transition-colors">Twitter</Link>

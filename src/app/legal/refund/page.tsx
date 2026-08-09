@@ -60,8 +60,14 @@ export default function RefundPage() {
           <section>
             <h2 className="text-2xl font-black text-white mb-4">5. İletişim</h2>
             <p>
-              İptal ve iade taleplerinizle ilgili her türlü soru için <strong>kurtayhasan[at]gmail.com</strong> adresine e-posta gönderebilirsiniz.
+              İptal ve iade taleplerinizle ilgili her türlü soru için aşağıdaki iletişim bilgilerinden bize ulaşabilirsiniz:
             </p>
+            <div className="bg-zinc-900/50 p-6 rounded-2xl border border-white/5 space-y-4 mt-4">
+              <p><strong>Şirket:</strong> Kurtay Bilişim Zirai Araştırma (Hasan Kurtay)</p>
+              <p><strong>Adres:</strong> TEPEBAŞI MAH. 603 SK. Kapı No:3/C KIZILTEPE/MARDİN</p>
+              <p><strong>Telefon:</strong> 0543 814 04 49</p>
+              <p><strong>E-posta:</strong> kurtayhasan@gmail.com</p>
+            </div>
           </section>
         </div>
         
