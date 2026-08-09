@@ -61,8 +61,8 @@ export default function ClientManagement() {
             <Users size={28} />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">Müşteri Yönetimi</h1>
-            <p className="text-zinc-500 font-medium text-sm">Danışmanlık verdiğiniz çiftçileri yönetin</p>
+            <h1 className="text-2xl font-black text-text-primary dark:text-white tracking-tight">Müşteri Yönetimi</h1>
+            <p className="text-text-muted font-medium text-sm">Danışmanlık verdiğiniz çiftçileri yönetin</p>
           </div>
         </div>
         
@@ -81,9 +81,9 @@ export default function ClientManagement() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-4">
-          <h2 className="text-sm font-black text-zinc-400 uppercase tracking-widest ml-1">Müşteri Listesi</h2>
+          <h2 className="text-sm font-black text-text-muted uppercase tracking-widest ml-1">Müşteri Listesi</h2>
           {loading ? (
-            <div className="p-12 text-center text-zinc-400">Yükleniyor...</div>
+            <div className="p-12 text-center text-text-muted">Yükleniyor...</div>
           ) : clients.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {clients.map(c => (
@@ -114,10 +114,10 @@ export default function ClientManagement() {
                     )}
                   </div>
                   <h3 className="text-lg font-black">{c.farmer.first_name} {c.farmer.last_name}</h3>
-                  <p className="text-zinc-500 text-sm mb-4">{c.farmer.phone}</p>
+                  <p className="text-text-muted text-sm mb-4">{c.farmer.phone}</p>
                   
                   {c.status === 'approved' && (
-                    <div className="flex items-center justify-between text-[10px] font-black text-zinc-400 uppercase tracking-widest pt-4 border-t border-white/5 dark:border-white/5">
+                    <div className="flex items-center justify-between text-[10px] font-black text-text-muted uppercase tracking-widest pt-4 border-t border-white/5 dark:border-white/5">
                       <span>Panele Git</span>
                       <ArrowRight size={14} className={selectedClientId === c.farmer_id ? 'text-emerald-500' : ''} />
                     </div>
@@ -127,7 +127,7 @@ export default function ClientManagement() {
             </div>
           ) : (
             <div className="p-12 text-center bg-surface  rounded-3xl border border-dashed border-white/5 dark:border-white/5">
-              <p className="text-zinc-500 font-medium">Henüz bir müşteri bulunmuyor. Sağ üstten telefon numarasıyla davet gönderebilirsiniz.</p>
+              <p className="text-text-muted font-medium">Henüz bir müşteri bulunmuyor. Sağ üstten telefon numarasıyla davet gönderebilirsiniz.</p>
             </div>
           )}
         </div>

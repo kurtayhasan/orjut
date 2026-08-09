@@ -103,7 +103,7 @@ export default function DashboardPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        <p className="text-zinc-500 dark:text-zinc-400 font-black text-xs uppercase tracking-widest animate-pulse">
+        <p className="text-text-muted dark:text-text-muted font-black text-xs uppercase tracking-widest animate-pulse">
           Oturum Bilgileri Yükleniyor...
         </p>
       </div>
@@ -175,8 +175,8 @@ export default function DashboardPage() {
 
           {/* BÖLÜM 2 — PREMIUM AI ANALİZ VE HAVA DURUMU (EXPANDED) */}
           <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-            <Card padding="none" className="xl:col-span-3 bg-surface/40 backdrop-blur-xl border border-primary/20 shadow-[0_0_40px_rgba(16,185,129,0.05)] overflow-hidden relative group min-h-[320px] flex flex-col">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/5 opacity-100" />
+            <Card padding="none" className="xl:col-span-3 bg-gradient-to-br from-primary/10 via-surface to-bg border border-primary/30 shadow-[0_0_40px_rgba(16,185,129,0.1)] overflow-hidden relative group min-h-[320px] flex flex-col">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-100" />
               
               {/* Animated Background Elements */}
               <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-all duration-700 transform group-hover:scale-110">
@@ -222,7 +222,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* AI Insight Content */}
-                <div className="bg-black/20 backdrop-blur-lg border border-white/5 p-6 rounded-3xl flex-1 flex flex-col justify-between">
+                <div className="bg-bg/60 backdrop-blur-lg border border-primary/10 p-6 rounded-3xl flex-1 flex flex-col justify-between">
                   <div className="text-white text-sm font-bold leading-relaxed space-y-2 mb-4">
                      {criticalAlert && (
                        <div className="bg-red-500/20 border border-red-500/30 p-3 rounded-2xl flex items-center gap-3 text-red-200 text-xs font-black uppercase tracking-wider mb-4 animate-pulse">

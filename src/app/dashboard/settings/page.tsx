@@ -101,12 +101,12 @@ export default function SettingsPage() {
     <div className="max-w-4xl mx-auto space-y-6 pb-48">
       {/* Header */}
       <header className="flex items-center gap-4 bg-surface border border-white/5 p-6 rounded-3xl shadow-sm">
-        <div className="bg-zinc-100 p-3 rounded-2xl text-zinc-600">
+        <div className="bg-zinc-100 p-3 rounded-2xl text-text-primary">
           <SettingsIcon size={28} />
         </div>
         <div>
-          <h1 className="text-2xl font-black text-zinc-900 tracking-tight">Ayarlar & Profil</h1>
-          <p className="text-zinc-500 font-medium text-sm">Hesabınızı ve uygulama tercihlerini yönetin</p>
+          <h1 className="text-2xl font-black text-text-primary tracking-tight">Ayarlar & Profil</h1>
+          <p className="text-text-muted font-medium text-sm">Hesabınızı ve uygulama tercihlerini yönetin</p>
         </div>
       </header>
 
@@ -117,10 +117,10 @@ export default function SettingsPage() {
             <div className="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-3xl font-black mx-auto mb-4">
               {userProfile?.name?.charAt(0) || 'U'}
             </div>
-            <h3 className="text-lg font-black text-zinc-900">{userProfile?.name}</h3>
-            <p className="text-sm text-zinc-500 font-medium mb-6">{userProfile?.phone}</p>
+            <h3 className="text-lg font-black text-text-primary">{userProfile?.name}</h3>
+            <p className="text-sm text-text-muted font-medium mb-6">{userProfile?.phone}</p>
             <div className="pt-6 border-t border-white/5">
-              <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full ${isPremium ? 'text-emerald-600 bg-emerald-50' : 'text-zinc-400 bg-zinc-50'}`}>
+              <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full ${isPremium ? 'text-emerald-600 bg-emerald-50' : 'text-text-muted bg-zinc-50'}`}>
                 {isPremium ? 'Hasat Pro Üyelik' : 'Ücretsiz Üyelik'}
               </span>
             </div>
@@ -143,7 +143,7 @@ export default function SettingsPage() {
                 <div className="p-2 bg-amber-50 text-amber-600 rounded-xl">
                   <Bell size={20} />
                 </div>
-                <h4 className="font-bold text-zinc-900">Bildirim Ayarları</h4>
+                <h4 className="font-bold text-text-primary">Bildirim Ayarları</h4>
               </div>
             </div>
             
@@ -164,13 +164,13 @@ export default function SettingsPage() {
             
             <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl border border-white/5">
               <div>
-                <p className="font-bold text-sm text-zinc-900">Anlık Bildirimler</p>
-                <p className="text-xs text-zinc-500 font-medium">Hava durumu ve kritik uyarılar</p>
+                <p className="font-bold text-sm text-text-primary">Anlık Bildirimler</p>
+                <p className="text-xs text-text-muted font-medium">Hava durumu ve kritik uyarılar</p>
               </div>
               <button
                 onClick={handleNotificationToggle}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase transition-all ${
-                  notificationsEnabled ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200' : 'bg-zinc-200 text-zinc-600 hover:bg-zinc-300'
+                  notificationsEnabled ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200' : 'bg-zinc-200 text-text-primary hover:bg-zinc-300'
                 }`}
               >
                 {notificationsEnabled ? <><Check size={14} /> Aktif</> : 'Etkinleştir'}
@@ -184,14 +184,14 @@ export default function SettingsPage() {
               <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
                 <Globe size={20} />
               </div>
-              <h4 className="font-bold text-zinc-900">Uygulama Tercihleri</h4>
+              <h4 className="font-bold text-text-primary">Uygulama Tercihleri</h4>
             </div>
 
             <div className="space-y-3">
               <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl border border-white/5">
                 <div>
-                  <p className="font-bold text-sm text-zinc-900">Uygulama Dili</p>
-                  <p className="text-xs text-zinc-500 font-medium">Platform dilini değiştirin</p>
+                  <p className="font-bold text-sm text-text-primary">Uygulama Dili</p>
+                  <p className="text-xs text-text-muted font-medium">Platform dilini değiştirin</p>
                 </div>
                 <select 
                   value={lang} 
@@ -205,10 +205,10 @@ export default function SettingsPage() {
 
               <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl border border-white/5 opacity-50 cursor-not-allowed">
                 <div>
-                  <p className="font-bold text-sm text-zinc-900 text-zinc-400">Koyu Tema (Yakında)</p>
-                  <p className="text-xs text-zinc-400 font-medium">Gece modu deneyimi</p>
+                  <p className="font-bold text-sm text-text-primary text-text-muted">Koyu Tema (Yakında)</p>
+                  <p className="text-xs text-text-muted font-medium">Gece modu deneyimi</p>
                 </div>
-                <Moon size={20} className="text-zinc-300" />
+                <Moon size={20} className="text-text-muted" />
               </div>
 
               <div className="flex items-center justify-between p-4 bg-primary/5 rounded-2xl border border-primary/10">
@@ -233,14 +233,14 @@ export default function SettingsPage() {
                 <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
                   <User size={20} />
                 </div>
-                <h4 className="font-bold text-zinc-900">Mühendis Erişim Talepleri</h4>
+                <h4 className="font-bold text-text-primary">Mühendis Erişim Talepleri</h4>
               </div>
               
               <div className="space-y-3">
                 {pendingRequests.map(req => (
                   <div key={req.id} className="flex items-center justify-between p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100">
                     <div>
-                      <p className="font-black text-sm text-zinc-900">{req.engineer.first_name} {req.engineer.last_name}</p>
+                      <p className="font-black text-sm text-text-primary">{req.engineer.first_name} {req.engineer.last_name}</p>
                       <p className="text-xs text-indigo-600 font-bold uppercase tracking-widest">Ziraat Mühendisi / Danışman</p>
                     </div>
                     <div className="flex gap-2">
@@ -269,23 +269,23 @@ export default function SettingsPage() {
               <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
                 <Shield size={20} />
               </div>
-              <h4 className="font-bold text-zinc-900">Güvenlik & Veri</h4>
+              <h4 className="font-bold text-text-primary">Güvenlik & Veri</h4>
             </div>
             
             <div className="space-y-4">
               <div className="flex items-center justify-between group cursor-pointer hover:bg-zinc-50 p-2 rounded-xl transition-all">
                 <div className="flex items-center gap-3">
-                  <Smartphone size={18} className="text-zinc-400" />
-                  <span className="text-sm font-medium text-zinc-700">Bağlı Cihazlar</span>
+                  <Smartphone size={18} className="text-text-muted" />
+                  <span className="text-sm font-medium text-text-primary">Bağlı Cihazlar</span>
                 </div>
-                <ChevronRight size={18} className="text-zinc-300 group-hover:text-zinc-500" />
+                <ChevronRight size={18} className="text-text-muted group-hover:text-text-muted" />
               </div>
               <div className="flex items-center justify-between group cursor-pointer hover:bg-zinc-50 p-2 rounded-xl transition-all">
                 <div className="flex items-center gap-3">
-                  <Shield size={18} className="text-zinc-400" />
-                  <span className="text-sm font-medium text-zinc-700">Şifre Değiştir</span>
+                  <Shield size={18} className="text-text-muted" />
+                  <span className="text-sm font-medium text-text-primary">Şifre Değiştir</span>
                 </div>
-                <ChevronRight size={18} className="text-zinc-300 group-hover:text-zinc-500" />
+                <ChevronRight size={18} className="text-text-muted group-hover:text-text-muted" />
               </div>
               
               <div className="pt-4 mt-2 border-t border-white/5">
