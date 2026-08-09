@@ -528,7 +528,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
         );
       } else {
         // Fallback for simulated/demo lands: A solid fill based on fake ndvi value
-        const baseValue = (land.id || 0) * 10;
+        const baseValue = typeof land.id === 'string' ? (land.id.charCodeAt(0) || 0) * 10 : ((land.id as unknown as number) || 0) * 10;
         const ndvi = land?.is_irrigated ? 0.75 + (baseValue / 200) : 0.60 + (baseValue / 200);
         let fillColor = '#f44336';
         if (ndvi > 0.6) fillColor = '#1b5e20';
