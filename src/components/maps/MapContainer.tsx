@@ -177,6 +177,8 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
   const [isIrrigated, setIsIrrigated] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [isMobileDrawMode, setIsMobileDrawMode] = useState(false);
+  const [mobileDrawPoints, setMobileDrawPoints] = useState<L.LatLng[]>([]);
   const [environmentType, setEnvironmentType] = useState<'acik_tarla' | 'sera'>('acik_tarla');
   const [sizeSqm, setSizeSqm] = useState<number>(0);
   const [searchQueryResult, setSearchQueryResult] = useState<L.LatLng | null>(null);
@@ -497,7 +499,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
         weight: 1.5,
         dashArray: '3'
       };
-    }
+}
   };
 
   const handleNDVIToggle = () => {
@@ -508,40 +510,41 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
     setIsNDVIActive(!isNDVIActive);
   };
 
-  const generateSimulatedGrid = (land: Partial<Land>, type: 'ndvi' | 'moisture') => {
-    if (!land.boundaries) return null;
-    const bbox = turf.bbox(land.boundaries as any);
-    const width = turf.distance([bbox[0], bbox[1]], [bbox[2], bbox[1]]);
-    const cellSide = Math.max(width / 15, 0.001); // 15x15 approx
-    const grid = turf.squareGrid(bbox, cellSide, { units: 'kilometers' });
-    
-    const features: any[] = [];
-    turf.featureEach(grid, (currentFeature) => {
-      if (turf.booleanIntersects(currentFeature, land.boundaries as any)) {
-        const centroid = turf.centroid(currentFeature);
-        const lat = centroid.geometry.coordinates[1];
-        const lng = centroid.geometry.coordinates[0];
-        const noise = Math.sin(lat * 100000 + lng * 100000);
-        
-        let color = '#000';
-        if (type === 'ndvi') {
-           const val = 0.65 + (noise * 0.15);
-           if (val > 0.7) color = '#1b5e20';
-           else if (val > 0.6) color = '#4caf50';
-           else if (val > 0.5) color = '#8bc34a';
-           else color = '#ffeb3b';
-        } else {
-           const val = 55 + (noise * 25);
-           if (val > 70) color = '#0d47a1';
-           else if (val > 55) color = '#2196f3';
-           else if (val > 40) color = '#00bcd4';
-           else color = '#ffc107';
-        }
-        currentFeature.properties = { color };
-        features.push(currentFeature);
+  const renderNDVILayer = (land: Partial<Land>) => {
+    const polyId = land.agromonitoring_polygon_id;
+    const apiKey = process.env.NEXT_PUBLIC_AGROMONITORING_API_KEY;
+    const isReady = polyId && apiKey && polyId !== 'none';
+
+    if (activeLayer === 'ndvi') {
+      if (isReady) {
+        // ACTUAL AGROMONITORING NDVI TILE LAYER!
+        return (
+          <TileLayer
+            key={`ndvi-tile-${polyId}`}
+            url={`https://api.agromonitoring.com/image/1.0/{z}/{x}/{y}.png?polyid=${polyId}&appid=${apiKey}&color=1`}
+            zIndex={200}
+            opacity={0.8}
+          />
+        );
+      } else {
+        // Fallback for simulated/demo lands: A solid fill based on fake ndvi value
+        const baseValue = (land.id || 0) * 10;
+        const ndvi = land?.is_irrigated ? 0.75 + (baseValue / 200) : 0.60 + (baseValue / 200);
+        let fillColor = '#f44336';
+        if (ndvi > 0.6) fillColor = '#1b5e20';
+        else if (ndvi > 0.4) fillColor = '#4caf50';
+        else if (ndvi > 0.2) fillColor = '#8bc34a';
+        else if (ndvi > 0) fillColor = '#ffeb3b';
+
+        return (
+          <Polygon 
+            positions={land.coordinates as any} 
+            pathOptions={{ fillColor, fillOpacity: 0.7, color: fillColor, weight: 1 }} 
+          />
+        );
       }
-    });
-    return turf.featureCollection(features);
+    }
+    return null;
   };
 
   if (!isMounted || typeof window === 'undefined') {
@@ -609,14 +612,16 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
         )}
       </div>
 
-      {/* Search Bar */}
-      <div className="absolute top-4 left-4 right-4 z-[1000] flex gap-2 pointer-events-none">
-        <form onSubmit={handleSearch} className="flex-1 max-w-md pointer-events-auto">
-          <div className="relative">
+      {/* ─── Map UI Overlay ─── */}
+      <div className="absolute top-4 left-16 right-16 z-[1000] pointer-events-none flex flex-col md:flex-row items-start md:items-center gap-4 justify-between">
+        
+        {/* Search Bar & Mobile Draw Button */}
+        <div className="flex w-full md:w-auto items-center gap-2 pointer-events-auto shadow-lg shadow-black/20 rounded-2xl ml-auto md:ml-0 bg-surface-2 p-1 border border-white/5">
+          <form onSubmit={handleSearch} className="flex-1 max-w-md relative">
             <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input 
-              type="text" 
-              placeholder="Şehir, ilçe veya mevki ara..." 
+              type="text"
+              placeholder="Konum ara..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-11 pr-4 py-3 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xl outline-none focus:ring-2 focus:ring-primary transition-all font-medium text-sm text-zinc-900 dark:text-zinc-100"
@@ -626,9 +631,64 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
                 <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
               </div>
             )}
-          </div>
-        </form>
+          </form>
+          <button 
+            type="button" 
+            onClick={() => setIsMobileDrawMode(true)}
+            className="p-3 bg-primary text-white rounded-xl font-bold flex items-center gap-2 hover:bg-primary-dark transition-colors"
+            title="Kolay Çizim Modu"
+          >
+            <MapPin size={18} />
+            <span className="hidden sm:inline">Kolay Çizim</span>
+          </button>
+        </div>
       </div>
+
+      {isMobileDrawMode && (
+        <>
+          <div className="absolute inset-0 z-[1000] flex items-center justify-center pointer-events-none">
+            <div className="w-16 h-16 border-2 border-primary rounded-full flex items-center justify-center bg-primary/20 backdrop-blur-sm shadow-xl">
+              <div className="w-2 h-2 bg-primary rounded-full shadow-[0_0_10px_rgba(16,185,129,1)]" />
+            </div>
+            <div className="absolute top-[55%] bg-black/50 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full backdrop-blur-md">
+              Merkez
+            </div>
+          </div>
+          <div className="absolute bottom-6 left-4 right-4 z-[1000] flex flex-col gap-3 max-w-sm mx-auto">
+             <div className="bg-surface-2/95 backdrop-blur-xl p-4 rounded-3xl border border-white/10 shadow-2xl space-y-4">
+                <div className="flex justify-between items-center text-white">
+                   <span className="font-bold text-sm">Kolay Çizim Modu</span>
+                   <span className="bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-black">{mobileDrawPoints.length} Nokta</span>
+                </div>
+                <div className="flex gap-2">
+                   <Button fullWidth onClick={() => {
+                     if (mapRef.current) {
+                        setMobileDrawPoints(prev => [...prev, mapRef.current!.getCenter()]);
+                        toast.success("Nokta eklendi");
+                     }
+                   }} size="lg" leftIcon={<MapPin size={18} />}>Nokta Ekle</Button>
+                   <Button fullWidth variant="primary" onClick={() => {
+                     if (mobileDrawPoints.length < 3) {
+                        toast.error("Alan için en az 3 nokta eklemelisiniz.");
+                        return;
+                     }
+                     const polygon = L.polygon(mobileDrawPoints);
+                     const event = { layerType: 'polygon', layer: polygon };
+                     onCreated(event);
+                     setIsMobileDrawMode(false);
+                     setMobileDrawPoints([]);
+                   }} size="lg" leftIcon={<Save size={18} />}>Bitir</Button>
+                </div>
+                <div className="flex justify-between">
+                  <Button variant="ghost" onClick={() => {
+                     setMobileDrawPoints(prev => prev.slice(0, -1));
+                  }}>Geri Al</Button>
+                  <Button variant="ghost" className="text-danger" onClick={() => { setIsMobileDrawMode(false); setMobileDrawPoints([]); }}>İptal</Button>
+                </div>
+             </div>
+          </div>
+        </>
+      )}
 
       <MapContainer 
         ref={mapRef}
@@ -691,6 +751,15 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
           />
         </FeatureGroup>
         
+        {isMobileDrawMode && mobileDrawPoints.length > 0 && (
+           <>
+              <Polygon positions={mobileDrawPoints} pathOptions={{ color: '#10B981', fillColor: '#10B981', fillOpacity: 0.3, weight: 2 }} />
+              {mobileDrawPoints.map((pt, i) => (
+                 <Marker key={`mdp-${i}`} position={pt} icon={L.divIcon({ className: 'bg-primary w-3 h-3 rounded-full border border-white', iconSize: [12,12] })} />
+              ))}
+           </>
+        )}
+        
         <MapController selectedLand={focusLand} searchResult={searchQueryResult} />
         
         {/* PHASE 3: ADVANCED AGRI-LAYERS MENU */}
@@ -739,10 +808,6 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
 
         {/* Render markers for all saved lands */}
         {lands.map((land: Land) => {
-          const hasPolygon = land?.agromonitoring_polygon_id && land?.agromonitoring_polygon_id !== 'none';
-          const showSimulatedGrid = activeLayer !== 'normal' && !hasPolygon;
-          const gridData = showSimulatedGrid ? generateSimulatedGrid(land, activeLayer) : null;
-          
           return (
           <React.Fragment key={land.id}>
             {land.boundaries ? (
@@ -750,7 +815,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
               <GeoJSON 
                 key={"orjut-ndvi-sync-" + activeLayer + "-" + land.id}
                 data={land.boundaries as GeoJSON.GeoJsonObject} 
-                style={() => showSimulatedGrid ? { fillColor: 'transparent', color: '#ffffff', weight: 2 } : getLandStyle(land)}
+                style={() => getLandStyle(land)}
                 eventHandlers={{
                   click: (e: unknown) => {
                     handleEditPlot(land);
@@ -761,23 +826,9 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
                   <LandWeatherPopup land={land} />
                 </Popup>
               </GeoJSON>
-              {showSimulatedGrid && gridData && (
-                <GeoJSON
-                  key={"orjut-grid-" + activeLayer + "-" + land.id}
-                  data={gridData as GeoJSON.GeoJsonObject}
-                  style={(feature: any) => ({
-                    fillColor: feature.properties?.color || '#000',
-                    fillOpacity: 0.75,
-                    color: feature.properties?.color || '#000',
-                    weight: 1,
-                  })}
-                  eventHandlers={{
-                    click: (e: unknown) => {
-                      handleEditPlot(land);
-                    }
-                  }}
-                />
-              )}
+              
+              {/* Render the NDVI TileLayer or Simulated Fill */}
+              {renderNDVILayer(land)}
               </>
             ) : (
               land.lat && land.lng && (

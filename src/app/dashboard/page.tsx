@@ -16,6 +16,7 @@ import {
   BrainCircuit, ShieldCheck, Microscope, Zap,
   GraduationCap, ArrowRight
 } from 'lucide-react';
+import WeatherForecast from '@/components/dashboard/WeatherForecast';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { cn, formatCurrency, formatDateShort } from '@/lib/utils';
@@ -261,6 +262,8 @@ export default function DashboardPage() {
                      <span>SON GÜNCELLEME: BUGÜN</span>
                   </div>
                 </div>
+                
+                <WeatherForecast lands={lands} />
               </div>
             </Card>
 
