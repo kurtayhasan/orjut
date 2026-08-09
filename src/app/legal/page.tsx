@@ -8,7 +8,7 @@ export default function LegalPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-[#fafafa] text-zinc-900 font-sans p-6 md:p-12">
+    <div className="min-h-screen bg-bg text-text-primary font-sans p-6 md:p-12">
       <div className="max-w-4xl mx-auto">
         <button 
           onClick={() => router.back()}
@@ -17,13 +17,13 @@ export default function LegalPage() {
           <ChevronLeft size={20} /> Geri Dön
         </button>
 
-        <div className="bg-white border border-zinc-200 rounded-[2.5rem] p-8 md:p-12 shadow-xl shadow-zinc-200/50">
+        <div className="bg-surface border border-zinc-200 rounded-[2.5rem] p-8 md:p-12 shadow-xl shadow-zinc-200/50">
           <div className="flex items-center gap-4 mb-10">
             <div className="bg-indigo-100 text-indigo-600 p-4 rounded-3xl">
               <ShieldCheck size={32} />
             </div>
             <div>
-              <h1 className="text-3xl font-black tracking-tight text-zinc-900">Yasal Bilgilendirmeler</h1>
+              <h1 className="text-3xl font-black tracking-tight text-text-primary">Yasal Bilgilendirmeler</h1>
               <p className="text-zinc-500 font-medium">Kurtay Bilişim Kullanım ve Gizlilik Şartları</p>
             </div>
           </div>
@@ -31,7 +31,7 @@ export default function LegalPage() {
           <div className="space-y-12">
             {/* KVKK & GDPR Section */}
             <section className="space-y-4">
-              <h2 className="flex items-center gap-2 text-xl font-black text-zinc-900">
+              <h2 className="flex items-center gap-2 text-xl font-black text-text-primary">
                 <Scale size={24} className="text-indigo-600" />
                 KVKK ve GDPR Aydınlatma Metni
               </h2>
@@ -52,7 +52,7 @@ export default function LegalPage() {
 
             {/* AI ve Anonim Veri Kullanımı */}
             <section className="space-y-4">
-              <h2 className="flex items-center gap-2 text-xl font-black text-zinc-900">
+              <h2 className="flex items-center gap-2 text-xl font-black text-text-primary">
                 <Sparkles size={24} className="text-indigo-600" />
                 Yapay Zeka (AI) ve Anonim Veri Kullanımı
               </h2>
@@ -71,7 +71,7 @@ export default function LegalPage() {
 
             {/* Gizlilik Politikası */}
             <section className="space-y-4">
-              <h2 className="flex items-center gap-2 text-xl font-black text-zinc-900">
+              <h2 className="flex items-center gap-2 text-xl font-black text-text-primary">
                 <Lock size={24} className="text-emerald-600" />
                 Gizlilik ve Veri Güvenliği
               </h2>
@@ -87,7 +87,7 @@ export default function LegalPage() {
 
             {/* Çerez Politikası */}
             <section className="space-y-4">
-              <h2 className="flex items-center gap-2 text-xl font-black text-zinc-900">
+              <h2 className="flex items-center gap-2 text-xl font-black text-text-primary">
                 <FileText size={24} className="text-amber-600" />
                 Çerez (Cookie) Politikası
               </h2>

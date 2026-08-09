@@ -159,6 +159,11 @@
     line-height: 44px !important;
   }
 
+  /* ─── React Phone Number Input Fix ─── */
+  .PhoneInputInput {
+    @apply bg-transparent text-text-primary outline-none;
+  }
+
   /* ─── Chrome Autofill Fix for Dark Mode ─── */
   input:-webkit-autofill,
   input:-webkit-autofill:hover, 

@@ -29,43 +29,43 @@ export default function LandingPage() {
       title: "Arazi Haritası",
       desc: "Parsellerini çiz, uydudan takip et ve sınırlarını belirle.",
       icon: Map,
-      color: "text-blue-600",
-      bg: "bg-blue-50"
+      color: "text-blue-400",
+      bg: "bg-blue-500/10"
     },
     {
       title: "Masraf Takibi",
       desc: "Gübre, ilaç ve mazot giderlerini kuruşu kuruşuna kaydet.",
       icon: Wallet,
-      color: "text-emerald-600",
-      bg: "bg-emerald-50"
+      color: "text-emerald-400",
+      bg: "bg-emerald-500/10"
     },
     {
       title: "Stok Yönetimi",
       desc: "Depondaki ürünleri bil, eksilince anında haberin olsun.",
       icon: Package,
-      color: "text-amber-600",
-      bg: "bg-amber-50"
+      color: "text-amber-400",
+      bg: "bg-bgmber-50"
     },
     {
       title: "Hava & Sulama",
       desc: "Tarlana özel hava durumu ve akıllı sulama tavsiyeleri.",
       icon: Droplets,
-      color: "text-cyan-600",
-      bg: "bg-cyan-50"
+      color: "text-cyan-400",
+      bg: "bg-cyan-500/10"
     },
     {
       title: "AI Asistan",
       desc: "Zirai konularda 7/24 uzman yapay zekâ danışmanlığı.",
       icon: Bot,
-      color: "text-purple-600",
-      bg: "bg-purple-50"
+      color: "text-purple-400",
+      bg: "bg-purple-500/10"
     },
     {
       title: "Sezon Raporu",
       desc: "Yıl sonunda ne kadar kazandığını detaylı analiz et.",
       icon: BarChart3,
-      color: "text-rose-600",
-      bg: "bg-rose-50"
+      color: "text-rose-400",
+      bg: "bg-rose-500/10"
     }
   ];
 
@@ -74,7 +74,7 @@ export default function LandingPage() {
       {/* NAVBAR */}
       <nav className={cn(
         "fixed top-0 w-full z-[var(--z-sticky)] transition-all duration-300",
-        scrolled ? "bg-white/90 backdrop-blur-md shadow-sm py-3" : "bg-transparent py-5"
+        scrolled ? "bg-bg/90 backdrop-blur-md shadow-sm py-3" : "bg-transparent py-5"
       )}>
         <div className="max-w-7xl mx-auto px-5 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -106,7 +106,7 @@ export default function LandingPage() {
 
       {/* MOBILE MENU */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-[var(--z-modal)] flex flex-col bg-white animate-fade-in">
+        <div className="fixed inset-0 z-[var(--z-modal)] flex flex-col bg-surface animate-fade-in">
           <div className="p-5 flex justify-between items-center border-b border-border">
              <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white">
@@ -134,7 +134,7 @@ export default function LandingPage() {
       <section className="pt-32 pb-20 px-5 relative overflow-hidden">
         {/* Background blobs */}
         <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-[500px] h-[500px] bg-bgmber-500/5 rounded-full blur-[100px] pointer-events-none" />
 
         <div className="max-w-7xl mx-auto flex flex-col items-center text-center relative z-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 rounded-full mb-8 border border-primary-100">
@@ -188,7 +188,7 @@ export default function LandingPage() {
       </section>
 
       {/* FEATURES SECTION */}
-      <section id="features" className="py-24 bg-white border-y border-border">
+      <section id="features" className="py-24 bg-surface border-y border-border">
         <div className="max-w-7xl mx-auto px-5">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-heading font-black text-text-primary mb-4 tracking-tight">
@@ -317,7 +317,7 @@ export default function LandingPage() {
 
       {/* CTA SECTION */}
       <section className="py-24 bg-primary text-white overflow-hidden relative">
-        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-surface/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
         <div className="max-w-4xl mx-auto px-5 text-center relative z-10">
            <h2 className="text-3xl md:text-5xl font-heading font-black mb-8 leading-tight">
              Tarlanızın Geleceğini <br className="hidden md:block" /> Dijital Güçle Yönetin
@@ -325,7 +325,7 @@ export default function LandingPage() {
            <p className="text-primary-100 text-lg md:text-xl mb-12 font-medium">
              Hemen kaydolun, 5 dakikada tarlalarınızı dijital dünyaya taşıyın.
            </p>
-           <Button onClick={() => router.push('/login')} size="xl" className="bg-white text-primary hover:bg-primary-50 px-12">
+           <Button onClick={() => router.push('/login')} size="xl" className="bg-surface text-primary hover:bg-primary-50 px-12">
              Şimdi Ücretsiz Hesap Oluştur
            </Button>
         </div>
