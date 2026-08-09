@@ -53,7 +53,8 @@ export async function POST(req: Request) {
     const email = user.email || 'musteri@orjut.com';
     const payment_amount = selectedPackage.price * 100; // PayTR kuruş bekler
     
-    const user_ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
+    const forwarded = req.headers.get('x-forwarded-for');
+    const user_ip = forwarded ? forwarded.split(',')[0].trim() : (req.headers.get('x-real-ip') || '127.0.0.1');
     const user_basket = Buffer.from(JSON.stringify([[selectedPackage.name, selectedPackage.price.toString(), 1]])).toString('base64');
     const no_installment = 0; // Taksit yapılmasın isteniyorsa 1, yapılsın isteniyorsa 0
     const max_installment = 12;
@@ -106,6 +107,6 @@ export async function POST(req: Request) {
 
   } catch (error: any) {
     console.error("Checkout api error:", error);
-    return NextResponse.json({ error: 'Ödeme oturumu oluşturulamadı.' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Ödeme oturumu oluşturulamadı.' }, { status: 500 });
   }
 }
