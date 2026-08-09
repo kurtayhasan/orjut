@@ -649,10 +649,19 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
               }
             />
           </LayersControl.BaseLayer>
-          <LayersControl.BaseLayer checked name="Uydu Görünümü">
+          <LayersControl.BaseLayer checked name="Google Uydu (Güncel)">
             <TileLayer
-              attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EBP, and the GIS User Community'
+              attribution='&copy; <a href="https://maps.google.com">Google Maps</a>'
+              url="https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
+              subdomains={['mt0','mt1','mt2','mt3']}
+              maxZoom={22}
+            />
+          </LayersControl.BaseLayer>
+          <LayersControl.BaseLayer name="Esri Uydu (Alternatif)">
+            <TileLayer
+              attribution='Tiles &copy; Esri'
               url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              maxZoom={19}
             />
           </LayersControl.BaseLayer>
 
