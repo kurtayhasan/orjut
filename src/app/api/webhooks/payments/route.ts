@@ -34,8 +34,10 @@ export async function POST(req: Request) {
 
     if (status === 'success') {
       // Ödeme başarılı, veritabanını güncelle
-      // merchant_oid formatı: ORDER_timestamp_userId
-      const userId = merchant_oid.split('_')[2]; 
+      // merchant_oid formatı: ORD + 13 haneli timestamp + 32 haneli tiresiz UUID
+      const strippedUuid = merchant_oid.slice(16); 
+      // UUID formatına (8-4-4-4-12) geri çevir:
+      const userId = `${strippedUuid.slice(0,8)}-${strippedUuid.slice(8,12)}-${strippedUuid.slice(12,16)}-${strippedUuid.slice(16,20)}-${strippedUuid.slice(20)}`;
 
       if (!userId) {
         throw new Error("Sipariş ID'sinden kullanıcı ID'si çıkarılamadı.");
