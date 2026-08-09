@@ -72,7 +72,7 @@ export default function FinancePage() {
       {/* HEADER SECTION */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black font-heading text-text-primary tracking-tight">Finansal Takip</h1>
+          <h1 className="text-3xl font-bold font-heading text-text-primary tracking-tight">Finansal Takip</h1>
           <p className="text-text-muted font-bold text-sm">Gelir ve giderlerinizi profesyonelce yönetin.</p>
         </div>
         <div className="flex items-center gap-2">
@@ -86,15 +86,15 @@ export default function FinancePage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card status="info" padding="lg" className="flex flex-col justify-between min-h-[140px]">
            <div>
-              <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-1">Net Durum</p>
+              <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Net Durum</p>
               <h2 className={cn(
-                "text-3xl font-black font-heading tracking-tight",
+                "text-3xl font-bold font-heading tracking-tight",
                 netBalance >= 0 ? "text-success" : "text-danger"
               )}>
                 {netBalance >= 0 ? '+' : ''}{formatCurrency(netBalance)}
               </h2>
            </div>
-           <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-text-muted">
+           <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-text-muted">
               <span>Mevcut Sezon</span>
               <span className={netBalance >= 0 ? "text-success" : "text-danger"}>
                 {netBalance >= 0 ? 'Karda' : 'Zararda'}
@@ -104,8 +104,8 @@ export default function FinancePage() {
 
         <Card status="success" padding="lg" className="flex flex-col justify-between min-h-[140px]">
            <div>
-              <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-1">Toplam Gelir</p>
-              <h2 className="text-3xl font-black font-heading text-success tracking-tight">
+              <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Toplam Gelir</p>
+              <h2 className="text-3xl font-bold font-heading text-success tracking-tight">
                 {formatCurrency(totalIncome)}
               </h2>
            </div>
@@ -118,8 +118,8 @@ export default function FinancePage() {
 
         <Card status="danger" padding="lg" className="flex flex-col justify-between min-h-[140px]">
            <div>
-              <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-1">Toplam Gider</p>
-              <h2 className="text-3xl font-black font-heading text-danger tracking-tight">
+              <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Toplam Gider</p>
+              <h2 className="text-3xl font-bold font-heading text-danger tracking-tight">
                 {formatCurrency(totalExpenses)}
               </h2>
            </div>
@@ -152,7 +152,7 @@ export default function FinancePage() {
                   key={t}
                   onClick={() => setFilter(t)}
                   className={cn(
-                    "px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-all",
+                    "px-4 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all",
                     filter === t ? "bg-surface-2 text-primary" : "text-text-muted hover:text-text-primary hover:bg-surface-2/50"
                   )}
                 >
@@ -170,8 +170,8 @@ export default function FinancePage() {
          <div className="lg:col-span-8 space-y-4">
             <Card padding="none" className="overflow-hidden">
                <div className="p-4 border-b border-border bg-surface-2 flex items-center justify-between">
-                  <h3 className="text-sm font-black font-heading text-text-primary uppercase tracking-tight">İşlem Geçmişi</h3>
-                  <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">{filteredTransactions.length} İşlem Listelendi</span>
+                  <h3 className="text-sm font-bold font-heading text-text-primary uppercase tracking-tight">İşlem Geçmişi</h3>
+                  <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">{filteredTransactions.length} İşlem Listelendi</span>
                </div>
                <div className="divide-y divide-border">
                   {filteredTransactions.length > 0 ? (
@@ -200,7 +200,7 @@ export default function FinancePage() {
                         <div className="flex items-center gap-6">
                            <div className="text-right">
                               <div className={cn(
-                                "text-lg font-black font-heading tracking-tight",
+                                "text-lg font-bold font-heading tracking-tight",
                                 tx.type === 'expense' ? "text-danger" : "text-success"
                               )}>
                                 {tx.type === 'expense' ? '-' : '+'}{formatCurrency(tx.amount)}
@@ -208,7 +208,7 @@ export default function FinancePage() {
                               {tx.receipt_url && (
                                 <button 
                                   onClick={(e) => { e.stopPropagation(); setViewerImage(tx.receipt_url!); }}
-                                  className="text-[10px] font-black text-primary hover:underline uppercase tracking-tighter"
+                                  className="text-[10px] font-bold text-primary hover:underline uppercase tracking-tighter"
                                 >
                                   📄 FİŞİ GÖR
                                 </button>
@@ -232,7 +232,7 @@ export default function FinancePage() {
             <Card padding="lg" className="sticky top-[88px]">
                <div className="flex items-center gap-2 mb-6">
                   <PieChart size={20} className="text-primary" />
-                  <h3 className="text-base font-black font-heading text-text-primary uppercase tracking-tight">Kategori Dağılımı</h3>
+                  <h3 className="text-base font-bold font-heading text-text-primary uppercase tracking-tight">Kategori Dağılımı</h3>
                </div>
                <div className="space-y-5">
                   {Object.entries(categoryTotals).filter(([key, val]) => key !== 'grandTotal' && (val as any).total > 0).map(([name, data]: [string, any]) => (
@@ -242,7 +242,7 @@ export default function FinancePage() {
                              <h4 className="text-sm font-bold text-text-primary leading-tight">{name}</h4>
                              <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest">{data.count} Kayıt</p>
                           </div>
-                          <div className="text-right font-black text-text-primary text-sm">
+                          <div className="text-right font-bold text-text-primary text-sm">
                              {formatCurrency(data.total)}
                           </div>
                        </div>
@@ -258,11 +258,11 @@ export default function FinancePage() {
 
                <div className="mt-10 p-5 bg-surface-2 rounded-xl border border-border">
                   <div className="flex flex-col items-center text-center">
-                     <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">En Yüksek Gider Kalemi</p>
+                     <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-2">En Yüksek Gider Kalemi</p>
                      <div className="w-12 h-12 bg-surface-2 rounded-full flex items-center justify-center text-xl shadow-sm mb-3 text-text-muted">
                         🌱
                      </div>
-                     <span className="font-black text-text-primary text-lg leading-tight uppercase">Gübreleme</span>
+                     <span className="font-bold text-text-primary text-lg leading-tight uppercase">Gübreleme</span>
                      <span className="text-xs font-bold text-text-muted mt-1">Giderlerin %42&apos;sini oluşturuyor</span>
                   </div>
                </div>

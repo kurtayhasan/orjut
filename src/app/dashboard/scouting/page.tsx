@@ -120,7 +120,7 @@ export default function ScoutingPage() {
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black font-heading text-text-primary tracking-tight">Arazi Gözlemi</h1>
+          <h1 className="text-3xl font-bold font-heading text-text-primary tracking-tight">Arazi Gözlemi</h1>
           <p className="text-text-muted font-bold text-sm">Bitki sağlığını ve gelişim evrelerini dökümante edin.</p>
         </div>
         <Button size="md" leftIcon={<Plus size={20} />} onClick={() => setIsAddModalOpen(true)}>Yeni Gözlem Ekle</Button>
@@ -129,8 +129,8 @@ export default function ScoutingPage() {
       {/* TIMELINE */}
       <div className="space-y-4">
          <div className="flex items-center justify-between px-1">
-            <h3 className="text-sm font-black font-heading text-text-primary uppercase tracking-tight">Gözlem Geçmişi</h3>
-            <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">{scoutingLogs.length} Rapor</span>
+            <h3 className="text-sm font-bold font-heading text-text-primary uppercase tracking-tight">Gözlem Geçmişi</h3>
+            <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">{scoutingLogs.length} Rapor</span>
          </div>
 
          <div className="space-y-4">
@@ -146,7 +146,7 @@ export default function ScoutingPage() {
                          )}>
                             <HeartPulse size={24} />
                          </div>
-                         <span className="text-[10px] font-black uppercase tracking-widest text-text-muted">{formatDateShort(log.date)}</span>
+                         <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">{formatDateShort(log.date)}</span>
                       </div>
 
                       <div className="flex-1 space-y-4">
@@ -157,7 +157,7 @@ export default function ScoutingPage() {
                             </div>
                             <div className="flex items-center gap-2">
                                <span className={cn(
-                                 "px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider",
+                                 "px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider",
                                  log.health_status === 'saglikli' ? "bg-success text-white" : 
                                  log.health_status === 'hastalik' ? "bg-warning text-[#1B2E1C]" : "bg-danger text-white"
                                )}>
@@ -185,17 +185,17 @@ export default function ScoutingPage() {
                                 <GraduationCap size={40} className="text-amber-900" />
                               </div>
                               <div className="flex items-center gap-2 mb-2">
-                                <span className="px-2 py-0.5 bg-amber-400 text-[#1B2E1C] text-[9px] font-black rounded uppercase tracking-widest flex items-center gap-1 shadow-sm">
+                                <span className="px-2 py-0.5 bg-amber-400 text-[#1B2E1C] text-[9px] font-bold rounded uppercase tracking-widest flex items-center gap-1 shadow-sm">
                                   <ShieldCheck size={10} /> Mühendis Tavsiyesi
                                 </span>
                               </div>
-                              <h5 className="font-black text-amber-900 text-sm">{log.prescription_text || log.prescription_action}</h5>
+                              <h5 className="font-bold text-amber-900 text-sm">{log.prescription_text || log.prescription_action}</h5>
                               {log.prescription_notes && !log.prescription_text && <p className="text-xs font-bold text-amber-800/80 mt-1">{log.prescription_notes}</p>}
                               
                               {log.is_prescription_applied ? (
                                 <div className="mt-4 flex items-center gap-2 px-3 py-2 bg-emerald-100 border border-emerald-200 rounded-lg text-emerald-700">
                                   <CheckCircle2 size={16} />
-                                  <span className="text-xs font-black uppercase tracking-wider">✅ Tamamlandı / Uygulandı</span>
+                                  <span className="text-xs font-bold uppercase tracking-wider">✅ Tamamlandı / Uygulandı</span>
                                 </div>
                               ) : (
                                 userRole === 'farmer' && (
@@ -309,7 +309,7 @@ export default function ScoutingPage() {
                 <GraduationCap size={20} />
               </div>
               <div className="min-w-0">
-                <h6 className="text-xs font-black text-emerald-900 uppercase tracking-tight">Uzman Teşhisi</h6>
+                <h6 className="text-xs font-bold text-emerald-900 uppercase tracking-tight">Uzman Teşhisi</h6>
                 <p className="text-[11px] font-bold text-emerald-800 truncate">
                   {selectedLog ? getLandDisplay(selectedLog.land_id) : ''} - {selectedLog ? getHealthStatusLabel(selectedLog.health_status || 'saglikli') : ''}
                 </p>

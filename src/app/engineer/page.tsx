@@ -63,7 +63,7 @@ export default function EngineerDashboard() {
 
   if (isLoadingProfile) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-black">
+      <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-bg">
         <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -132,7 +132,7 @@ export default function EngineerDashboard() {
   });
 
   return (
-    <div className="p-8 max-w-5xl mx-auto space-y-8 min-h-screen bg-zinc-50 dark:bg-black">
+    <div className="p-8 max-w-5xl mx-auto space-y-8 min-h-screen bg-zinc-50 dark:bg-bg">
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button
@@ -145,7 +145,7 @@ export default function EngineerDashboard() {
           >
             Kendi Panelime Dön
           </Button>
-          <h1 className="text-3xl font-black text-zinc-900 dark:text-white flex items-center gap-2">
+          <h1 className="text-3xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
             <Users className="text-indigo-500" /> Danışan Çiftçilerim
           </h1>
         </div>
@@ -203,11 +203,11 @@ export default function EngineerDashboard() {
                   {/* Farmer profile summary */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-zinc-800 pb-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-black text-lg">
+                      <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-lg">
                         {client.first_name?.[0]}
                       </div>
                       <div>
-                        <h3 className="font-black text-lg text-zinc-900 dark:text-zinc-100 group-hover:text-indigo-500 transition-colors">
+                        <h3 className="font-bold text-lg text-zinc-900 dark:text-zinc-100 group-hover:text-indigo-500 transition-colors">
                           {client.first_name} {client.last_name}
                         </h3>
                         <p className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1 font-bold">
@@ -217,13 +217,13 @@ export default function EngineerDashboard() {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-[10px] font-black uppercase tracking-widest text-zinc-500 rounded-lg">
+                      <span className="px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-[10px] font-bold uppercase tracking-widest text-zinc-500 rounded-lg">
                         {farmerLands.length} Tarla
                       </span>
-                      <span className="px-3 py-1 bg-rose-50 dark:bg-rose-950/20 text-[10px] font-black uppercase tracking-widest text-rose-600 dark:text-rose-400 rounded-lg flex items-center gap-1">
+                      <span className="px-3 py-1 bg-rose-50 dark:bg-rose-950/20 text-[10px] font-bold uppercase tracking-widest text-rose-600 dark:text-rose-400 rounded-lg flex items-center gap-1">
                         <Coins size={12} /> ₺{totalSpent.toLocaleString()} Harcama
                       </span>
-                      <span className="px-3 py-1.5 bg-indigo-600 text-[10px] font-black uppercase tracking-widest text-white rounded-lg group-hover:bg-indigo-700 transition-all">
+                      <span className="px-3 py-1.5 bg-indigo-600 text-[10px] font-bold uppercase tracking-widest text-white rounded-lg group-hover:bg-indigo-700 transition-all">
                         Paneli Yönet
                       </span>
                     </div>
@@ -231,7 +231,7 @@ export default function EngineerDashboard() {
 
                   {/* Nested Lands Grid */}
                   <div className="space-y-3">
-                    <h4 className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest flex items-center gap-1">
+                    <h4 className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest flex items-center gap-1">
                       <Sprout size={12} /> Tarım Alanları ve Reçeteler
                     </h4>
 
@@ -263,7 +263,7 @@ export default function EngineerDashboard() {
                                 <p className="text-[10px] text-zinc-500 dark:text-zinc-400 font-bold mt-0.5">
                                   Ada {land.block_no} / Parsel {land.parcel_no} • {land.size_decare} Dekar
                                 </p>
-                                <p className="text-[9px] text-rose-500 font-black uppercase mt-1">
+                                <p className="text-[9px] text-rose-500 font-bold uppercase mt-1">
                                   Maliyet: ₺{landExpenses.toLocaleString()}
                                 </p>
                               </div>
@@ -271,7 +271,7 @@ export default function EngineerDashboard() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="min-h-[32px] px-2.5 text-[10px] font-black uppercase tracking-wider text-indigo-600 hover:text-white hover:bg-indigo-600"
+                                className="min-h-[32px] px-2.5 text-[10px] font-bold uppercase tracking-wider text-indigo-600 hover:text-white hover:bg-indigo-600"
                                 onClick={(e) => handleOpenPrescriptionModal(land, e)}
                               >
                                 <ClipboardCheck size={12} className="mr-1" /> Reçete Ekle
@@ -321,10 +321,10 @@ export default function EngineerDashboard() {
         <form onSubmit={handleAddScoutingLog} className="space-y-4 py-2">
           <div className="p-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-xl text-xs font-bold text-zinc-500 dark:text-zinc-400">
             <span className="text-zinc-400">Arazi Konumu: </span>
-            <span className="text-zinc-900 dark:text-white font-black">{activePrescriptionLandDetails?.district || activePrescriptionLandDetails?.city} </span>
+            <span className="text-zinc-900 dark:text-white font-bold">{activePrescriptionLandDetails?.district || activePrescriptionLandDetails?.city} </span>
             <span className="mx-1 text-zinc-300">|</span>
             <span className="text-zinc-400">Ürün Tipi: </span>
-            <span className="text-zinc-900 dark:text-white font-black">{activePrescriptionLandDetails?.crop_type}</span>
+            <span className="text-zinc-900 dark:text-white font-bold">{activePrescriptionLandDetails?.crop_type}</span>
           </div>
 
           <div className="grid grid-cols-2 gap-3">

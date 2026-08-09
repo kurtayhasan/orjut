@@ -33,13 +33,13 @@ export default function LandMovementsModal({ isOpen, onClose, land, transactions
               <LandPlot size={20} />
             </div>
             <div>
-              <h3 className="font-black text-zinc-900 dark:text-zinc-100">{land.district || land.city}</h3>
+              <h3 className="font-bold text-zinc-900 dark:text-zinc-100">{land.district || land.city}</h3>
               <p className="text-xs text-zinc-500 font-bold">Ada {land.block_no} / Parsel {land.parcel_no}</p>
             </div>
           </div>
           <div className="text-right">
-            <div className="text-xl font-black text-rose-600">₺{totalSpent.toLocaleString()}</div>
-            <div className="text-[10px] text-zinc-400 font-black uppercase tracking-widest text-right">Toplam Harcama</div>
+            <div className="text-xl font-bold text-rose-600">₺{totalSpent.toLocaleString()}</div>
+            <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest text-right">Toplam Harcama</div>
           </div>
         </div>
 
@@ -57,7 +57,7 @@ export default function LandMovementsModal({ isOpen, onClose, land, transactions
                 <div className="bg-surface dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 p-4 rounded-2xl shadow-sm">
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-black text-white px-2 py-0.5 bg-zinc-800 dark:bg-zinc-700 rounded-md uppercase tracking-wider">
+                      <span className="text-[10px] font-bold text-white px-2 py-0.5 bg-zinc-800 dark:bg-zinc-700 rounded-md uppercase tracking-wider">
                         {tx.category || 'Diğer'}
                       </span>
                       <span className="text-xs text-zinc-400 font-bold flex items-center gap-1">
@@ -65,13 +65,13 @@ export default function LandMovementsModal({ isOpen, onClose, land, transactions
                         {format(new Date(tx.date), 'dd MMMM yyyy', { locale: tr })}
                       </span>
                     </div>
-                    <span className="font-black text-rose-600">₺{tx.amount.toLocaleString()}</span>
+                    <span className="font-bold text-rose-600">₺{tx.amount.toLocaleString()}</span>
                   </div>
                   
                   <p className="text-sm font-bold text-zinc-700 dark:text-zinc-300 mb-2">{tx.description}</p>
                   
                   {tx.receipt_url && (
-                    <a href={tx.receipt_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-[10px] font-black text-emerald-600 hover:text-emerald-500 uppercase tracking-widest">
+                    <a href={tx.receipt_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 hover:text-emerald-500 uppercase tracking-widest">
                       <Receipt size={12} /> Makbuzu Görüntüle
                     </a>
                   )}

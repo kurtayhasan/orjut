@@ -138,9 +138,9 @@ export default function AIPage() {
           </div>
           <div>
              <div className="flex items-center gap-2">
-                <h1 className="text-3xl font-black font-heading text-text-primary tracking-tight">Akıllı Asistan</h1>
+                <h1 className="text-3xl font-bold font-heading text-text-primary tracking-tight">Akıllı Asistan</h1>
                 {!isPremium && (
-                  <span className="bg-amber-400 text-[#1B2E1C] text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+                  <span className="bg-amber-400 text-[#1B2E1C] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
                     <Crown size={12} /> PRO
                   </span>
                 )}
@@ -159,7 +159,7 @@ export default function AIPage() {
                    <Lock size={32} />
                 </div>
                 <div>
-                   <h3 className="text-2xl font-black font-heading text-text-primary mb-2 tracking-tight">Yapay Zekâ Kilidini Aç</h3>
+                   <h3 className="text-2xl font-bold font-heading text-text-primary mb-2 tracking-tight">Yapay Zekâ Kilidini Aç</h3>
                    <p className="text-sm font-bold text-text-muted leading-relaxed">
                       Tarlalarınızın verilerini analiz eden ve size özel öneriler sunan akıllı asistana sadece Premium üyeler erişebilir.
                    </p>
@@ -178,7 +178,7 @@ export default function AIPage() {
                    <Lock size={32} />
                 </div>
                 <div>
-                   <h3 className="text-2xl font-black font-heading text-text-primary mb-2 tracking-tight">İnternet Bağlantısı Gerekiyor</h3>
+                   <h3 className="text-2xl font-bold font-heading text-text-primary mb-2 tracking-tight">İnternet Bağlantısı Gerekiyor</h3>
                    <p className="text-sm font-bold text-text-muted leading-relaxed">
                       Yapay zeka asistanını kullanabilmek için internet bağlantısına ihtiyacınız var. Lütfen bağlantınızı kontrol edip tekrar deneyin.
                    </p>
@@ -197,7 +197,7 @@ export default function AIPage() {
                       <Sparkles size={48} className="text-primary relative" />
                    </div>
                    <div className="space-y-2">
-                      <h3 className="text-xl font-black font-heading text-text-primary">Nasıl Yardımcı Olabilirim?</h3>
+                      <h3 className="text-xl font-bold font-heading text-text-primary">Nasıl Yardımcı Olabilirim?</h3>
                       <p className="text-sm font-bold text-text-muted max-w-sm mx-auto">
                          Aşağıdaki konularda veya aklınıza takılan herhangi bir zirai soruda bana danışabilirsiniz.
                       </p>

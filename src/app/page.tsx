@@ -79,7 +79,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
-              <span className="font-heading font-black text-xl">O</span>
+              <span className="font-heading font-bold text-xl">O</span>
             </div>
             <span className="text-xl font-heading font-extrabold text-text-primary tracking-tight">
               Orjut <span className="text-primary font-bold">ZiraiAsistan</span>
@@ -110,7 +110,7 @@ export default function LandingPage() {
           <div className="p-5 flex justify-between items-center border-b border-border">
              <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white">
-                <span className="font-heading font-black">O</span>
+                <span className="font-heading font-bold">O</span>
               </div>
               <span className="font-heading font-bold">Orjut</span>
             </div>
@@ -142,7 +142,7 @@ export default function LandingPage() {
             <span className="text-sm font-extrabold text-primary uppercase tracking-wider">Enterprise AgTech Çözümü</span>
           </div>
 
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading font-black text-text-primary leading-[1.1] mb-6 tracking-tight max-w-4xl">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading font-bold text-text-primary leading-[1.1] mb-6 tracking-tight max-w-4xl">
             Tarlanızı Geleceğe Taşıyan<br />
             <span className="text-primary">Dijital İş Ortağınız</span>
           </h1>
@@ -191,7 +191,7 @@ export default function LandingPage() {
       <section id="features" className="py-24 bg-surface border-y border-border">
         <div className="max-w-7xl mx-auto px-5">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-heading font-black text-text-primary mb-4 tracking-tight">
+            <h2 className="text-3xl md:text-5xl font-heading font-bold text-text-primary mb-4 tracking-tight">
               Tarım İşinizi Kolaylaştıran Özellikler
             </h2>
             <p className="text-lg text-text-secondary max-w-2xl mx-auto font-medium">
@@ -217,7 +217,7 @@ export default function LandingPage() {
       <section id="how-it-works" className="py-24">
         <div className="max-w-7xl mx-auto px-5">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-heading font-black text-text-primary mb-4 tracking-tight">
+            <h2 className="text-3xl md:text-5xl font-heading font-bold text-text-primary mb-4 tracking-tight">
               3 Basit Adımda Başlayın
             </h2>
           </div>
@@ -232,7 +232,7 @@ export default function LandingPage() {
                { step: "3", title: "Akıllı Öneriler Al", desc: "AI asistanın verilerini analiz etsin, sana yol göstersin.", icon: Bot }
              ].map((s, i) => (
                <div key={i} className="flex flex-col items-center text-center relative z-10">
-                 <div className="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center text-2xl font-black mb-6 shadow-xl shadow-primary/20">
+                 <div className="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center text-2xl font-bold mb-6 shadow-xl shadow-primary/20">
                     {s.step}
                  </div>
                  <h3 className="text-2xl font-bold text-text-primary font-heading mb-3">{s.title}</h3>
@@ -247,7 +247,7 @@ export default function LandingPage() {
       <section id="pricing" className="py-24 bg-surface-2 border-t border-border">
         <div className="max-w-7xl mx-auto px-5">
            <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-heading font-black text-text-primary mb-4 tracking-tight">
+            <h2 className="text-3xl md:text-5xl font-heading font-bold text-text-primary mb-4 tracking-tight">
               Her Ölçeğe Uygun Paketler
             </h2>
             <p className="text-lg text-text-secondary font-medium">Temel özellikler her zaman ücretsiz.</p>
@@ -259,7 +259,7 @@ export default function LandingPage() {
                 <div className="mb-6">
                   <h3 className="text-xl font-bold text-text-primary font-heading">Ücretsiz Başlangıç</h3>
                   <div className="mt-4 flex items-baseline gap-1">
-                    <span className="text-4xl font-black text-text-primary">₺0</span>
+                    <span className="text-4xl font-bold text-text-primary">₺0</span>
                     <span className="text-text-secondary font-bold">/ay</span>
                   </div>
                 </div>
@@ -279,17 +279,17 @@ export default function LandingPage() {
 
              {/* Pro */}
              <Card padding="lg" className="flex flex-col border-2 border-primary relative overflow-hidden">
-                <div className="absolute top-0 right-0 bg-primary text-white px-4 py-1 text-xs font-black uppercase tracking-widest rounded-bl-lg z-10">
+                <div className="absolute top-0 right-0 bg-primary text-white px-4 py-1 text-xs font-bold uppercase tracking-widest rounded-bl-lg z-10">
                    2 AY HEDİYE
                 </div>
                 <div className="mb-6">
                   <h3 className="text-xl font-bold text-text-primary font-heading">Hasat Pro</h3>
                   <div className="mt-4">
                     <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-black text-text-primary">₺499</span>
+                      <span className="text-4xl font-bold text-text-primary">₺499</span>
                       <span className="text-text-secondary font-bold">/ay</span>
                     </div>
-                    <p className="text-xs text-primary font-black mt-1 uppercase tracking-tighter">Yıllık 4.990 TL</p>
+                    <p className="text-xs text-primary font-bold mt-1 uppercase tracking-tighter">Yıllık 4.990 TL</p>
                   </div>
                 </div>
                 <div className="flex-1 space-y-4 mb-8">
@@ -319,7 +319,7 @@ export default function LandingPage() {
       <section className="py-24 bg-primary text-white overflow-hidden relative">
         <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-surface/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
         <div className="max-w-4xl mx-auto px-5 text-center relative z-10">
-           <h2 className="text-3xl md:text-5xl font-heading font-black mb-8 leading-tight">
+           <h2 className="text-3xl md:text-5xl font-heading font-bold mb-8 leading-tight">
              Tarlanızın Geleceğini <br className="hidden md:block" /> Dijital Güçle Yönetin
            </h2>
            <p className="text-primary-100 text-lg md:text-xl mb-12 font-medium">
@@ -337,7 +337,7 @@ export default function LandingPage() {
           <div className="col-span-1 md:col-span-2 space-y-6">
              <div className="flex items-center gap-2">
               <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white">
-                <span className="font-heading font-black text-xl">O</span>
+                <span className="font-heading font-bold text-xl">O</span>
               </div>
               <span className="text-xl font-heading font-extrabold tracking-tight">
                 Orjut <span className="text-primary">ZiraiAsistan</span>

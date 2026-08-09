@@ -38,7 +38,7 @@ export default function LandTimeline({ history }: { history: TimelineItem[] }) {
           <div className="bg-surface-2 rounded-2xl p-4 border border-border hover:border-primary/30 transition-colors shadow-sm group">
             <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-black text-text-primary uppercase tracking-wider">
+                <span className="text-xs font-bold text-text-primary uppercase tracking-wider">
                   {format(new Date(item.timestamp), 'd MMMM yyyy', { locale: tr })}
                 </span>
                 <span className="text-[10px] font-bold text-text-muted bg-surface px-2 py-0.5 rounded-md border border-border">
@@ -47,7 +47,7 @@ export default function LandTimeline({ history }: { history: TimelineItem[] }) {
               </div>
               
               {item.weather_snapshot && (
-                <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-text-secondary">
+                <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-text-secondary">
                   <div className="flex items-center gap-1.5">
                     <Cloud size={12} className="text-info" />
                     <span>{item.weather_snapshot.temp}°C / {item.weather_snapshot.humidity}%</span>
@@ -66,7 +66,7 @@ export default function LandTimeline({ history }: { history: TimelineItem[] }) {
             </div>
             
             <div className="mt-3 flex justify-end">
-               <button className="text-[9px] font-black uppercase tracking-widest text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+               <button className="text-[9px] font-bold uppercase tracking-widest text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                  Detaylar <ChevronRight size={10} />
                </button>
             </div>

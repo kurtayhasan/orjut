@@ -48,7 +48,7 @@ function LandTimelineContainer({ landId }: { landId: string }) {
 
   return (
     <div className="space-y-4">
-      <h4 className="font-black text-[10px] text-text-muted uppercase tracking-widest mb-3 flex items-center gap-2">
+      <h4 className="font-bold text-[10px] text-text-muted uppercase tracking-widest mb-3 flex items-center gap-2">
         <Activity size={14} className="text-primary" /> Analiz Geçmişi
       </h4>
       {loading ? (
@@ -166,7 +166,7 @@ export default function LandsPage() {
       {/* HEADER SECTION */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black font-heading text-text-primary tracking-tight">Arazilerim</h1>
+          <h1 className="text-3xl font-bold font-heading text-text-primary tracking-tight">Arazilerim</h1>
           <p className="text-text-muted font-bold text-sm">Toplam {formatArea(totalArea)} aktif tarım alanı yönetiyorsunuz.</p>
         </div>
         <div className="flex items-center gap-2">
@@ -253,22 +253,22 @@ export default function LandsPage() {
               <div className="space-y-6 flex-1">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="text-2xl font-black font-heading text-text-primary">{selectedLand.district || selectedLand.city}</h3>
+                    <h3 className="text-2xl font-bold font-heading text-text-primary">{selectedLand.district || selectedLand.city}</h3>
                     <p className="text-text-muted font-bold">Ada {selectedLand.block_no} / Parsel {selectedLand.parcel_no}</p>
                   </div>
                   <div className="text-right">
-                    <div className="font-black text-3xl text-primary font-heading tracking-tight">{selectedLand.size_decare}</div>
-                    <div className="text-[10px] text-text-muted font-black uppercase tracking-widest">Dönüm Alan</div>
+                    <div className="font-bold text-3xl text-primary font-heading tracking-tight">{selectedLand.size_decare}</div>
+                    <div className="text-[10px] text-text-muted font-bold uppercase tracking-widest">Dönüm Alan</div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 bg-surface-2 rounded-xl border border-border">
-                    <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-1">Ürün</p>
+                    <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Ürün</p>
                     <p className="font-bold text-text-primary flex items-center gap-2"><Sprout size={14} className="text-primary" /> {selectedLand.crop_type}</p>
                   </div>
                   <div className="p-4 bg-surface-2 rounded-xl border border-border">
-                    <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-1">Sulama</p>
+                    <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Sulama</p>
                     <p className="font-bold text-text-primary flex items-center gap-2">
                        {selectedLand.is_irrigated ? <><Droplets size={14} className="text-blue-500" /> Sulanıyor</> : 'Kuru Tarım'}
                     </p>
@@ -292,7 +292,7 @@ export default function LandsPage() {
                     <h4 className="font-bold text-text-primary flex items-center gap-2 text-sm">
                       <Activity size={16} className="text-emerald-500" /> Sağlık ve Nem Analizi
                     </h4>
-                    <span className="text-[9px] font-black uppercase tracking-widest text-primary bg-primary-50 border border-primary-100 px-2 py-0.5 rounded-md">Proaktif AI</span>
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-primary bg-primary-50 border border-primary-100 px-2 py-0.5 rounded-md">Proaktif AI</span>
                   </div>
                   {realtimeData.loading ? (
                     <div className="space-y-4 py-2 animate-pulse">
@@ -309,7 +309,7 @@ export default function LandsPage() {
                     <div className="space-y-4">
                       <div>
                         <div className="flex justify-between items-center mb-1.5">
-                          <span className="text-[10px] font-black uppercase tracking-widest text-text-muted">Bitki Sağlığı (NDVI)</span>
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Bitki Sağlığı (NDVI)</span>
                           <span className={cn(
                             "text-xs font-bold px-2.5 py-0.5 rounded-full",
                             (realtimeData.healthIndex ?? 85) >= 80 ? "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20" : "text-amber-600 bg-amber-50 dark:bg-amber-950/20"
@@ -326,7 +326,7 @@ export default function LandsPage() {
                       </div>
                       <div>
                         <div className="flex justify-between items-center mb-1.5">
-                          <span className="text-[10px] font-black uppercase tracking-widest text-text-muted">Toprak Nemi</span>
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Toprak Nemi</span>
                           <span className={cn(
                             "text-xs font-bold px-2.5 py-0.5 rounded-full",
                             (realtimeData.humidity ?? 42) >= 50 ? "text-blue-600 bg-blue-50 dark:bg-blue-950/20" : "text-amber-600 bg-amber-50 dark:bg-amber-950/20"
@@ -348,7 +348,7 @@ export default function LandsPage() {
                 <LandTimelineContainer landId={selectedLand.id} />
 
                 <div>
-                   <h4 className="font-black text-[10px] text-text-muted uppercase tracking-widest mb-3">Arazi Notları</h4>
+                   <h4 className="font-bold text-[10px] text-text-muted uppercase tracking-widest mb-3">Arazi Notları</h4>
                    <p className="text-sm text-text-secondary italic">Bu arazi için henüz bir gözlem kaydı bulunmuyor.</p>
                 </div>
               </div>
@@ -389,8 +389,8 @@ export default function LandsPage() {
                          </div>
                       </div>
                       <div className="text-right">
-                         <div className="font-black text-xl text-text-primary tracking-tight">{land.size_decare}</div>
-                         <div className="text-[10px] text-text-muted font-black uppercase tracking-widest">Dönüm</div>
+                         <div className="font-bold text-xl text-text-primary tracking-tight">{land.size_decare}</div>
+                         <div className="text-[10px] text-text-muted font-bold uppercase tracking-widest">Dönüm</div>
                       </div>
                     </div>
                   </Card>

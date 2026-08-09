@@ -8,7 +8,7 @@ export default function DeliveryPage() {
   return (
     <div className="min-h-screen bg-[#050505] text-zinc-300 selection:bg-emerald-500/20">
       <div className="max-w-4xl mx-auto px-6 py-24">
-        <Link href="/" className="inline-flex items-center gap-2 text-zinc-500 hover:text-emerald-500 transition-colors font-black text-xs uppercase tracking-widest mb-12 group">
+        <Link href="/" className="inline-flex items-center gap-2 text-zinc-500 hover:text-emerald-500 transition-colors font-bold text-xs uppercase tracking-widest mb-12 group">
           <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
           Anasayfaya Dön
         </Link>
@@ -17,12 +17,12 @@ export default function DeliveryPage() {
           <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-500">
             <Package size={24} />
           </div>
-          <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter">Teslimat Politikası</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tighter">Teslimat Politikası</h1>
         </div>
 
         <div className="prose prose-invert prose-emerald max-w-none space-y-8 text-lg font-medium leading-relaxed">
           <section>
-            <h2 className="text-2xl font-black text-white mb-4">1. Teslimat Şekli</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">1. Teslimat Şekli</h2>
             <p>
               Kurtay Bilişim (Orjut Zirai Asistan), elektronik ortamda anında ifa edilen dijital bir hizmettir (SaaS - Software as a Service). 
               Bu nedenle, satın almış olduğunuz herhangi bir paket veya hizmet için <strong>fiziksel bir kargo teslimatı veya gönderimi yapılmamaktadır.</strong>
@@ -30,7 +30,7 @@ export default function DeliveryPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-black text-white mb-4">2. Teslimat Süresi</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">2. Teslimat Süresi</h2>
             <p>
               Kullanıcıların web sitemiz üzerinden kredi kartı veya diğer ödeme yöntemleriyle yapmış oldukları ödemeler onaylandığı anda, satın alınan dijital hizmetler ve ek özellikler (örneğin; Hasat Pro paketi erişimi, uydu haritaları kotası) <strong>anında kullanıcının hesabına tanımlanır.</strong>
             </p>
@@ -40,14 +40,14 @@ export default function DeliveryPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-black text-white mb-4">3. Teslimat Adresi</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">3. Teslimat Adresi</h2>
             <p>
               Sistem üzerinden satın alım işlemi gerçekleştirilirken fiziksel bir teslimat adresi talep edilmez. Tüm erişim hakları, kullanıcının sisteme kayıt olurken kullandığı telefon numarası veya e-posta adresi ile ilişkilendirilmiş hesabına dijital olarak tanımlanır.
             </p>
           </section>
 
           <section>
-            <h2 className="text-2xl font-black text-white mb-4">4. İletişim</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">4. İletişim</h2>
             <p>
               Teslimat süreçleri (hesaba paketin tanımlanmaması vb. teknik sorunlar) hakkında sorularınız veya destek talepleriniz için aşağıdaki iletişim bilgilerinden bize ulaşabilirsiniz:
             </p>
@@ -62,7 +62,7 @@ export default function DeliveryPage() {
         </div>
         
         <div className="mt-24 pt-12 border-t border-white/5 text-center">
-          <p className="text-xs font-black text-zinc-600 uppercase tracking-widest">Son Güncelleme: 9 Ağustos 2026</p>
+          <p className="text-xs font-bold text-zinc-600 uppercase tracking-widest">Son Güncelleme: 9 Ağustos 2026</p>
         </div>
       </div>
     </div>

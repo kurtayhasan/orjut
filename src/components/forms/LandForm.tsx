@@ -74,7 +74,7 @@ export default function LandFormModal({
         <div className="p-6 border-b border-zinc-50 dark:border-zinc-800">
           <div className="flex justify-between items-start">
             <div>
-              <h3 className="text-xl font-black text-zinc-900 dark:text-zinc-100 tracking-tight">
+              <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
                 {editingLandId ? 'Araziyi Düzenle' : 'Yeni Arazi Tanımla'}
               </h3>
               <p className="text-zinc-500 dark:text-zinc-400 text-xs font-medium uppercase tracking-wider mt-1">Tapu ve Ürün Bilgileri</p>

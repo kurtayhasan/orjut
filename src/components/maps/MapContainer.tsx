@@ -89,7 +89,7 @@ function LandWeatherPopup({ land }: { land: Partial<Land> }) {
   return (
     <div className="p-2 min-w-[160px] max-w-[240px] space-y-2 text-zinc-900 dark:text-zinc-100 font-sans">
       <div className="border-b border-zinc-100 dark:border-zinc-800 pb-1.5">
-        <h4 className="font-black text-xs text-indigo-600 dark:text-indigo-400">
+        <h4 className="font-bold text-xs text-indigo-600 dark:text-indigo-400">
           {land.district || land.city || 'İsimsiz Arazi'}
         </h4>
         <p className="text-[9px] text-zinc-500 dark:text-zinc-400 font-bold uppercase mt-0.5">
@@ -106,13 +106,13 @@ function LandWeatherPopup({ land }: { land: Partial<Land> }) {
 
       <div className="flex items-center justify-between text-[11px] font-bold pt-0.5">
         <span className="text-zinc-500 dark:text-zinc-400">Sıcaklık:</span>
-        <span className="text-zinc-800 dark:text-zinc-100 font-black">
+        <span className="text-zinc-800 dark:text-zinc-100 font-bold">
           {loading ? '...' : weather?.temperature !== undefined && weather?.temperature !== null ? `${weather.temperature}°C` : '--'}
         </span>
       </div>
       <div className="flex items-center justify-between text-[11px] font-bold">
         <span className="text-zinc-500 dark:text-zinc-400">Nem Oranı:</span>
-        <span className="text-zinc-800 dark:text-zinc-100 font-black">
+        <span className="text-zinc-800 dark:text-zinc-100 font-bold">
           {loading ? '...' : weather?.humidity !== undefined && weather?.humidity !== null ? `${weather.humidity}%` : '--'}
         </span>
       </div>
@@ -574,7 +574,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
               setIsNDVIActive(true);
             }
           }}
-          className={`p-3 rounded-2xl shadow-xl backdrop-blur-md transition-all border flex items-center gap-2 ${activeLayer === 'ndvi' ? 'bg-primary border-primary text-white font-black' : 'bg-white/90 dark:bg-zinc-900/90 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-surface font-bold'}`}
+          className={`p-3 rounded-2xl shadow-xl backdrop-blur-md transition-all border flex items-center gap-2 ${activeLayer === 'ndvi' ? 'bg-primary border-primary text-white font-bold' : 'bg-white/90 dark:bg-zinc-900/90 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-surface font-bold'}`}
         >
           {isPremium ? <Radio size={18} className={activeLayer === 'ndvi' ? 'animate-pulse' : ''} /> : <Lock size={18} className="text-amber-500" />}
           <span className="text-xs uppercase tracking-widest hidden sm:inline">🛰️ NDVI Bitki Sağlığı</span>
@@ -595,7 +595,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
               setIsNDVIActive(true);
             }
           }}
-          className={`p-3 rounded-2xl shadow-xl backdrop-blur-md transition-all border flex items-center gap-2 ${activeLayer === 'moisture' ? 'bg-blue-600 border-blue-600 text-white font-black' : 'bg-white/90 dark:bg-zinc-900/90 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-surface font-bold'}`}
+          className={`p-3 rounded-2xl shadow-xl backdrop-blur-md transition-all border flex items-center gap-2 ${activeLayer === 'moisture' ? 'bg-blue-600 border-blue-600 text-white font-bold' : 'bg-white/90 dark:bg-zinc-900/90 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-surface font-bold'}`}
         >
           {isPremium ? <Droplet size={18} className={activeLayer === 'moisture' ? 'animate-pulse' : ''} /> : <Lock size={18} className="text-amber-500" />}
           <span className="text-xs uppercase tracking-widest hidden sm:inline">💧 Toprak Nemi</span>
@@ -650,7 +650,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
             <div className="w-16 h-16 border-2 border-primary rounded-full flex items-center justify-center bg-primary/20 backdrop-blur-sm shadow-xl">
               <div className="w-2 h-2 bg-primary rounded-full shadow-[0_0_10px_rgba(16,185,129,1)]" />
             </div>
-            <div className="absolute top-[55%] bg-black/50 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full backdrop-blur-md">
+            <div className="absolute top-[55%] bg-black/50 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full backdrop-blur-md">
               Merkez
             </div>
           </div>
@@ -658,7 +658,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
              <div className="bg-surface-2/95 backdrop-blur-xl p-4 rounded-3xl border border-white/10 shadow-2xl space-y-4">
                 <div className="flex justify-between items-center text-white">
                    <span className="font-bold text-sm">Kolay Çizim Modu</span>
-                   <span className="bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-black">{mobileDrawPoints.length} Nokta</span>
+                   <span className="bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-bold">{mobileDrawPoints.length} Nokta</span>
                 </div>
                 <div className="flex gap-2">
                    <Button fullWidth onClick={() => {
@@ -791,9 +791,9 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
                       }
                     }}
                     className={cn(
-                      "flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest",
+                      "flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all font-bold text-[10px] uppercase tracking-widest",
                       isActive 
-                        ? "bg-primary text-white shadow-lg font-black" 
+                        ? "bg-primary text-white shadow-lg font-bold" 
                         : "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-bold"
                     )}
                   >
@@ -856,8 +856,8 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
       {!isPremium && (
         <div className="absolute top-6 left-6 z-[1000] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border border-zinc-200 dark:border-zinc-800 p-4 rounded-2xl shadow-xl flex flex-col gap-2 pointer-events-auto w-48">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500 flex items-center gap-1"><Layers size={12}/> Arazi</span>
-            <span className="text-xs font-black text-primary">{lands.length} / 3</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 flex items-center gap-1"><Layers size={12}/> Arazi</span>
+            <span className="text-xs font-bold text-primary">{lands.length} / 3</span>
           </div>
           <div className="w-full h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
             <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${Math.min((lands.length / 3) * 100, 100)}%` }} />
@@ -868,7 +868,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
             return (
               <>
                 <div className="flex justify-between items-center mt-1">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-zinc-500 flex items-center gap-1"><Activity size={12}/> Alan</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 flex items-center gap-1"><Activity size={12}/> Alan</span>
                   <span className="text-[10px] font-bold text-zinc-700 dark:text-zinc-300">{Math.round(totalDecare)} / 100 Dn</span>
                 </div>
                 <div className="w-full h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
@@ -882,22 +882,22 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
 
       {isNDVIActive && (
         <div className="absolute bottom-6 right-6 z-[1000] bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-white/20 dark:border-zinc-800 p-4 rounded-2xl shadow-2xl max-w-[220px] pointer-events-none select-none">
-          <h4 className="text-[10px] font-black text-zinc-900 dark:text-white uppercase tracking-widest mb-3 flex items-center gap-1.5">
+          <h4 className="text-[10px] font-bold text-zinc-900 dark:text-white uppercase tracking-widest mb-3 flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             NDVI Sağlık İndeksi
           </h4>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-md bg-[#2d8f2d] border border-green-700/30" />
-              <span className="text-[9px] font-black uppercase tracking-wider text-zinc-600 dark:text-zinc-300">🟢 Yüksek / İyi Gelişim</span>
+              <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-300">🟢 Yüksek / İyi Gelişim</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-md bg-[#e6e600] border border-yellow-600/30" />
-              <span className="text-[9px] font-black uppercase tracking-wider text-zinc-600 dark:text-zinc-300">🟡 Orta Gelişim</span>
+              <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-300">🟡 Orta Gelişim</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-md bg-[#cc0000] border border-red-700/30" />
-              <span className="text-[9px] font-black uppercase tracking-wider text-zinc-600 dark:text-zinc-300">🔴 Düşük / Stres</span>
+              <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-300">🔴 Düşük / Stres</span>
             </div>
           </div>
         </div>

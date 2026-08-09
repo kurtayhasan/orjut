@@ -52,7 +52,7 @@ export default function InviteCollaborator({ engineerId }: InviteCollaboratorPro
           <Button 
             size="sm" 
             variant={copied ? "primary" : "outline"} 
-            className="shrink-0 min-h-[36px] px-3 font-black text-xs" 
+            className="shrink-0 min-h-[36px] px-3 font-bold text-xs" 
             onClick={handleCopy}
           >
             {copied ? (

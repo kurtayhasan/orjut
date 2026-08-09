@@ -6,30 +6,30 @@
 
 :root {
   /* ─── Ana Renk Skalası ─── */
-  --color-primary:        #10B981;  /* Emerald 500 */
-  --color-primary-light:  #34D399;  /* Emerald 400 */
-  --color-primary-dark:   #059669;  /* Emerald 600 */
-  --color-primary-50:     rgba(16, 185, 129, 0.1);
-  --color-primary-100:    rgba(16, 185, 129, 0.2);
+  --color-primary:        #059669;  /* Emerald 600 (Softer) */
+  --color-primary-light:  #10B981;  /* Emerald 500 */
+  --color-primary-dark:   #047857;  /* Emerald 700 */
+  --color-primary-50:     rgba(5, 150, 105, 0.1);
+  --color-primary-100:    rgba(5, 150, 105, 0.2);
 
   /* ─── Yüzey Renkleri ─── */
-  --color-bg:             #0B1110;  /* Deep Forest Night */
-  --color-surface:        #121A18;
-  --color-surface-2:      #182421;
-  --color-surface-3:      #1F2D29;
+  --color-bg:             #0F172A;  /* Slate 900 (Dark Blue-Gray) */
+  --color-surface:        #1E293B;  /* Slate 800 */
+  --color-surface-2:      #334155;  /* Slate 700 */
+  --color-surface-3:      #475569;  /* Slate 600 */
 
   /* ─── Sınır Renkleri ─── */
-  --color-border:         rgba(255, 255, 255, 0.08);
-  --color-border-strong:  rgba(255, 255, 255, 0.15);
-  --color-border-focus:   #00E676;  /* Focus ring rengi */
+  --color-border:         rgba(255, 255, 255, 0.05);
+  --color-border-strong:  rgba(255, 255, 255, 0.10);
+  --color-border-focus:   #059669;  /* Emerald 600 */
 
   /* ─── Metin Renkleri ─── */
-  --color-text-primary:   #F8FAFC;  /* Bright white */
-  --color-text-secondary: #94A3B8;  /* Muted gray */
-  --color-text-muted:     #64748B;
-  --color-text-disabled:  #475569;
-  --color-text-inverse:   #06110D;
-  --color-text-on-primary:#06110D;
+  --color-text-primary:   #E2E8F0;  /* Slate 200 (Softer white) */
+  --color-text-secondary: #94A3B8;  /* Slate 400 */
+  --color-text-muted:     #64748B;  /* Slate 500 */
+  --color-text-disabled:  #475569;  /* Slate 600 */
+  --color-text-inverse:   #0F172A;  /* Slate 900 */
+  --color-text-on-primary:#F8FAFC;  /* White on primary */
 
   /* ─── Semantik Renkler ─── */
   --color-success:        #10B981;

@@ -40,7 +40,7 @@ export default function DeleteAccountPage() {
             <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle2 size={32} />
             </div>
-            <h1 className="text-2xl font-black mb-3">Talebiniz Alındı</h1>
+            <h1 className="text-2xl font-bold mb-3">Talebiniz Alındı</h1>
             <p className="text-zinc-400 text-sm leading-relaxed mb-6">
               Hesap silme talebiniz destek ekibimize başarıyla ulaştı. Güvenlik politikalarımız gereği <span className="text-white font-bold">{phone}</span> numaralı hesabınız ve ilişkili tüm verileriniz 48 saat içerisinde kalıcı olarak silinecektir.
             </p>
@@ -53,7 +53,7 @@ export default function DeleteAccountPage() {
             <div className="w-12 h-12 bg-rose-500/20 text-rose-500 rounded-2xl flex items-center justify-center mb-6">
               <Trash2 size={24} />
             </div>
-            <h1 className="text-3xl font-black mb-3">Hesabımı Sil</h1>
+            <h1 className="text-3xl font-bold mb-3">Hesabımı Sil</h1>
             <p className="text-zinc-400 text-sm leading-relaxed mb-8">
               ZiraiAsistan hesabınızı ve ilişkili tüm tarımsal verilerinizi (araziler, finansal işlemler, analizler) kalıcı olarak silmek için numaranızı girin. Bu işlem <span className="text-rose-400 font-bold">geri alınamaz</span>.
             </p>

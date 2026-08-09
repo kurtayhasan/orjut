@@ -145,9 +145,9 @@ export default function LoginPage() {
         
         <div className="relative z-10 max-w-md text-white">
           <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center text-primary shadow-2xl mb-12">
-            <span className="text-4xl font-black font-heading">O</span>
+            <span className="text-4xl font-bold font-heading">O</span>
           </div>
-          <h2 className="text-5xl font-black font-heading leading-tight mb-6">
+          <h2 className="text-5xl font-bold font-heading leading-tight mb-6">
             Tarım İşlerinizi<br />Cebinizden Yönetin
           </h2>
           <p className="text-xl text-primary-100 font-medium leading-relaxed">
@@ -166,12 +166,12 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           <div className="text-center mb-10 md:hidden">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-2xl shadow-xl shadow-primary/20 mb-6">
-              <span className="text-white text-3xl font-black font-heading">O</span>
+              <span className="text-white text-3xl font-bold font-heading">O</span>
             </div>
           </div>
 
           <div className="mb-10 text-center md:text-left">
-            <h1 className="text-3xl md:text-4xl font-black text-text-primary font-heading tracking-tight mb-2">
+            <h1 className="text-3xl md:text-4xl font-bold text-text-primary font-heading tracking-tight mb-2">
               {isLogin ? 'Tekrar Hoş Geldiniz' : 'Hesabınızı Oluşturun'}
             </h1>
             <p className="text-text-secondary font-medium">
@@ -294,7 +294,7 @@ export default function LoginPage() {
                   <label htmlFor="register-captcha" className="text-sm font-semibold text-text-primary">Güvenlik Doğrulaması</label>
                   <div className="flex gap-3">
                     <div className="flex-1 bg-surface-2 border-2 border-border rounded-md flex items-center justify-center relative overflow-hidden h-12">
-                      <span className="font-black text-2xl italic tracking-[0.4em] text-primary select-none z-10">
+                      <span className="font-bold text-2xl italic tracking-[0.4em] text-primary select-none z-10">
                         {generatedCaptcha.split('').join(' ')}
                       </span>
                       <button 
@@ -314,7 +314,7 @@ export default function LoginPage() {
                         maxLength={4}
                         placeholder="Kod"
                         className={cn(
-                          "w-full bg-surface-2 border-2 border-border rounded-md h-12 text-center text-base font-black outline-none focus:border-primary transition-all",
+                          "w-full bg-surface-2 border-2 border-border rounded-md h-12 text-center text-base font-bold outline-none focus:border-primary transition-all",
                           registerForm.formState.errors.captcha && "border-danger bg-danger-bg"
                         )}
                         {...registerForm.register('captcha')}

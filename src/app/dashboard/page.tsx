@@ -104,7 +104,7 @@ export default function DashboardPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        <p className="text-text-muted dark:text-text-muted font-black text-xs uppercase tracking-widest animate-pulse">
+        <p className="text-text-muted dark:text-text-muted font-bold text-xs uppercase tracking-widest animate-pulse">
           Oturum Bilgileri Yükleniyor...
         </p>
       </div>
@@ -116,7 +116,7 @@ export default function DashboardPage() {
       {/* BÖLÜM 1 — KARŞILAMA VE GİRİŞ */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-black font-heading text-text-primary tracking-tight">
+          <h1 className="text-3xl font-bold font-heading text-text-primary tracking-tight">
             Merhaba, {userProfile?.first_name || 'Çiftçi'} 👋
           </h1>
           <p className="text-text-muted font-bold text-sm">Orjut AgTech Tarım İşletim Sistemine Hoş Geldiniz.</p>
@@ -130,13 +130,13 @@ export default function DashboardPage() {
               <Tractor size={48} className="stroke-[1.5]" />
             </div>
             <div className="space-y-2 max-w-md">
-              <h2 className="text-xl font-black font-heading text-text-primary">İlk Arazinizi Ekleyin!</h2>
+              <h2 className="text-xl font-bold font-heading text-text-primary">İlk Arazinizi Ekleyin!</h2>
               <p className="text-sm font-bold text-text-muted leading-relaxed px-4">
                 Hoş geldiniz! Akıllı tarım asistanınızın çalışması, NDVI sağlık analizlerinin yapılması ve konumunuza özel gerçek zamanlı hava durumunun alınabilmesi için lütfen harita üzerinden ilk arazinizi ekleyin.
               </p>
             </div>
             <Link href="/dashboard/lands" className="pb-8">
-              <Button size="lg" className="font-black uppercase tracking-wider text-xs shadow-lg px-8 py-4" leftIcon={<Plus size={18} />}>
+              <Button size="lg" className="font-bold uppercase tracking-wider text-xs shadow-lg px-8 py-4" leftIcon={<Plus size={18} />}>
                 İlk Arazimi Ekle
               </Button>
             </Link>
@@ -153,12 +153,12 @@ export default function DashboardPage() {
                         <GraduationCap size={28} />
                      </div>
                      <div className="text-white">
-                        <h3 className="text-lg font-black font-heading tracking-tight">Zirai Reçete Bildirimi</h3>
+                        <h3 className="text-lg font-bold font-heading tracking-tight">Zirai Reçete Bildirimi</h3>
                         <p className="text-sm font-bold text-amber-50/90">Ziraat Mühendisinizden {unappliedPrescriptions.length} adet yeni zirai tavsiye/reçete var.</p>
                      </div>
                   </div>
                   <Link href="/dashboard/scouting">
-                     <Button className="bg-surface text-amber-600 hover:bg-amber-50 border-none font-black shadow-md" size="md" rightIcon={<ArrowRight size={18} />}>
+                     <Button className="bg-surface text-amber-600 hover:bg-amber-50 border-none font-bold shadow-md" size="md" rightIcon={<ArrowRight size={18} />}>
                        Reçeteleri Gör
                      </Button>
                   </Link>
@@ -193,8 +193,8 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-6 bg-surface/10 backdrop-blur-xl p-5 rounded-3xl border border-white/20 shadow-lg shrink-0">
                     <div className="text-center">
                       <Sun className="text-amber-300 mb-1 mx-auto drop-shadow-md" size={40} />
-                      <div className="text-4xl font-black text-white">{weather.temp ?? '--'}°</div>
-                      <div className="text-[10px] font-black text-white/70 uppercase tracking-widest mt-1 truncate max-w-[120px]">
+                      <div className="text-4xl font-bold text-white">{weather.temp ?? '--'}°</div>
+                      <div className="text-[10px] font-bold text-white/70 uppercase tracking-widest mt-1 truncate max-w-[120px]">
                         {lands.length > 0 ? (lands[0].district || lands[0].city || 'Arazi Konumu').toUpperCase() : 'KONUM BEKLENİYOR'}
                       </div>
                     </div>
@@ -215,9 +215,9 @@ export default function DashboardPage() {
                       <div className="bg-surface/20 p-2 rounded-xl backdrop-blur-md">
                         <Zap size={20} className="text-amber-300 fill-amber-300" />
                       </div>
-                      <span className="text-xs font-black text-white uppercase tracking-[0.2em]">Akıllı Tarım Asistanı</span>
+                      <span className="text-xs font-bold text-white uppercase tracking-[0.2em]">Akıllı Tarım Asistanı</span>
                     </div>
-                    <h2 className="text-2xl md:text-3xl font-black font-heading text-white leading-tight tracking-tight mb-2">Günlük Proaktif Analiz Raporu</h2>
+                    <h2 className="text-2xl md:text-3xl font-bold font-heading text-white leading-tight tracking-tight mb-2">Günlük Proaktif Analiz Raporu</h2>
                     <p className="text-xs font-bold text-white/70">Gerçek zamanlı hava durumu ve ekin evresi analizleriyle oluşturulan tavsiyeler.</p>
                   </div>
                 </div>
@@ -226,7 +226,7 @@ export default function DashboardPage() {
                 <div className="bg-bg/60 backdrop-blur-lg border border-primary/10 p-6 rounded-3xl flex-1 flex flex-col justify-between">
                   <div className="text-white text-sm font-bold leading-relaxed space-y-2 mb-4">
                      {criticalAlert && (
-                       <div className="bg-red-500/20 border border-red-500/30 p-3 rounded-2xl flex items-center gap-3 text-red-200 text-xs font-black uppercase tracking-wider mb-4 animate-pulse">
+                       <div className="bg-red-500/20 border border-red-500/30 p-3 rounded-2xl flex items-center gap-3 text-red-200 text-xs font-bold uppercase tracking-wider mb-4 animate-pulse">
                          <AlertTriangle size={18} />
                          <span>{criticalAlert}</span>
                        </div>
@@ -240,7 +240,7 @@ export default function DashboardPage() {
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            className="mt-4 border-white/30 hover:bg-surface/10 text-white font-black text-[10px] uppercase tracking-wider flex items-center gap-2"
+                            className="mt-4 border-white/30 hover:bg-surface/10 text-white font-bold text-[10px] uppercase tracking-wider flex items-center gap-2"
                             onClick={() => handleStartAnalysis()}
                             disabled={isAnalyzing}
                           >
@@ -257,7 +257,7 @@ export default function DashboardPage() {
                       )}
                   </div>
                   
-                  <div className="flex items-center justify-between border-t border-white/10 pt-4 text-[10px] font-black text-white/50 uppercase tracking-widest">
+                  <div className="flex items-center justify-between border-t border-white/10 pt-4 text-[10px] font-bold text-white/50 uppercase tracking-widest">
                      <span>ORJUT AI ENGINE v1.2</span>
                      <span>SON GÜNCELLEME: BUGÜN</span>
                   </div>
@@ -271,7 +271,7 @@ export default function DashboardPage() {
             <Card className="xl:col-span-1 flex flex-col justify-between" padding="lg">
                <div>
                   <div className="flex items-center justify-between border-b border-surface-3 pb-4 mb-4">
-                     <h4 className="text-sm font-black font-heading uppercase tracking-widest text-text-primary">Gider Analizi</h4>
+                     <h4 className="text-sm font-bold font-heading uppercase tracking-widest text-text-primary">Gider Analizi</h4>
                   </div>
                   <div className="space-y-5">
                      {categoryStats.length === 0 ? (
@@ -282,7 +282,7 @@ export default function DashboardPage() {
                          <Button 
                            variant="outline" 
                            size="sm" 
-                           className="mt-4 font-black text-[10px] uppercase tracking-wider"
+                           className="mt-4 font-bold text-[10px] uppercase tracking-wider"
                            onClick={() => setIsExpenseModalOpen(true)}
                          >
                            Gider Ekle
@@ -291,7 +291,7 @@ export default function DashboardPage() {
                      ) : (
                        categoryStats.map((stat, idx) => (
                          <div key={stat.name} className="space-y-1.5">
-                            <div className="flex justify-between text-[11px] font-black uppercase tracking-tighter">
+                            <div className="flex justify-between text-[11px] font-bold uppercase tracking-tighter">
                                <span className="text-text-muted truncate mr-2">{stat.name}</span>
                                <span className="text-text-primary shrink-0">%{stat.percentage}</span>
                             </div>
@@ -316,8 +316,8 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               <div className="flex items-center justify-between px-1">
-                <h3 className="text-lg font-black font-heading text-text-primary uppercase tracking-tight">Son Masraflar ve İşlemler</h3>
-                <Link href="/dashboard/transactions" className="text-xs font-black text-primary hover:underline">TÜMÜ →</Link>
+                <h3 className="text-lg font-bold font-heading text-text-primary uppercase tracking-tight">Son Masraflar ve İşlemler</h3>
+                <Link href="/dashboard/transactions" className="text-xs font-bold text-primary hover:underline">TÜMÜ →</Link>
               </div>
               <Card padding="none" className="overflow-hidden">
                 {isLoadingTransactions ? (
@@ -337,21 +337,21 @@ export default function DashboardPage() {
                           {tx.type === 'expense' ? <TrendingDown size={22} /> : <TrendingUp size={22} />}
                         </div>
                         <div className="min-w-0">
-                          <h4 className="font-black text-text-primary text-base leading-tight mb-1 truncate">{tx.description || tx.category}</h4>
+                          <h4 className="font-bold text-text-primary text-base leading-tight mb-1 truncate">{tx.description || tx.category}</h4>
                           <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-black text-text-muted uppercase tracking-widest bg-surface-2 px-2 py-0.5 rounded">{tx.category}</span>
+                            <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest bg-surface-2 px-2 py-0.5 rounded">{tx.category}</span>
                             <span className="text-[10px] font-bold text-text-muted">{formatDateShort(tx.date)}</span>
                           </div>
                         </div>
                       </div>
                       <div className="text-right flex flex-col items-end">
                         <span className={cn(
-                          "font-black text-lg tracking-tight",
+                          "font-bold text-lg tracking-tight",
                           tx.type === 'expense' ? "text-danger" : "text-success"
                         )}>
                           {tx.type === 'expense' ? '-' : '+'}{formatCurrency(tx.amount)}
                         </span>
-                        {tx.receipt_url && <span className="text-[9px] font-black text-primary uppercase bg-primary-50 px-1.5 py-0.5 rounded mt-1">Belge Mevcut</span>}
+                        {tx.receipt_url && <span className="text-[9px] font-bold text-primary uppercase bg-primary-50 px-1.5 py-0.5 rounded mt-1">Belge Mevcut</span>}
                       </div>
                     </div>
                   ))
@@ -362,8 +362,8 @@ export default function DashboardPage() {
             {/* BÖLÜM 5 — ARAZİ ÖZETİ VE NAVİGASYON */}
             <div className="space-y-6">
               <div className="flex items-center justify-between px-1">
-                <h3 className="text-lg font-black font-heading text-text-primary uppercase tracking-tight">Arazilerim</h3>
-                <Link href="/dashboard/lands" className="text-xs font-black text-primary hover:underline">TÜMÜ →</Link>
+                <h3 className="text-lg font-bold font-heading text-text-primary uppercase tracking-tight">Arazilerim</h3>
+                <Link href="/dashboard/lands" className="text-xs font-bold text-primary hover:underline">TÜMÜ →</Link>
               </div>
               <div className="grid grid-cols-1 gap-4">
                  {lands.slice(0, 4).map(land => (
@@ -373,9 +373,9 @@ export default function DashboardPage() {
                             <LandPlot size={24} />
                          </div>
                          <div>
-                            <h4 className="font-black text-text-primary text-base leading-tight mb-1">{land.district || land.city}</h4>
+                            <h4 className="font-bold text-text-primary text-base leading-tight mb-1">{land.district || land.city}</h4>
                             <div className="flex items-center gap-2">
-                               <span className="text-[10px] font-black text-text-muted uppercase tracking-widest bg-surface-2 px-2 py-0.5 rounded">{land.crop_type}</span>
+                               <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest bg-surface-2 px-2 py-0.5 rounded">{land.crop_type}</span>
                                <span className="text-[10px] font-bold text-text-muted">{land.size_decare} Dönüm</span>
                             </div>
                          </div>
@@ -403,7 +403,7 @@ export default function DashboardPage() {
                 <div className="w-16 h-16 bg-surface-2 rounded-full flex items-center justify-center shadow-sm mb-4 text-text-muted">
                    <TrendingUp size={32} />
                 </div>
-                <h3 className="text-xl font-black font-heading text-text-primary uppercase tracking-tight mb-2">Pazar Verileri Yakında!</h3>
+                <h3 className="text-xl font-bold font-heading text-text-primary uppercase tracking-tight mb-2">Pazar Verileri Yakında!</h3>
                 <p className="text-sm font-bold text-text-muted max-w-md">Gerçek zamanlı borsa ve hal fiyatları, girdi maliyetleri analizleri çok yakında Orjut AgTech sistemine entegre edilecektir. Optimizasyon çalışmaları devam ediyor.</p>
              </div>
              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diagonal-stripes.png')] opacity-5 pointer-events-none" />

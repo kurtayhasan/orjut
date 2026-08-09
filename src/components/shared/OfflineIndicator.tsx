@@ -102,7 +102,7 @@ export default function OfflineIndicator() {
   if (isOnline && !isSyncing && pendingCount === 0) return null;
 
   return (
-    <div className="flex items-center gap-3 px-4 py-2 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-xs font-black transition-all shadow-2xl animate-in slide-in-from-bottom-4">
+    <div className="flex items-center gap-3 px-4 py-2 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-xs font-bold transition-all shadow-2xl animate-in slide-in-from-bottom-4">
       {!isOnline && (
         <div className="bg-amber-500/20 text-amber-100 border border-amber-500/30 flex items-center gap-2 px-3 py-1.5 rounded-xl">
           <WifiOff size={16} className="text-amber-400" />

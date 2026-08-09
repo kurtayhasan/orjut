@@ -105,7 +105,7 @@ export default function SettingsPage() {
           <SettingsIcon size={28} />
         </div>
         <div>
-          <h1 className="text-2xl font-black text-text-primary tracking-tight">Ayarlar & Profil</h1>
+          <h1 className="text-2xl font-bold text-text-primary tracking-tight">Ayarlar & Profil</h1>
           <p className="text-text-muted font-medium text-sm">Hesabınızı ve uygulama tercihlerini yönetin</p>
         </div>
       </header>
@@ -114,13 +114,13 @@ export default function SettingsPage() {
         {/* Profile Info */}
         <div className="md:col-span-1 space-y-6">
           <div className="bg-surface border-2 border-white/5 rounded-3xl p-6 text-center shadow-sm">
-            <div className="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-3xl font-black mx-auto mb-4">
+            <div className="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-4">
               {userProfile?.name?.charAt(0) || 'U'}
             </div>
-            <h3 className="text-lg font-black text-text-primary">{userProfile?.name}</h3>
+            <h3 className="text-lg font-bold text-text-primary">{userProfile?.name}</h3>
             <p className="text-sm text-text-muted font-medium mb-6">{userProfile?.phone}</p>
             <div className="pt-6 border-t border-white/5">
-              <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full ${isPremium ? 'text-emerald-600 bg-emerald-50' : 'text-text-muted bg-zinc-50'}`}>
+              <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full ${isPremium ? 'text-emerald-600 bg-emerald-50' : 'text-text-muted bg-zinc-50'}`}>
                 {isPremium ? 'Hasat Pro Üyelik' : 'Ücretsiz Üyelik'}
               </span>
             </div>
@@ -153,7 +153,7 @@ export default function SettingsPage() {
                   <Bell size={18} />
                 </div>
                 <div>
-                  <p className="text-sm font-black text-amber-900">Bildirimler Engellendi</p>
+                  <p className="text-sm font-bold text-amber-900">Bildirimler Engellendi</p>
                   <p className="text-xs text-amber-700/80 font-bold mt-1 leading-relaxed">
                     Tarayıcı ayarlarınızdan bildirimlere izin vermediğiniz için kritik uyarıları alamazsınız. 
                     Lütfen adres çubuğundaki kilit simgesine tıklayarak bildirimlere izin verin.
@@ -169,7 +169,7 @@ export default function SettingsPage() {
               </div>
               <button
                 onClick={handleNotificationToggle}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase transition-all ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase transition-all ${
                   notificationsEnabled ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200' : 'bg-zinc-200 text-text-primary hover:bg-zinc-300'
                 }`}
               >
@@ -240,19 +240,19 @@ export default function SettingsPage() {
                 {pendingRequests.map(req => (
                   <div key={req.id} className="flex items-center justify-between p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100">
                     <div>
-                      <p className="font-black text-sm text-text-primary">{req.engineer.first_name} {req.engineer.last_name}</p>
+                      <p className="font-bold text-sm text-text-primary">{req.engineer.first_name} {req.engineer.last_name}</p>
                       <p className="text-xs text-indigo-600 font-bold uppercase tracking-widest">Ziraat Mühendisi / Danışman</p>
                     </div>
                     <div className="flex gap-2">
                       <button 
                         onClick={() => handleRequest(req.id, 'rejected')}
-                        className="px-4 py-2 bg-surface text-rose-600 rounded-xl text-[10px] font-black uppercase border border-rose-100 hover:bg-rose-50 transition-all"
+                        className="px-4 py-2 bg-surface text-rose-600 rounded-xl text-[10px] font-bold uppercase border border-rose-100 hover:bg-rose-50 transition-all"
                       >
                         Reddet
                       </button>
                       <button 
                         onClick={() => handleRequest(req.id, 'approved')}
-                        className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase hover:bg-emerald-700 transition-all"
+                        className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-[10px] font-bold uppercase hover:bg-emerald-700 transition-all"
                       >
                         Onayla
                       </button>
@@ -295,7 +295,7 @@ export default function SettingsPage() {
                       <Trash2 size={20} />
                     </div>
                     <div>
-                      <span className="text-sm font-black text-rose-700 block mb-0.5">Hesabımı ve Verilerimi Sil</span>
+                      <span className="text-sm font-bold text-rose-700 block mb-0.5">Hesabımı ve Verilerimi Sil</span>
                       <span className="text-xs text-rose-600/70 font-medium">Bu işlem geri alınamaz ve onay gerektirir.</span>
                     </div>
                   </div>

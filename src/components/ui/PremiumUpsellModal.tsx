@@ -72,7 +72,7 @@ export default function PremiumUpsellModal({ isOpen, onClose }: PremiumUpsellMod
             </div>
 
             {/* Headline */}
-            <h2 className="text-2xl font-black text-center text-white tracking-tight mb-2">
+            <h2 className="text-2xl font-bold text-center text-white tracking-tight mb-2">
               Bu Özellik Hasat Pro Paketine Dâhildir
             </h2>
             <p className="text-sm text-zinc-400 text-center font-medium mb-4 leading-relaxed">
@@ -120,7 +120,7 @@ export default function PremiumUpsellModal({ isOpen, onClose }: PremiumUpsellMod
             <div className="flex p-1 bg-white/5 rounded-xl mb-6 border border-white/5">
               <button
                 onClick={() => setBillingCycle('monthly')}
-                className={`flex-1 py-2.5 text-xs font-black rounded-lg transition-all uppercase tracking-wider ${
+                className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all uppercase tracking-wider ${
                   billingCycle === 'monthly' 
                     ? 'bg-white/10 text-white shadow-sm' 
                     : 'text-zinc-500 hover:text-zinc-300'
@@ -130,7 +130,7 @@ export default function PremiumUpsellModal({ isOpen, onClose }: PremiumUpsellMod
               </button>
               <button
                 onClick={() => setBillingCycle('yearly')}
-                className={`flex-1 py-2.5 text-xs font-black rounded-lg transition-all uppercase tracking-wider relative ${
+                className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all uppercase tracking-wider relative ${
                   billingCycle === 'yearly' 
                     ? 'bg-emerald-500/20 text-emerald-400 shadow-sm border border-emerald-500/30' 
                     : 'text-zinc-500 hover:text-zinc-300'
@@ -138,7 +138,7 @@ export default function PremiumUpsellModal({ isOpen, onClose }: PremiumUpsellMod
               >
                 Yıllık
                 {billingCycle === 'yearly' && (
-                  <span className="absolute -top-2 right-2 text-[9px] bg-emerald-500 text-black px-2 py-0.5 rounded-full font-black">
+                  <span className="absolute -top-2 right-2 text-[9px] bg-emerald-500 text-black px-2 py-0.5 rounded-full font-bold">
                     2 AY HEDİYE
                   </span>
                 )}
@@ -148,7 +148,7 @@ export default function PremiumUpsellModal({ isOpen, onClose }: PremiumUpsellMod
             {/* Price */}
             <div className="text-center mb-6">
               <div className="flex items-baseline justify-center gap-1">
-                <span className="text-4xl font-black text-white">
+                <span className="text-4xl font-bold text-white">
                   {billingCycle === 'monthly' ? '499' : '4.990'}
                 </span>
                 <span className="text-lg font-bold text-zinc-500">TL</span>
@@ -218,7 +218,7 @@ export default function PremiumUpsellModal({ isOpen, onClose }: PremiumUpsellMod
                   setIsProcessing(false);
                 }
               }}
-              className="w-full py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-black rounded-2xl shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all text-base flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:active:scale-100"
+              className="w-full py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-2xl shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all text-base flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:active:scale-100"
             >
               {isProcessing ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

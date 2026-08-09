@@ -52,7 +52,7 @@ export default function Sidebar({ className }: { className?: string }) {
       )}
       
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 w-60 bg-[#06110D]/80 backdrop-blur-xl border-r border-white/5 flex flex-col shrink-0 h-full transform transition-transform duration-300 ease-out lg:relative lg:translate-x-0 lg:z-0 lg:flex-shrink-0 lg:h-screen",
+        "fixed inset-y-0 left-0 z-50 w-60 bg-surface/80 backdrop-blur-xl border-r border-white/5 flex flex-col shrink-0 h-full transform transition-transform duration-300 ease-out lg:relative lg:translate-x-0 lg:z-0 lg:flex-shrink-0 lg:h-screen",
         isSidebarOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full",
         className
       )}>
@@ -60,10 +60,10 @@ export default function Sidebar({ className }: { className?: string }) {
         <div className="h-[72px] flex items-center justify-between px-6 border-b border-white/5">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 bg-primary/20 border border-primary/50 rounded-xl flex items-center justify-center text-primary shadow-sm">
-              <span className="font-black text-xl">O</span>
+              <span className="font-bold text-xl">O</span>
             </div>
             <div className="flex flex-col -space-y-1">
-              <span className="text-lg font-black text-white tracking-tight">ORJUT</span>
+              <span className="text-lg font-bold text-white tracking-tight">ORJUT</span>
               <span className="text-[9px] font-bold text-primary-light uppercase tracking-widest">ZiraiAsistan</span>
             </div>
           </div>
@@ -120,7 +120,7 @@ export default function Sidebar({ className }: { className?: string }) {
               !isPremium && "cursor-pointer hover:bg-white/10 transition-colors"
             )}
           >
-            <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-black text-sm">
+            <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-sm">
               {userProfile?.first_name?.[0] || 'U'}
             </div>
             <div className="flex flex-col min-w-0">
@@ -128,7 +128,7 @@ export default function Sidebar({ className }: { className?: string }) {
                 {userProfile?.first_name ? `${userProfile.first_name} ${userProfile.last_name || ''}` : 'Kullanıcı'}
               </span>
               <span className={cn(
-                "text-[10px] font-black uppercase tracking-wider",
+                "text-[10px] font-bold uppercase tracking-wider",
                 isPremium ? "text-amber-400" : "text-white/40"
               )}>
                 {isPremium ? 'Premium Üye' : 'Ücretsiz Üye'}
@@ -154,7 +154,7 @@ export default function Sidebar({ className }: { className?: string }) {
                         window.location.reload();
                       }}
                       className={cn(
-                        "flex-1 py-1.5 text-[8px] font-black uppercase tracking-widest rounded transition-all",
+                        "flex-1 py-1.5 text-[8px] font-bold uppercase tracking-widest rounded transition-all",
                         userRole === r ? "bg-primary text-white" : "text-white/40 hover:text-white"
                       )}
                     >
@@ -194,7 +194,7 @@ function SidebarItem({ icon: Icon, label, href, active, badge, onClick, classNam
       <Icon size={20} className={active ? 'text-primary' : 'text-white/40 group-hover:text-white/80 transition-colors'} />
       <span className="truncate">{label}</span>
       {badge && (
-        <span className="ml-auto px-1.5 py-0.5 bg-amber-400 text-[#1B2E1C] text-[8px] font-black rounded uppercase tracking-wider flex items-center gap-0.5">
+        <span className="ml-auto px-1.5 py-0.5 bg-amber-400 text-[#1B2E1C] text-[8px] font-bold rounded uppercase tracking-wider flex items-center gap-0.5">
           <Crown size={8} />
           {badge}
         </span>

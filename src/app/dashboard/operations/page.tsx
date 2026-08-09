@@ -137,7 +137,7 @@ export default function OperationsPage() {
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black font-heading text-text-primary tracking-tight">Zirai İşlemler</h1>
+          <h1 className="text-3xl font-bold font-heading text-text-primary tracking-tight">Zirai İşlemler</h1>
           <p className="text-text-muted font-bold text-sm">Saha operasyonlarını ve stok tüketimini yönetin.</p>
         </div>
         <Button size="md" className="min-h-[48px]" leftIcon={<Plus size={20} />} onClick={() => setIsAddModalOpen(true)}>Yeni İşlem Kaydet</Button>
@@ -151,7 +151,7 @@ export default function OperationsPage() {
                 key={f}
                 onClick={() => setFilter(f)}
                 className={cn(
-                  "flex-1 md:px-6 py-2 px-4 min-h-[40px] text-[10px] font-black uppercase tracking-widest rounded-md transition-all whitespace-nowrap",
+                  "flex-1 md:px-6 py-2 px-4 min-h-[40px] text-[10px] font-bold uppercase tracking-widest rounded-md transition-all whitespace-nowrap",
                   filter === f ? "bg-surface shadow-sm text-primary" : "text-text-muted hover:text-text-primary"
                 )}
               >
@@ -190,7 +190,7 @@ export default function OperationsPage() {
 
                    <div className="flex items-center justify-between md:justify-end gap-8">
                       <div className="text-right">
-                         <div className="text-xl font-black font-heading text-text-primary tracking-tight">
+                         <div className="text-xl font-bold font-heading text-text-primary tracking-tight">
                             {op.amount} <span className="text-sm font-bold text-text-muted">{op.unit}</span>
                          </div>
                          {op.notes && (
@@ -222,7 +222,7 @@ export default function OperationsPage() {
          <div className="flex items-start gap-3">
             <Info className="text-primary mt-0.5 shrink-0" size={18} />
             <div>
-               <h4 className="text-sm font-black font-heading text-primary uppercase tracking-tight">Stok Entegrasyonu</h4>
+               <h4 className="text-sm font-bold font-heading text-primary uppercase tracking-tight">Stok Entegrasyonu</h4>
                <p className="text-sm font-medium text-text-primary leading-relaxed mt-1">
                   Gübreleme ve ilaçlama işlemlerinde stoktan ürün seçimi zorunludur. Kayıt yapıldığında ürün miktarı envanterinizden otomatik olarak düşülür.
                </p>
@@ -238,7 +238,7 @@ export default function OperationsPage() {
       >
         <form onSubmit={handleSubmit} className="space-y-4">
            <div className="space-y-1.5">
-              <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">İşlem Tipi</label>
+              <label className="text-[10px] font-bold text-text-muted uppercase tracking-widest ml-1">İşlem Tipi</label>
               <div className="grid grid-cols-3 gap-2">
                  {(['su', 'gubre', 'ilac'] as const).map(t => (
                    <button
@@ -251,7 +251,7 @@ export default function OperationsPage() {
                      )}
                    >
                      {t === 'su' ? <Droplet size={18} /> : t === 'gubre' ? <FlaskConical size={18} /> : <Bug size={18} />}
-                     <span className="text-[10px] font-black uppercase">{t === 'su' ? 'SULAMA' : t === 'gubre' ? 'GÜBRE' : 'İLAÇ'}</span>
+                     <span className="text-[10px] font-bold uppercase">{t === 'su' ? 'SULAMA' : t === 'gubre' ? 'GÜBRE' : 'İLAÇ'}</span>
                    </button>
                  ))}
               </div>

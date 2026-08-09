@@ -90,7 +90,7 @@ export default function Header() {
           {!isPremium && (
             <button 
               onClick={triggerUpsell}
-              className="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-[#1B2E1C] px-3 py-1.5 rounded-lg text-xs font-black transition-all active:scale-95 flex items-center gap-1.5 shadow-sm shadow-amber-500/20"
+              className="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-[#1B2E1C] px-3 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95 flex items-center gap-1.5 shadow-sm shadow-amber-500/20"
             >
               <Crown size={14} className="fill-[#1B2E1C]" />
               <span className="hidden sm:inline">Premium&apos;a Geç</span>
@@ -118,7 +118,7 @@ export default function Header() {
           {/* Profile Link */}
           <Link
             href="/dashboard/settings"
-            className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary text-xs font-black border-2 border-primary/30 hover:bg-primary/30 transition-all active:scale-95"
+            className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary text-xs font-bold border-2 border-primary/30 hover:bg-primary/30 transition-all active:scale-95"
             aria-label="Profil ve Ayarlar"
           >
             {initials}

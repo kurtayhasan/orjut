@@ -147,7 +147,7 @@ export default function BottomBar({ className }: { className?: string }) {
             variant="ghost" 
             fullWidth 
             size="lg" 
-            className="mt-4 text-danger font-black min-h-[48px]"
+            className="mt-4 text-danger font-bold min-h-[48px]"
             onClick={() => setIsActionSheetOpen(false)}
           >
             İptal

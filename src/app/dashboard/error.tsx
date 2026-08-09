@@ -22,7 +22,7 @@ export default function DashboardError({
           <AlertCircle size={32} />
         </div>
         <div className="space-y-2">
-          <h2 className="text-xl font-black font-heading text-text-primary">
+          <h2 className="text-xl font-bold font-heading text-text-primary">
             Beklenmeyen Bir Durum Oluştu
           </h2>
           <p className="text-sm font-bold text-text-muted leading-relaxed">
@@ -34,7 +34,7 @@ export default function DashboardError({
             onClick={() => reset()}
             fullWidth
             size="lg"
-            className="font-black uppercase tracking-wider text-xs shadow-lg flex items-center justify-center gap-2"
+            className="font-bold uppercase tracking-wider text-xs shadow-lg flex items-center justify-center gap-2"
             leftIcon={<RotateCcw size={16} />}
           >
             Yenile

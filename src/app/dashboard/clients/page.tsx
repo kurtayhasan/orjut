@@ -61,7 +61,7 @@ export default function ClientManagement() {
             <Users size={28} />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-text-primary dark:text-white tracking-tight">Müşteri Yönetimi</h1>
+            <h1 className="text-2xl font-bold text-text-primary dark:text-white tracking-tight">Müşteri Yönetimi</h1>
             <p className="text-text-muted font-medium text-sm">Danışmanlık verdiğiniz çiftçileri yönetin</p>
           </div>
         </div>
@@ -81,7 +81,7 @@ export default function ClientManagement() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-4">
-          <h2 className="text-sm font-black text-text-muted uppercase tracking-widest ml-1">Müşteri Listesi</h2>
+          <h2 className="text-sm font-bold text-text-muted uppercase tracking-widest ml-1">Müşteri Listesi</h2>
           {loading ? (
             <div className="p-12 text-center text-text-muted">Yükleniyor...</div>
           ) : clients.length > 0 ? (
@@ -100,24 +100,24 @@ export default function ClientManagement() {
                   }}
                 >
                   <div className="flex justify-between items-start mb-4">
-                    <div className="w-12 h-12 bg-zinc-100 dark:bg-zinc-900 rounded-2xl flex items-center justify-center font-black text-lg">
+                    <div className="w-12 h-12 bg-zinc-100 dark:bg-zinc-900 rounded-2xl flex items-center justify-center font-bold text-lg">
                       {c.farmer.first_name[0]}{c.farmer.last_name[0]}
                     </div>
                     {c.status === 'approved' ? (
-                      <span className="text-emerald-500 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-1 rounded text-[10px] font-black uppercase tracking-tighter flex items-center gap-1">
+                      <span className="text-emerald-500 bg-emerald-100 dark:bg-emerald-900/30 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-tighter flex items-center gap-1">
                         <CheckCircle2 size={12} /> Onaylı
                       </span>
                     ) : (
-                      <span className="text-amber-500 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded text-[10px] font-black uppercase tracking-tighter flex items-center gap-1">
+                      <span className="text-amber-500 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-tighter flex items-center gap-1">
                         <Clock size={12} /> Bekliyor
                       </span>
                     )}
                   </div>
-                  <h3 className="text-lg font-black">{c.farmer.first_name} {c.farmer.last_name}</h3>
+                  <h3 className="text-lg font-bold">{c.farmer.first_name} {c.farmer.last_name}</h3>
                   <p className="text-text-muted text-sm mb-4">{c.farmer.phone}</p>
                   
                   {c.status === 'approved' && (
-                    <div className="flex items-center justify-between text-[10px] font-black text-text-muted uppercase tracking-widest pt-4 border-t border-white/5 dark:border-white/5">
+                    <div className="flex items-center justify-between text-[10px] font-bold text-text-muted uppercase tracking-widest pt-4 border-t border-white/5 dark:border-white/5">
                       <span>Panele Git</span>
                       <ArrowRight size={14} className={selectedClientId === c.farmer_id ? 'text-emerald-500' : ''} />
                     </div>
@@ -134,7 +134,7 @@ export default function ClientManagement() {
 
         <div className="space-y-6">
           <Card className="p-6 bg-indigo-600 text-white">
-            <h3 className="text-lg font-black mb-2">Nasıl Çalışır?</h3>
+            <h3 className="text-lg font-bold mb-2">Nasıl Çalışır?</h3>
             <p className="text-indigo-100 text-sm leading-relaxed mb-4">
               Müşterinizin telefon numarasını girerek erişim talebi gönderin. Çiftçi onayladıktan sonra, kartına tıklayarak onun hesabını yönetmeye başlayabilirsiniz.
             </p>

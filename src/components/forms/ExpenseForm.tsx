@@ -180,7 +180,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
         
         {/* CATEGORY SELECTOR */}
         <div className="space-y-2">
-           <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Kategori Seçin</label>
+           <label className="text-[10px] font-bold text-text-muted uppercase tracking-widest ml-1">Kategori Seçin</label>
            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
               {categories.map((cat) => {
                 const Icon = cat.icon;
@@ -201,7 +201,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
                     )}
                   >
                     <Icon size={20} className={isActive ? "text-primary" : "text-text-muted"} />
-                    <span className="text-[9px] font-black uppercase tracking-tighter text-center">{cat.label}</span>
+                    <span className="text-[9px] font-bold uppercase tracking-tighter text-center">{cat.label}</span>
                   </button>
                 );
               })}
@@ -217,7 +217,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
              value={amount} 
              onChange={(e: any) => setAmount(e.target.value)} 
              required={!isUsingStock}
-             className="text-2xl font-black text-primary"
+             className="text-2xl font-bold text-primary"
            />
            <div className="flex gap-2">
               <Input 
@@ -280,7 +280,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
                   )}
                 >
                   <Box size={20} />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-center">Stoka Ekle</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-center">Stoka Ekle</span>
                 </button>
 
                 <button
@@ -292,7 +292,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
                   )}
                 >
                   <RefreshCcw size={20} />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-center">Stoktan Kullan</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-center">Stoktan Kullan</span>
                 </button>
              </div>
 
@@ -300,7 +300,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
              {addToInventory && (
                <div className="p-4 bg-primary-50 border border-primary/20 rounded-xl animate-scale-in space-y-4">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-primary uppercase tracking-widest ml-1">Ürün Seçimi</label>
+                    <label className="text-[10px] font-bold text-primary uppercase tracking-widest ml-1">Ürün Seçimi</label>
                     <select 
                       className="w-full p-3 rounded-lg border border-primary/20 bg-surface font-bold text-sm focus:ring-primary focus:border-primary"
                       value={stockSelectionMode}
@@ -346,7 +346,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
                         onChange={e => setIsHybridApplied(e.target.checked)}
                       />
                       <div>
-                         <p className="text-xs font-black text-primary">Aldığım Miktarın Bir Kısmını Hemen Uygula</p>
+                         <p className="text-xs font-bold text-primary">Aldığım Miktarın Bir Kısmını Hemen Uygula</p>
                          <p className="text-[9px] font-bold text-primary/70 uppercase">Zirai işlem kaydı otomatik oluşturulur.</p>
                       </div>
                     </label>
@@ -405,7 +405,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
 
         {/* RECEIPT UPLOAD */}
         <div className="space-y-2">
-           <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 flex items-center gap-1">
+           <label className="text-[10px] font-bold text-text-muted uppercase tracking-widest ml-1 flex items-center gap-1">
               <Camera size={12} /> Makbuz / Fiş Yükle
            </label>
            <ReceiptUpload onUploadSuccess={(url, base64) => {

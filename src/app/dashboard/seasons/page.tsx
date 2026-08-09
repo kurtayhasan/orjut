@@ -81,7 +81,7 @@ export default function SeasonsPage() {
             <Archive size={32} />
           </div>
           <div>
-            <h1 className="text-3xl font-black font-heading text-zinc-100 tracking-tight">Sezonlar & Arşiv</h1>
+            <h1 className="text-3xl font-bold font-heading text-zinc-100 tracking-tight">Sezonlar & Arşiv</h1>
             <p className="text-text-muted font-bold text-sm">Üretim döngülerini dökümante edin ve analiz edin.</p>
           </div>
         </div>
@@ -94,8 +94,8 @@ export default function SeasonsPage() {
         {/* SEASON LIST */}
         <div className="lg:col-span-4 space-y-4">
            <div className="flex items-center justify-between px-1">
-              <h3 className="text-[10px] font-black text-text-muted uppercase tracking-widest">Kayıtlı Sezonlar</h3>
-              <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">{seasons.length} Döngü</span>
+              <h3 className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Kayıtlı Sezonlar</h3>
+              <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">{seasons.length} Döngü</span>
            </div>
            
            <div className="space-y-3">
@@ -116,7 +116,7 @@ export default function SeasonsPage() {
                     <div className="flex justify-between items-start">
                        <div className="flex flex-col">
                           <h4 className={cn(
-                            "font-black tracking-tight transition-colors",
+                            "font-bold tracking-tight transition-colors",
                             activeSeason?.id === season.id ? "text-primary" : "text-zinc-100"
                           )}>
                             {season.name}
@@ -133,7 +133,7 @@ export default function SeasonsPage() {
                               toggleSeasonStatus(season.id, season.is_active);
                             }}
                             className={cn(
-                              "text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border transition-all",
+                              "text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border transition-all",
                               season.is_active 
                                 ? "text-danger bg-danger/10 border-danger/20 hover:bg-danger/20" 
                                 : "text-success bg-success/10 border-success/20 hover:bg-success/20"
@@ -157,7 +157,7 @@ export default function SeasonsPage() {
         {/* COMPARISON & DETAILS */}
         <div className="lg:col-span-8 space-y-6">
            <div className="flex items-center justify-between px-1">
-              <h3 className="text-[10px] font-black text-text-muted uppercase tracking-widest">Performans Karşılaştırması</h3>
+              <h3 className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Performans Karşılaştırması</h3>
               {activeSeason && (
                 <div className="flex gap-2">
                    <button onClick={handleDownloadPDF} className="p-2 bg-surface/[0.05] text-zinc-100 rounded-lg hover:bg-surface/10 border border-white/5 transition-all" title="PDF Raporu">

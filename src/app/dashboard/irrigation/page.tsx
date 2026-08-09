@@ -64,7 +64,7 @@ export default function IrrigationPage() {
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black font-heading text-text-primary tracking-tight">Sulama Takibi</h1>
+          <h1 className="text-3xl font-bold font-heading text-text-primary tracking-tight">Sulama Takibi</h1>
           <p className="text-text-muted font-bold text-sm">Su tüketiminizi ve sulama periyotlarınızı yönetin.</p>
         </div>
         <Button size="md" leftIcon={<Plus size={20} />} onClick={() => setIsAddModalOpen(true)}>Yeni Sulama Kaydı</Button>
@@ -77,8 +77,8 @@ export default function IrrigationPage() {
                <Waves size={24} />
             </div>
             <div>
-               <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">Bu Ay Toplam</p>
-               <h3 className="text-xl font-black text-text-primary">
+               <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Bu Ay Toplam</p>
+               <h3 className="text-xl font-bold text-text-primary">
                   {irrigationLogs.length > 0 ? irrigationLogs.reduce((s, l) => s + (l.amount || 0), 0) : 0} <span className="text-sm font-bold">Saat</span>
                </h3>
             </div>
@@ -88,8 +88,8 @@ export default function IrrigationPage() {
                <Droplet size={24} />
             </div>
             <div>
-               <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">Sulanabilir Alan</p>
-               <h3 className="text-xl font-black text-text-primary">
+               <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Sulanabilir Alan</p>
+               <h3 className="text-xl font-bold text-text-primary">
                   {lands.filter(l => l.is_irrigated).reduce((s, l) => s + l.size_decare, 0)} <span className="text-sm font-bold">Dönüm</span>
                </h3>
             </div>
@@ -99,8 +99,8 @@ export default function IrrigationPage() {
                <Calendar size={24} />
             </div>
             <div>
-               <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">Son Sulama</p>
-               <h3 className="text-xl font-black text-text-primary">
+               <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Son Sulama</p>
+               <h3 className="text-xl font-bold text-text-primary">
                   {irrigationLogs[0] ? formatDateShort(irrigationLogs[0].date) : '-'}
                </h3>
             </div>
@@ -110,8 +110,8 @@ export default function IrrigationPage() {
       {/* HISTORY LIST */}
       <Card padding="none" className="overflow-hidden">
          <div className="p-4 border-b border-border bg-surface-2 flex justify-between items-center">
-            <h3 className="text-sm font-black font-heading text-text-primary uppercase tracking-tight">Geçmiş Sulamalar</h3>
-            <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">{irrigationLogs.length} Kayıt</span>
+            <h3 className="text-sm font-bold font-heading text-text-primary uppercase tracking-tight">Geçmiş Sulamalar</h3>
+            <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">{irrigationLogs.length} Kayıt</span>
          </div>
          <div className="divide-y divide-border">
             {irrigationLogs.length > 0 ? (
@@ -132,7 +132,7 @@ export default function IrrigationPage() {
                    </div>
                    <div className="flex items-center gap-6">
                       <div className="text-right">
-                         <div className="text-xl font-black font-heading text-blue-600 tracking-tight">
+                         <div className="text-xl font-bold font-heading text-blue-600 tracking-tight">
                             {log.amount || 0} <span className="text-xs">{log.unit || 'saat'}</span>
                          </div>
                       </div>

@@ -69,7 +69,7 @@ export default function InventoryPage() {
             <Warehouse size={28} />
           </div>
           <div>
-            <h1 className="text-3xl font-black font-heading text-text-primary tracking-tight">Depo & Envanter</h1>
+            <h1 className="text-3xl font-bold font-heading text-text-primary tracking-tight">Depo & Envanter</h1>
             <p className="text-text-muted font-bold text-sm">Girdi stoklarınızı ve ürün gelişimini izleyin.</p>
           </div>
         </div>
@@ -77,7 +77,7 @@ export default function InventoryPage() {
           <button 
             onClick={() => setView('crops')}
             className={cn(
-              "flex-1 md:px-6 py-2 text-[10px] font-black uppercase tracking-widest rounded-md transition-all",
+              "flex-1 md:px-6 py-2 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all",
               view === 'crops' ? "bg-surface shadow-sm text-primary" : "text-text-muted hover:text-text-primary"
             )}
           >
@@ -86,7 +86,7 @@ export default function InventoryPage() {
           <button 
             onClick={() => setView('inputs')}
             className={cn(
-              "flex-1 md:px-6 py-2 text-[10px] font-black uppercase tracking-widest rounded-md transition-all",
+              "flex-1 md:px-6 py-2 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all",
               view === 'inputs' ? "bg-surface shadow-sm text-primary" : "text-text-muted hover:text-text-primary"
             )}
           >
@@ -100,32 +100,32 @@ export default function InventoryPage() {
           {/* STATS FOR CROPS */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card padding="md" className="flex flex-col items-center text-center">
-              <span className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">Beklenen Toplam Hasat</span>
-              <div className="text-2xl font-black font-heading text-text-primary">{(totalExpectedYield / 1000).toFixed(1)} <span className="text-sm font-bold text-text-muted">Ton</span></div>
+              <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-2">Beklenen Toplam Hasat</span>
+              <div className="text-2xl font-bold font-heading text-text-primary">{(totalExpectedYield / 1000).toFixed(1)} <span className="text-sm font-bold text-text-muted">Ton</span></div>
             </Card>
             <Card padding="md" className="flex flex-col items-center text-center">
-              <span className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">Ortalama Gelişim</span>
-              <div className="text-2xl font-black font-heading text-primary">
+              <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-2">Ortalama Gelişim</span>
+              <div className="text-2xl font-bold font-heading text-primary">
                 {lands.length > 0 ? (lands.reduce((sum, l) => sum + getProgress(l.crop_type, l.planting_date), 0) / lands.length).toFixed(0) : 0}%
               </div>
             </Card>
             <Card padding="md" className="flex flex-col items-center text-center">
-              <span className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">Hasada Kalan</span>
-              <div className="text-2xl font-black font-heading text-amber-600">
+              <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-2">Hasada Kalan</span>
+              <div className="text-2xl font-bold font-heading text-amber-600">
                 {lands.length > 0 ? Math.max(0, Math.floor(lands.reduce((sum, l) => sum + (CROP_LIFECYCLES[l.crop_type] || 150) - (calculateDays(l.planting_date) || 0), 0) / lands.length)) : 0} <span className="text-sm font-bold text-text-muted">Gün</span>
               </div>
             </Card>
             <Card padding="md" className="flex flex-col items-center text-center">
-              <span className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">Aktif Parsel</span>
-              <div className="text-2xl font-black font-heading text-text-primary">{lands.length}</div>
+              <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-2">Aktif Parsel</span>
+              <div className="text-2xl font-bold font-heading text-text-primary">{lands.length}</div>
             </Card>
           </div>
 
           {/* CROP PROGRESS LIST */}
           <Card padding="none" className="overflow-hidden">
              <div className="p-4 border-b border-border bg-surface-2 flex justify-between items-center">
-                <h3 className="text-sm font-black font-heading text-text-primary uppercase tracking-tight">Parsel Bazlı Gelişim</h3>
-                <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Sıralama: En Yakın Hasat</span>
+                <h3 className="text-sm font-bold font-heading text-text-primary uppercase tracking-tight">Parsel Bazlı Gelişim</h3>
+                <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Sıralama: En Yakın Hasat</span>
              </div>
              <div className="divide-y divide-border">
                 {lands.length > 0 ? (
@@ -138,14 +138,14 @@ export default function InventoryPage() {
                           <div>
                              <h4 className="font-bold text-text-primary leading-none mb-1">{land.district || land.city}</h4>
                              <p className="text-xs font-bold text-text-muted">Ada {land.block_no} / P. {land.parcel_no}</p>
-                             <span className="inline-block mt-2 px-2 py-0.5 bg-surface-3 rounded text-[9px] font-black text-text-primary uppercase">{land.crop_type}</span>
+                             <span className="inline-block mt-2 px-2 py-0.5 bg-surface-3 rounded text-[9px] font-bold text-text-primary uppercase">{land.crop_type}</span>
                           </div>
                        </div>
 
                        <div className="flex-1">
                           <div className="flex justify-between items-end mb-2">
-                             <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Yaşam Döngüsü</span>
-                             <span className="text-sm font-black text-primary">{getProgress(land.crop_type, land.planting_date).toFixed(0)}%</span>
+                             <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Yaşam Döngüsü</span>
+                             <span className="text-sm font-bold text-primary">{getProgress(land.crop_type, land.planting_date).toFixed(0)}%</span>
                           </div>
                           <div className="h-3 w-full bg-surface-2 rounded-full overflow-hidden border border-border shadow-inner">
                              <div 
@@ -160,11 +160,11 @@ export default function InventoryPage() {
                        </div>
 
                        <div className="text-right min-w-[150px]">
-                          <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-1">Beklenen Verim</p>
-                          <div className="text-xl font-black font-heading text-text-primary">
+                          <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Beklenen Verim</p>
+                          <div className="text-xl font-bold font-heading text-text-primary">
                              {((land.expected_yield_per_decare || 0) * (land.size_decare || 0) / 1000).toFixed(1)} <span className="text-sm">Ton</span>
                           </div>
-                          <div className="text-[10px] text-success font-black flex items-center justify-end gap-1 mt-1 uppercase tracking-widest">
+                          <div className="text-[10px] text-success font-bold flex items-center justify-end gap-1 mt-1 uppercase tracking-widest">
                              <Activity size={12} /> {land.expected_yield_per_decare} kg/dönüm
                           </div>
                        </div>
@@ -183,7 +183,7 @@ export default function InventoryPage() {
             {/* STOCKS LIST */}
             <div className="lg:col-span-8 space-y-4">
               <div className="flex items-center justify-between px-1">
-                 <h3 className="text-base font-black font-heading text-text-primary uppercase tracking-tight">Mevcut Stoklar</h3>
+                 <h3 className="text-base font-bold font-heading text-text-primary uppercase tracking-tight">Mevcut Stoklar</h3>
                  <Button size="sm" leftIcon={<Plus size={16} />} onClick={() => setIsAddModalOpen(true)}>Yeni Stok Ekle</Button>
               </div>
               <Card padding="none" className="overflow-hidden">
@@ -200,7 +200,7 @@ export default function InventoryPage() {
                               </div>
                               <div>
                                  <h4 className="font-bold text-text-primary leading-tight">{item.item_name}</h4>
-                                 <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">
+                                 <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest">
                                     {item.type === 'fertilizer' ? 'Gübre' : item.type === 'pesticide' ? 'İlaç' : item.type === 'seed' ? 'Tohum' : item.type === 'fuel' ? 'Yakıt' : 'Diğer'}
                                  </p>
                               </div>
@@ -208,12 +208,12 @@ export default function InventoryPage() {
                            <div className="flex items-center gap-6">
                               <div className="text-right">
                                  <div className={cn(
-                                   "text-xl font-black font-heading tracking-tight",
+                                   "text-xl font-bold font-heading tracking-tight",
                                    item.quantity < 10 ? "text-danger" : "text-text-primary"
                                  )}>
                                     {item.quantity}
                                  </div>
-                                 <div className="text-[10px] font-black text-text-muted uppercase tracking-widest">{item.unit}</div>
+                                 <div className="text-[10px] font-bold text-text-muted uppercase tracking-widest">{item.unit}</div>
                               </div>
                               <button onClick={() => deleteInventoryItem(item.id)} className="p-2 text-text-muted hover:text-danger hover:bg-danger-bg rounded-lg transition-colors md:opacity-0 md:group-hover:opacity-100">
                                  <Trash2 size={18} />
@@ -235,7 +235,7 @@ export default function InventoryPage() {
                  <Card className="bg-danger-bg border-danger/20" padding="md">
                     <div className="flex items-center gap-2 text-danger mb-3">
                        <AlertTriangle size={20} />
-                       <h4 className="text-sm font-black font-heading uppercase tracking-tight">Kritik Stok Uyarısı</h4>
+                       <h4 className="text-sm font-bold font-heading uppercase tracking-tight">Kritik Stok Uyarısı</h4>
                     </div>
                     <div className="space-y-2">
                        {lowStockItems.map(item => (
@@ -267,16 +267,16 @@ export default function InventoryPage() {
                <Card padding="md" className="space-y-4">
                   <div className="flex items-center gap-2 mb-2">
                      <ShoppingBag size={20} className="text-primary" />
-                     <h4 className="text-sm font-black font-heading uppercase tracking-tight">Hızlı Bilgi</h4>
+                     <h4 className="text-sm font-bold font-heading uppercase tracking-tight">Hızlı Bilgi</h4>
                   </div>
                   <div className="space-y-3">
                      <div className="flex justify-between items-center text-xs">
                         <span className="font-bold text-text-muted">Toplam Kalem</span>
-                        <span className="font-black text-text-primary">{inventory.length}</span>
+                        <span className="font-bold text-text-primary">{inventory.length}</span>
                      </div>
                      <div className="flex justify-between items-center text-xs">
                         <span className="font-bold text-text-muted">Son Hareket</span>
-                        <span className="font-black text-text-primary">2 gün önce</span>
+                        <span className="font-bold text-text-primary">2 gün önce</span>
                      </div>
                   </div>
                </Card>

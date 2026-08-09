@@ -75,7 +75,7 @@ export default function WeatherForecast({ lands }: WeatherForecastProps) {
   return (
     <div className="bg-surface-2/40 backdrop-blur-xl rounded-3xl p-6 border border-white/5 shadow-lg mt-6">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-black font-heading tracking-tight text-white flex items-center gap-2">
+        <h3 className="text-lg font-bold font-heading tracking-tight text-white flex items-center gap-2">
           📅 7 Günlük Hava Tahmini
         </h3>
         <span className="text-xs font-bold text-text-muted bg-surface-3 px-3 py-1 rounded-full">
@@ -86,16 +86,16 @@ export default function WeatherForecast({ lands }: WeatherForecastProps) {
       <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar snap-x">
         {forecast.map((day, i) => (
           <div key={i} className="min-w-[90px] snap-center flex flex-col items-center justify-between p-4 bg-surface/40 hover:bg-surface/80 border border-white/5 rounded-2xl transition-colors">
-            <span className="text-xs font-black text-text-muted uppercase tracking-wider mb-2">
+            <span className="text-xs font-bold text-text-muted uppercase tracking-wider mb-2">
               {i === 0 ? 'Bugün' : day.date.toLocaleDateString('tr-TR', { weekday: 'short' })}
             </span>
             <div className="my-2 drop-shadow-md">
               {getWeatherIcon(day.code)}
             </div>
-            <div className="text-xs font-black text-blue-300 mt-1 mb-3 flex items-center gap-1">
+            <div className="text-xs font-bold text-blue-300 mt-1 mb-3 flex items-center gap-1">
                <CloudRain size={10} /> %{day.precipProb}
             </div>
-            <div className="flex items-center gap-2 text-sm font-black">
+            <div className="flex items-center gap-2 text-sm font-bold">
               <span className="text-white">{day.maxTemp}°</span>
               <span className="text-text-muted/60">{day.minTemp}°</span>
             </div>
