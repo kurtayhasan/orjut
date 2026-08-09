@@ -69,7 +69,7 @@ export default function LandFormModal({
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[5000] flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl w-full max-w-lg animate-in fade-in zoom-in-95 duration-300 max-h-[90vh] flex flex-col border border-zinc-100 dark:border-zinc-800 my-auto relative overflow-hidden">
+      <div className="bg-surface dark:bg-zinc-900 rounded-[2rem] shadow-2xl w-full max-w-lg animate-in fade-in zoom-in-95 duration-300 max-h-[90vh] flex flex-col border border-zinc-100 dark:border-zinc-800 my-auto relative overflow-hidden">
         {/* Header - Sticky */}
         <div className="p-6 border-b border-zinc-50 dark:border-zinc-800">
           <div className="flex justify-between items-start">
@@ -94,14 +94,14 @@ export default function LandFormModal({
               <button 
                 type="button"
                 onClick={() => setEnvironmentType('acik_tarla')}
-                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${environmentType === 'acik_tarla' ? 'bg-white dark:bg-zinc-700 shadow-sm text-primary' : 'text-zinc-500 hover:text-zinc-700'}`}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${environmentType === 'acik_tarla' ? 'bg-surface dark:bg-zinc-700 shadow-sm text-primary' : 'text-zinc-500 hover:text-zinc-700'}`}
               >
                 Açık Tarla
               </button>
               <button 
                 type="button"
                 onClick={() => setEnvironmentType('sera')}
-                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${environmentType === 'sera' ? 'bg-white dark:bg-zinc-700 shadow-sm text-primary' : 'text-zinc-500 hover:text-zinc-700'}`}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${environmentType === 'sera' ? 'bg-surface dark:bg-zinc-700 shadow-sm text-primary' : 'text-zinc-500 hover:text-zinc-700'}`}
               >
                 Sera
               </button>
@@ -260,7 +260,7 @@ export default function LandFormModal({
               </div>
             </div>
             <div className="space-y-1 flex flex-col justify-end">
-              <label className="flex items-center gap-2 p-3 bg-zinc-50 dark:bg-zinc-800 border-2 border-zinc-100 dark:border-zinc-700 rounded-xl cursor-pointer hover:bg-white dark:hover:bg-zinc-700 hover:border-primary transition-all select-none">
+              <label className="flex items-center gap-2 p-3 bg-zinc-50 dark:bg-zinc-800 border-2 border-zinc-100 dark:border-zinc-700 rounded-xl cursor-pointer hover:bg-surface dark:hover:bg-zinc-700 hover:border-primary transition-all select-none">
                 <input 
                   type="checkbox" 
                   className="w-4 h-4 text-primary rounded border-zinc-300 dark:border-zinc-600 focus:ring-primary" 
@@ -279,7 +279,7 @@ export default function LandFormModal({
         {/* Footer - Sticky */}
         <div className="p-6 border-t border-zinc-50 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 rounded-b-[2rem]">
           <div className="flex gap-3">
-            <button onClick={onClose} className="flex-1 py-3.5 text-zinc-500 dark:text-zinc-400 font-bold bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded-xl transition-all active:scale-[0.98]">İptal</button>
+            <button onClick={onClose} className="flex-1 py-3.5 text-zinc-500 dark:text-zinc-400 font-bold bg-surface dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded-xl transition-all active:scale-[0.98]">İptal</button>
             <button 
               onClick={onSave} 
               className="flex-1 py-3.5 text-white font-bold bg-primary hover:bg-primary-hover shadow-lg hover:shadow-primary/30 rounded-xl transition-all active:scale-[0.98]"

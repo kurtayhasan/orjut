@@ -21,7 +21,7 @@ export default function CategorySummaryBar({ totals, activeFilter, onFilterChang
       <button
         onClick={() => onFilterChange(null)}
         className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${
-          activeFilter === null ? 'border-zinc-900 bg-zinc-900 text-white shadow-md' : 'border-zinc-100 text-zinc-400 hover:border-zinc-200 bg-white'
+          activeFilter === null ? 'border-zinc-900 bg-zinc-900 text-white shadow-md' : 'border-zinc-100 text-zinc-400 hover:border-zinc-200 bg-surface'
         }`}
       >
         Tümü
@@ -31,7 +31,7 @@ export default function CategorySummaryBar({ totals, activeFilter, onFilterChang
           key={cat.key}
           onClick={() => onFilterChange(cat.key)}
           className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all flex items-center gap-2 ${
-            activeFilter === cat.key ? 'ring-2 ring-indigo-500 ring-offset-1 border-transparent' : 'border-zinc-100 hover:border-zinc-200 bg-white'
+            activeFilter === cat.key ? 'ring-2 ring-indigo-500 ring-offset-1 border-transparent' : 'border-zinc-100 hover:border-zinc-200 bg-surface'
           } ${cat.color}`}
         >
           <span>{cat.label}</span>

@@ -100,7 +100,7 @@ export default function SettingsPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-48">
       {/* Header */}
-      <header className="flex items-center gap-4 bg-white border border-zinc-200 p-6 rounded-3xl shadow-sm">
+      <header className="flex items-center gap-4 bg-surface border border-white/5 p-6 rounded-3xl shadow-sm">
         <div className="bg-zinc-100 p-3 rounded-2xl text-zinc-600">
           <SettingsIcon size={28} />
         </div>
@@ -113,13 +113,13 @@ export default function SettingsPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Profile Info */}
         <div className="md:col-span-1 space-y-6">
-          <div className="bg-white border-2 border-zinc-100 rounded-3xl p-6 text-center shadow-sm">
+          <div className="bg-surface border-2 border-white/5 rounded-3xl p-6 text-center shadow-sm">
             <div className="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-3xl font-black mx-auto mb-4">
               {userProfile?.name?.charAt(0) || 'U'}
             </div>
             <h3 className="text-lg font-black text-zinc-900">{userProfile?.name}</h3>
             <p className="text-sm text-zinc-500 font-medium mb-6">{userProfile?.phone}</p>
-            <div className="pt-6 border-t border-zinc-100">
+            <div className="pt-6 border-t border-white/5">
               <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full ${isPremium ? 'text-emerald-600 bg-emerald-50' : 'text-zinc-400 bg-zinc-50'}`}>
                 {isPremium ? 'Hasat Pro Üyelik' : 'Ücretsiz Üyelik'}
               </span>
@@ -137,7 +137,7 @@ export default function SettingsPage() {
         {/* Settings Sections */}
         <div className="md:col-span-2 space-y-4">
           {/* Notifications */}
-          <div className="bg-white border-2 border-zinc-100 rounded-3xl p-6 shadow-sm">
+          <div className="bg-surface border-2 border-white/5 rounded-3xl p-6 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-amber-50 text-amber-600 rounded-xl">
@@ -149,7 +149,7 @@ export default function SettingsPage() {
             
             {permissionStatus === 'denied' && (
               <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-2xl flex gap-3 animate-in fade-in slide-in-from-top-2 duration-500">
-                <div className="p-2 bg-white rounded-xl shadow-sm text-amber-600 h-fit">
+                <div className="p-2 bg-surface rounded-xl shadow-sm text-amber-600 h-fit">
                   <Bell size={18} />
                 </div>
                 <div>
@@ -162,7 +162,7 @@ export default function SettingsPage() {
               </div>
             )}
             
-            <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
+            <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl border border-white/5">
               <div>
                 <p className="font-bold text-sm text-zinc-900">Anlık Bildirimler</p>
                 <p className="text-xs text-zinc-500 font-medium">Hava durumu ve kritik uyarılar</p>
@@ -179,7 +179,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Preferences */}
-          <div className="bg-white border-2 border-zinc-100 rounded-3xl p-6 shadow-sm">
+          <div className="bg-surface border-2 border-white/5 rounded-3xl p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
                 <Globe size={20} />
@@ -188,7 +188,7 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
+              <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl border border-white/5">
                 <div>
                   <p className="font-bold text-sm text-zinc-900">Uygulama Dili</p>
                   <p className="text-xs text-zinc-500 font-medium">Platform dilini değiştirin</p>
@@ -196,14 +196,14 @@ export default function SettingsPage() {
                 <select 
                   value={lang} 
                   onChange={(e) => setLang(e.target.value as 'tr' | 'en')}
-                  className="bg-white border border-zinc-200 rounded-xl px-3 py-1.5 text-sm font-bold outline-none"
+                  className="bg-surface border border-white/5 rounded-xl px-3 py-1.5 text-sm font-bold outline-none"
                 >
                   <option value="tr">Türkçe (TR)</option>
                   <option value="en">English (EN)</option>
                 </select>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl border border-zinc-100 opacity-50 cursor-not-allowed">
+              <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl border border-white/5 opacity-50 cursor-not-allowed">
                 <div>
                   <p className="font-bold text-sm text-zinc-900 text-zinc-400">Koyu Tema (Yakında)</p>
                   <p className="text-xs text-zinc-400 font-medium">Gece modu deneyimi</p>
@@ -228,7 +228,7 @@ export default function SettingsPage() {
 
           {/* Engineer Access */}
           {pendingRequests.length > 0 && (
-            <div className="bg-white border-2 border-indigo-100 rounded-3xl p-6 shadow-sm animate-pulse-subtle">
+            <div className="bg-surface border-2 border-indigo-100 rounded-3xl p-6 shadow-sm animate-pulse-subtle">
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
                   <User size={20} />
@@ -246,7 +246,7 @@ export default function SettingsPage() {
                     <div className="flex gap-2">
                       <button 
                         onClick={() => handleRequest(req.id, 'rejected')}
-                        className="px-4 py-2 bg-white text-rose-600 rounded-xl text-[10px] font-black uppercase border border-rose-100 hover:bg-rose-50 transition-all"
+                        className="px-4 py-2 bg-surface text-rose-600 rounded-xl text-[10px] font-black uppercase border border-rose-100 hover:bg-rose-50 transition-all"
                       >
                         Reddet
                       </button>
@@ -264,7 +264,7 @@ export default function SettingsPage() {
           )}
 
           {/* Security */}
-          <div className="bg-white border-2 border-zinc-100 rounded-3xl p-6 shadow-sm">
+          <div className="bg-surface border-2 border-white/5 rounded-3xl p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
                 <Shield size={20} />
@@ -288,10 +288,10 @@ export default function SettingsPage() {
                 <ChevronRight size={18} className="text-zinc-300 group-hover:text-zinc-500" />
               </div>
               
-              <div className="pt-4 mt-2 border-t border-zinc-100">
+              <div className="pt-4 mt-2 border-t border-white/5">
                 <Link href="/delete-account" className="flex items-center justify-between group cursor-pointer bg-rose-50 hover:bg-rose-100 p-4 rounded-xl transition-all border border-rose-100/50">
                   <div className="flex items-center gap-4">
-                    <div className="p-2.5 bg-white text-rose-600 rounded-lg shadow-sm">
+                    <div className="p-2.5 bg-surface text-rose-600 rounded-lg shadow-sm">
                       <Trash2 size={20} />
                     </div>
                     <div>

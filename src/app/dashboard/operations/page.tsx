@@ -152,7 +152,7 @@ export default function OperationsPage() {
                 onClick={() => setFilter(f)}
                 className={cn(
                   "flex-1 md:px-6 py-2 px-4 min-h-[40px] text-[10px] font-black uppercase tracking-widest rounded-md transition-all whitespace-nowrap",
-                  filter === f ? "bg-white shadow-sm text-primary" : "text-text-muted hover:text-text-primary"
+                  filter === f ? "bg-surface shadow-sm text-primary" : "text-text-muted hover:text-text-primary"
                 )}
               >
                 {f === 'all' ? 'Tümü' : f === 'su' ? 'Sulama' : f === 'gubre' ? 'Gübreleme' : 'İlaçlama'}
@@ -273,7 +273,7 @@ export default function OperationsPage() {
                   value={selectedInventoryId} 
                   onChange={e => setSelectedInventoryId(e.target.value)} 
                   required
-                  className="bg-white"
+                  className="bg-surface"
                 >
                    <option value="" disabled>Stok seçin...</option>
                    {filteredInventory.map(item => (

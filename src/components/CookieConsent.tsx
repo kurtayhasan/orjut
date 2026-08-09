@@ -36,7 +36,7 @@ export default function CookieConsent() {
           <div className="flex gap-2">
             <button 
               onClick={handleAccept}
-              className="flex-1 py-2 bg-white text-black text-[11px] font-black uppercase tracking-wider rounded-xl hover:bg-emerald-500 hover:text-white transition-all"
+              className="flex-1 py-2 bg-surface text-black text-[11px] font-black uppercase tracking-wider rounded-xl hover:bg-emerald-500 hover:text-white transition-all"
             >
               Anladım ve Kabul Et
             </button>

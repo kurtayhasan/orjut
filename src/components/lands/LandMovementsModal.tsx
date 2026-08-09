@@ -52,9 +52,9 @@ export default function LandMovementsModal({ isOpen, onClose, land, transactions
           ) : (
             landTransactions.map((tx) => (
               <div key={tx.id} className="relative pl-6 pb-6 border-l-2 border-zinc-100 dark:border-zinc-800 last:pb-0">
-                <div className="absolute left-[-9px] top-0 w-4 h-4 bg-white dark:bg-zinc-900 border-2 border-emerald-500 rounded-full"></div>
+                <div className="absolute left-[-9px] top-0 w-4 h-4 bg-surface dark:bg-zinc-900 border-2 border-emerald-500 rounded-full"></div>
                 
-                <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 p-4 rounded-2xl shadow-sm">
+                <div className="bg-surface dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 p-4 rounded-2xl shadow-sm">
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] font-black text-white px-2 py-0.5 bg-zinc-800 dark:bg-zinc-700 rounded-md uppercase tracking-wider">

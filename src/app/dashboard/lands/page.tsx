@@ -175,7 +175,7 @@ export default function LandsPage() {
                 onClick={() => setViewMode('list')}
                 className={cn(
                   "p-2 rounded-md transition-all",
-                  viewMode === 'list' ? "bg-white shadow-sm text-primary" : "text-text-muted hover:text-text-primary"
+                  viewMode === 'list' ? "bg-surface shadow-sm text-primary" : "text-text-muted hover:text-text-primary"
                 )}
               >
                 <List size={20} />
@@ -184,7 +184,7 @@ export default function LandsPage() {
                 onClick={() => setViewMode('map')}
                 className={cn(
                   "p-2 rounded-md transition-all",
-                  viewMode === 'map' ? "bg-white shadow-sm text-primary" : "text-text-muted hover:text-text-primary"
+                  viewMode === 'map' ? "bg-surface shadow-sm text-primary" : "text-text-muted hover:text-text-primary"
                 )}
               >
                 <Grid size={20} />

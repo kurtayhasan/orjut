@@ -84,7 +84,7 @@ export default function FinancePage() {
 
       {/* STATS WIDGETS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card status="info" padding="lg" className="bg-white border-2 border-border shadow-sm flex flex-col justify-between min-h-[140px]">
+        <Card status="info" padding="lg" className="flex flex-col justify-between min-h-[140px]">
            <div>
               <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-1">Net Durum</p>
               <h2 className={cn(
@@ -102,7 +102,7 @@ export default function FinancePage() {
            </div>
         </Card>
 
-        <Card status="success" padding="lg" className="bg-white border-2 border-border shadow-sm flex flex-col justify-between min-h-[140px]">
+        <Card status="success" padding="lg" className="flex flex-col justify-between min-h-[140px]">
            <div>
               <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-1">Toplam Gelir</p>
               <h2 className="text-3xl font-black font-heading text-success tracking-tight">
@@ -116,7 +116,7 @@ export default function FinancePage() {
            </div>
         </Card>
 
-        <Card status="danger" padding="lg" className="bg-white border-2 border-border shadow-sm flex flex-col justify-between min-h-[140px]">
+        <Card status="danger" padding="lg" className="flex flex-col justify-between min-h-[140px]">
            <div>
               <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-1">Toplam Gider</p>
               <h2 className="text-3xl font-black font-heading text-danger tracking-tight">
@@ -153,7 +153,7 @@ export default function FinancePage() {
                   onClick={() => setFilter(t)}
                   className={cn(
                     "px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-all",
-                    filter === t ? "bg-white shadow-sm text-primary" : "text-text-muted hover:text-text-primary"
+                    filter === t ? "bg-surface-2 text-primary" : "text-text-muted hover:text-text-primary hover:bg-surface-2/50"
                   )}
                 >
                   {t === 'all' ? 'Hepsi' : t === 'expense' ? 'Gider' : 'Gelir'}
@@ -259,7 +259,7 @@ export default function FinancePage() {
                <div className="mt-10 p-5 bg-surface-2 rounded-xl border border-border">
                   <div className="flex flex-col items-center text-center">
                      <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">En Yüksek Gider Kalemi</p>
-                     <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-xl shadow-sm mb-3">
+                     <div className="w-12 h-12 bg-surface-2 rounded-full flex items-center justify-center text-xl shadow-sm mb-3 text-text-muted">
                         🌱
                      </div>
                      <span className="font-black text-text-primary text-lg leading-tight uppercase">Gübreleme</span>

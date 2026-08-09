@@ -36,7 +36,7 @@ export default function BottomBar({ className }: { className?: string }) {
   return (
     <>
       <div className={cn(
-        "fixed bottom-0 left-0 right-0 z-50 bg-surface border-t border-border shadow-lg lg:hidden pb-safe",
+        "fixed bottom-0 left-0 right-0 z-50 bg-[#0B1110]/80 backdrop-blur-xl border-t border-white/5 shadow-lg lg:hidden pb-safe",
         className
       )}>
         <div className="h-[64px] flex items-center justify-around px-2 relative">

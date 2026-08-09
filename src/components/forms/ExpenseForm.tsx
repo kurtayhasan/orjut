@@ -302,7 +302,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-black text-primary uppercase tracking-widest ml-1">Ürün Seçimi</label>
                     <select 
-                      className="w-full p-3 rounded-lg border border-primary/20 bg-white font-bold text-sm focus:ring-primary focus:border-primary"
+                      className="w-full p-3 rounded-lg border border-primary/20 bg-surface font-bold text-sm focus:ring-primary focus:border-primary"
                       value={stockSelectionMode}
                       onChange={(e: any) => setStockSelectionMode(e.target.value)}
                     >
@@ -318,7 +318,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
                       value={existingStockId}
                       onChange={(e: any) => setExistingStockId(e.target.value)}
                       required={addToInventory && stockSelectionMode === 'existing'}
-                      className="bg-white"
+                      className="bg-surface"
                     >
                       <option value="" disabled>Ürün seçin...</option>
                       {filteredInventory.map(item => (
@@ -332,7 +332,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
                       value={invName} 
                       onChange={(e: any) => setInvName(e.target.value)} 
                       required={addToInventory && stockSelectionMode === 'new'}
-                      className="bg-white"
+                      className="bg-surface"
                     />
                   )}
 
@@ -360,7 +360,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
                           value={appliedAmount}
                           onChange={(e: any) => setAppliedAmount(e.target.value)}
                           required={isHybridApplied}
-                          className="bg-white"
+                          className="bg-surface"
                         />
                         <Input 
                           as="select"
@@ -368,7 +368,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
                           value={hybridLandId}
                           onChange={(e: any) => setHybridLandId(e.target.value)}
                           required={isHybridApplied}
-                          className="bg-white"
+                          className="bg-surface"
                         >
                           <option value="" disabled>Seçiniz...</option>
                           {lands.map(l => (
@@ -390,7 +390,7 @@ export default function ExpenseModal({ isOpen, onClose, defaultCategory }: Expen
                     value={selectedInventoryId}
                     onChange={(e: any) => setSelectedInventoryId(e.target.value)}
                     required={isUsingStock}
-                    className="bg-white"
+                    className="bg-surface"
                   >
                     <option value="" disabled>Ürün seçin...</option>
                     {filteredInventory.map(item => (

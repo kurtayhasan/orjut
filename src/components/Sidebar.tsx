@@ -59,7 +59,7 @@ export default function Sidebar({ className }: { className?: string }) {
         {/* LOGO AREA */}
         <div className="h-[72px] flex items-center justify-between px-6 border-b border-white/5">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-primary/20 border border-primary/50 rounded-xl flex items-center justify-center text-primary shadow-[0_0_15px_rgba(0,230,118,0.3)]">
+            <div className="w-9 h-9 bg-primary/20 border border-primary/50 rounded-xl flex items-center justify-center text-primary shadow-sm">
               <span className="font-black text-xl">O</span>
             </div>
             <div className="flex flex-col -space-y-1">
@@ -185,10 +185,10 @@ function SidebarItem({ icon: Icon, label, href, active, badge, onClick, classNam
       href={href} 
       onClick={onClick}
       className={cn(
-        "w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all text-sm font-bold group",
+        "w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all text-sm group",
         active 
-          ? 'bg-primary/10 text-primary border border-primary/20 shadow-[inset_0_0_10px_rgba(0,230,118,0.1)]' 
-          : cn('text-white/60 hover:bg-white/5 hover:text-white', className)
+          ? 'bg-primary/10 text-primary font-bold' 
+          : cn('text-white/60 hover:bg-white/5 hover:text-white font-medium', className)
       )}
     >
       <Icon size={20} className={active ? 'text-primary' : 'text-white/40 group-hover:text-white/80 transition-colors'} />

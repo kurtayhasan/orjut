@@ -110,7 +110,7 @@ export default function SeasonsPage() {
                       "transition-all group",
                       activeSeason?.id === season.id 
                         ? "bg-primary/10 border-primary/30 ring-1 ring-primary/20" 
-                        : "bg-white/[0.02] border-white/5 hover:border-white/10"
+                        : "bg-surface/[0.02] border-white/5 hover:border-white/10"
                     )}
                   >
                     <div className="flex justify-between items-start">
@@ -160,13 +160,13 @@ export default function SeasonsPage() {
               <h3 className="text-[10px] font-black text-text-muted uppercase tracking-widest">Performans Karşılaştırması</h3>
               {activeSeason && (
                 <div className="flex gap-2">
-                   <button onClick={handleDownloadPDF} className="p-2 bg-white/[0.05] text-zinc-100 rounded-lg hover:bg-white/10 border border-white/5 transition-all" title="PDF Raporu">
+                   <button onClick={handleDownloadPDF} className="p-2 bg-surface/[0.05] text-zinc-100 rounded-lg hover:bg-surface/10 border border-white/5 transition-all" title="PDF Raporu">
                       <FileText size={16} />
                    </button>
-                   <button onClick={handleDownloadExcel} className="p-2 bg-white/[0.05] text-zinc-100 rounded-lg hover:bg-white/10 border border-white/5 transition-all" title="Excel Raporu">
+                   <button onClick={handleDownloadExcel} className="p-2 bg-surface/[0.05] text-zinc-100 rounded-lg hover:bg-surface/10 border border-white/5 transition-all" title="Excel Raporu">
                       <FileSpreadsheet size={16} />
                    </button>
-                   <button onClick={handleShareWhatsApp} className="p-2 bg-white/[0.05] text-zinc-100 rounded-lg hover:bg-white/10 border border-white/5 transition-all" title="WhatsApp ile Paylaş">
+                   <button onClick={handleShareWhatsApp} className="p-2 bg-surface/[0.05] text-zinc-100 rounded-lg hover:bg-surface/10 border border-white/5 transition-all" title="WhatsApp ile Paylaş">
                       <Share2 size={16} />
                    </button>
                 </div>

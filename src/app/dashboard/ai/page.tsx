@@ -207,7 +207,7 @@ export default function AIPage() {
                         <button 
                           key={i}
                           onClick={() => { setInput(s); inputRef.current?.focus(); }}
-                          className="p-4 bg-white border border-border rounded-xl text-xs font-bold text-text-primary text-left hover:border-primary hover:text-primary transition-all flex items-center justify-between group shadow-sm"
+                          className="p-4 bg-surface border border-border rounded-xl text-xs font-bold text-text-primary text-left hover:border-primary hover:text-primary transition-all flex items-center justify-between group shadow-sm"
                         >
                            <span className="flex items-center gap-2">
                               <Lightbulb size={14} className="text-amber-500" /> {s}
@@ -234,7 +234,7 @@ export default function AIPage() {
                      "max-w-[85%] md:max-w-[70%] p-5 rounded-2xl text-sm font-bold leading-relaxed shadow-sm",
                      msg.role === 'user' 
                        ? "bg-primary text-white rounded-tr-none" 
-                       : "bg-white text-text-primary border border-border rounded-tl-none"
+                       : "bg-surface text-text-primary border border-border rounded-tl-none"
                    )}>
                       {msg.content}
                    </div>
@@ -246,7 +246,7 @@ export default function AIPage() {
                    <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shrink-0 shadow-sm">
                       <Bot size={20} />
                    </div>
-                   <div className="bg-white text-text-primary border border-border rounded-2xl rounded-tl-none p-5 flex items-center gap-3 shadow-sm">
+                   <div className="bg-surface text-text-primary border border-border rounded-2xl rounded-tl-none p-5 flex items-center gap-3 shadow-sm">
                       <Loader2 size={18} className="animate-spin text-primary" />
                       <span className="text-sm font-bold text-text-muted">Analiz ediyorum...</span>
                    </div>
@@ -256,7 +256,7 @@ export default function AIPage() {
            </div>
 
            {/* Input Container */}
-           <div className="p-4 border-t border-border bg-white shadow-[0_-4px_12px_rgba(0,0,0,0.02)]">
+           <div className="p-4 border-t border-border bg-surface shadow-[0_-4px_12px_rgba(0,0,0,0.02)]">
               <div className="max-w-4xl mx-auto flex gap-2">
                  <input 
                    ref={inputRef}

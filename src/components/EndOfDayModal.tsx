@@ -64,7 +64,7 @@ export default function EndOfDayModal({ isOpen, onClose }: ModalProps) {
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-2 font-bold">Yarın görüşmek üzere.</p>
           </div>
 
-          <Button variant="primary" onClick={handleReset} className="w-full !bg-zinc-900 dark:!bg-white dark:!text-zinc-900" size="lg">Tamam</Button>
+          <Button variant="primary" onClick={handleReset} className="w-full !bg-zinc-900 dark:!bg-surface dark:!text-zinc-900" size="lg">Tamam</Button>
         </>
       )}
     </BaseModal>

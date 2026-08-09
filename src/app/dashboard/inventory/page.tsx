@@ -78,7 +78,7 @@ export default function InventoryPage() {
             onClick={() => setView('crops')}
             className={cn(
               "flex-1 md:px-6 py-2 text-[10px] font-black uppercase tracking-widest rounded-md transition-all",
-              view === 'crops' ? "bg-white shadow-sm text-primary" : "text-text-muted hover:text-text-primary"
+              view === 'crops' ? "bg-surface shadow-sm text-primary" : "text-text-muted hover:text-text-primary"
             )}
           >
             Ürün Gelişimi
@@ -87,7 +87,7 @@ export default function InventoryPage() {
             onClick={() => setView('inputs')}
             className={cn(
               "flex-1 md:px-6 py-2 text-[10px] font-black uppercase tracking-widest rounded-md transition-all",
-              view === 'inputs' ? "bg-white shadow-sm text-primary" : "text-text-muted hover:text-text-primary"
+              view === 'inputs' ? "bg-surface shadow-sm text-primary" : "text-text-muted hover:text-text-primary"
             )}
           >
             Girdi Stokları
@@ -242,7 +242,7 @@ export default function InventoryPage() {
                          <button 
                            key={item.id} 
                            onClick={() => setIsExpenseModalOpen(true)}
-                           className="w-full flex justify-between items-center text-xs font-bold text-text-primary p-2 hover:bg-white/40 rounded-lg transition-colors text-left"
+                           className="w-full flex justify-between items-center text-xs font-bold text-text-primary p-2 hover:bg-surface/40 rounded-lg transition-colors text-left"
                          >
                             <div className="flex items-center gap-2">
                                <div className="w-1.5 h-1.5 rounded-full bg-danger animate-pulse" />

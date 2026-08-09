@@ -45,7 +45,7 @@ export default function InviteCollaborator({ engineerId }: InviteCollaboratorPro
           </div>
         </div>
 
-        <div className="flex items-center gap-2 p-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl">
+        <div className="flex items-center gap-2 p-2 bg-surface dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl">
           <span className="text-xs font-semibold truncate flex-1 px-2 text-zinc-600 dark:text-zinc-400">
             {getInviteUrl()}
           </span>

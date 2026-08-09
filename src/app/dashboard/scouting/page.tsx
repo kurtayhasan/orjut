@@ -305,7 +305,7 @@ export default function ScoutingPage() {
       <BaseModal isOpen={isPrescriptionModalOpen} onClose={() => setIsPrescriptionModalOpen(false)} title="Zirai Tavsiye / Reçete">
         <form onSubmit={handlePrescriptionSubmit} className="space-y-4">
            <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex items-center gap-3">
-              <div className="p-2 bg-white rounded-lg text-emerald-600 shadow-sm">
+              <div className="p-2 bg-surface rounded-lg text-emerald-600 shadow-sm">
                 <GraduationCap size={20} />
               </div>
               <div className="min-w-0">

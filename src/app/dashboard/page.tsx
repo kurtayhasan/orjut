@@ -124,7 +124,7 @@ export default function DashboardPage() {
 
       {lands.length === 0 ? (
         <div className="flex-1 w-full max-w-7xl mx-auto p-4">
-          <Card className="flex flex-col items-center justify-center text-center py-16 px-6 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-xl space-y-6" padding="none">
+          <Card className="flex flex-col items-center justify-center text-center py-16 px-6 bg-surface/40 backdrop-blur-xl border border-white/5 rounded-3xl shadow-xl space-y-6" padding="none">
             <div className="w-20 h-20 bg-primary/10 text-primary rounded-3xl flex items-center justify-center animate-pulse mt-8">
               <Tractor size={48} className="stroke-[1.5]" />
             </div>
@@ -148,7 +148,7 @@ export default function DashboardPage() {
             <Card className="bg-gradient-to-r from-amber-500 to-amber-600 border-none shadow-lg animate-bounce-subtle" padding="lg">
                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                     <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-white shrink-0">
+                     <div className="w-12 h-12 bg-surface/20 rounded-2xl flex items-center justify-center text-white shrink-0">
                         <GraduationCap size={28} />
                      </div>
                      <div className="text-white">
@@ -157,7 +157,7 @@ export default function DashboardPage() {
                      </div>
                   </div>
                   <Link href="/dashboard/scouting">
-                     <Button className="bg-white text-amber-600 hover:bg-amber-50 border-none font-black shadow-md" size="md" rightIcon={<ArrowRight size={18} />}>
+                     <Button className="bg-surface text-amber-600 hover:bg-amber-50 border-none font-black shadow-md" size="md" rightIcon={<ArrowRight size={18} />}>
                        Reçeteleri Gör
                      </Button>
                   </Link>
@@ -175,8 +175,8 @@ export default function DashboardPage() {
 
           {/* BÖLÜM 2 — PREMIUM AI ANALİZ VE HAVA DURUMU (EXPANDED) */}
           <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-            <Card padding="none" className="xl:col-span-3 bg-primary border-none shadow-2xl overflow-hidden relative group min-h-[320px] flex flex-col">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/95 to-primary-dark opacity-100" />
+            <Card padding="none" className="xl:col-span-3 bg-surface/40 backdrop-blur-xl border border-primary/20 shadow-[0_0_40px_rgba(16,185,129,0.05)] overflow-hidden relative group min-h-[320px] flex flex-col">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/5 opacity-100" />
               
               {/* Animated Background Elements */}
               <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-all duration-700 transform group-hover:scale-110">
@@ -189,7 +189,7 @@ export default function DashboardPage() {
               <div className="relative z-0 p-6 md:p-10 flex flex-col flex-1">
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-8 mb-8">
                   {/* Weather Widget */}
-                  <div className="flex items-center gap-6 bg-white/10 backdrop-blur-xl p-5 rounded-3xl border border-white/20 shadow-lg shrink-0">
+                  <div className="flex items-center gap-6 bg-surface/10 backdrop-blur-xl p-5 rounded-3xl border border-white/20 shadow-lg shrink-0">
                     <div className="text-center">
                       <Sun className="text-amber-300 mb-1 mx-auto drop-shadow-md" size={40} />
                       <div className="text-4xl font-black text-white">{weather.temp ?? '--'}°</div>
@@ -197,7 +197,7 @@ export default function DashboardPage() {
                         {lands.length > 0 ? (lands[0].district || lands[0].city || 'Arazi Konumu').toUpperCase() : 'KONUM BEKLENİYOR'}
                       </div>
                     </div>
-                    <div className="w-px h-16 bg-white/20" />
+                    <div className="w-px h-16 bg-surface/20" />
                     <div className="space-y-3">
                       <div className="flex items-center gap-3 text-white/90 text-sm font-bold">
                         <Wind size={18} className="text-blue-200" /> {weather.windspeed ?? '--'} km/s
@@ -211,7 +211,7 @@ export default function DashboardPage() {
                   {/* AI Insight Header */}
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-3">
-                      <div className="bg-white/20 p-2 rounded-xl backdrop-blur-md">
+                      <div className="bg-surface/20 p-2 rounded-xl backdrop-blur-md">
                         <Zap size={20} className="text-amber-300 fill-amber-300" />
                       </div>
                       <span className="text-xs font-black text-white uppercase tracking-[0.2em]">Akıllı Tarım Asistanı</span>
@@ -222,7 +222,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* AI Insight Content */}
-                <div className="bg-white/10 dark:bg-black/20 backdrop-blur-lg border border-white/10 p-6 rounded-3xl flex-1 flex flex-col justify-between">
+                <div className="bg-black/20 backdrop-blur-lg border border-white/5 p-6 rounded-3xl flex-1 flex flex-col justify-between">
                   <div className="text-white text-sm font-bold leading-relaxed space-y-2 mb-4">
                      {criticalAlert && (
                        <div className="bg-red-500/20 border border-red-500/30 p-3 rounded-2xl flex items-center gap-3 text-red-200 text-xs font-black uppercase tracking-wider mb-4 animate-pulse">
@@ -239,7 +239,7 @@ export default function DashboardPage() {
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            className="mt-4 border-white/30 hover:bg-white/10 text-white font-black text-[10px] uppercase tracking-wider flex items-center gap-2"
+                            className="mt-4 border-white/30 hover:bg-surface/10 text-white font-black text-[10px] uppercase tracking-wider flex items-center gap-2"
                             onClick={() => handleStartAnalysis()}
                             disabled={isAnalyzing}
                           >
@@ -397,7 +397,7 @@ export default function DashboardPage() {
           {/* BÖLÜM 6 — PAZAR VERİLERİ (PLACEHOLDER) */}
           <Card padding="lg" className="border-2 border-dashed border-border bg-surface-2/50 relative overflow-hidden mt-6">
              <div className="flex flex-col items-center justify-center text-center py-8 relative z-10">
-                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-4 text-zinc-300">
+                <div className="w-16 h-16 bg-surface-2 rounded-full flex items-center justify-center shadow-sm mb-4 text-text-muted">
                    <TrendingUp size={32} />
                 </div>
                 <h3 className="text-xl font-black font-heading text-text-primary uppercase tracking-tight mb-2">Pazar Verileri Yakında!</h3>

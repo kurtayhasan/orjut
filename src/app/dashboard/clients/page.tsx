@@ -55,7 +55,7 @@ export default function ClientManagement() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-900 p-6 rounded-3xl shadow-sm">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-surface  border border-white/5 dark:border-zinc-900 p-6 rounded-3xl shadow-sm">
         <div className="flex items-center gap-4">
           <div className="bg-indigo-100 dark:bg-indigo-900/30 p-3 rounded-2xl text-indigo-600">
             <Users size={28} />
@@ -92,7 +92,7 @@ export default function ClientManagement() {
                   className={`p-6 cursor-pointer transition-all border-2 ${
                     selectedClientId === c.farmer_id 
                     ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20' 
-                    : 'border-transparent hover:border-zinc-200 dark:hover:border-zinc-800'
+                    : 'border-transparent hover:border-white/5 dark:hover:border-white/5'
                   }`}
                   onClick={() => {
                     setSelectedClientId(selectedClientId === c.farmer_id ? null : c.farmer_id);
@@ -117,7 +117,7 @@ export default function ClientManagement() {
                   <p className="text-zinc-500 text-sm mb-4">{c.farmer.phone}</p>
                   
                   {c.status === 'approved' && (
-                    <div className="flex items-center justify-between text-[10px] font-black text-zinc-400 uppercase tracking-widest pt-4 border-t border-zinc-100 dark:border-zinc-800">
+                    <div className="flex items-center justify-between text-[10px] font-black text-zinc-400 uppercase tracking-widest pt-4 border-t border-white/5 dark:border-white/5">
                       <span>Panele Git</span>
                       <ArrowRight size={14} className={selectedClientId === c.farmer_id ? 'text-emerald-500' : ''} />
                     </div>
@@ -126,7 +126,7 @@ export default function ClientManagement() {
               ))}
             </div>
           ) : (
-            <div className="p-12 text-center bg-white dark:bg-zinc-950 rounded-3xl border border-dashed border-zinc-200 dark:border-zinc-800">
+            <div className="p-12 text-center bg-surface  rounded-3xl border border-dashed border-white/5 dark:border-white/5">
               <p className="text-zinc-500 font-medium">Henüz bir müşteri bulunmuyor. Sağ üstten telefon numarasıyla davet gönderebilirsiniz.</p>
             </div>
           )}

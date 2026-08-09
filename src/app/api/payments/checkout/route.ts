@@ -47,7 +47,9 @@ export async function POST(req: Request) {
       });
     }
 
-    const merchant_oid = `ORDER${Date.now()}${user.id.replace(/[^a-zA-Z0-9]/g, '')}`;
+    // PayTR merchant_oid en fazla 64 karakter olmalıdır.
+    // ORDER_ (6) + timestamp (13) + _ (1) + UUID (36) = 56 karakter (Güvenli)
+    const merchant_oid = `ORDER_${Date.now()}_${user.id}`;
     const email = user.email || 'musteri@orjut.com';
     const payment_amount = selectedPackage.price * 100; // PayTR kuruş bekler
     

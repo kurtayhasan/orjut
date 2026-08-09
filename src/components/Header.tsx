@@ -118,7 +118,7 @@ export default function Header() {
           {/* Profile Link */}
           <Link
             href="/dashboard/settings"
-            className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary text-xs font-black border-2 border-primary/50 shadow-[0_0_10px_rgba(0,230,118,0.3)] hover:scale-105 transition-all active:scale-95"
+            className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary text-xs font-black border-2 border-primary/30 hover:bg-primary/30 transition-all active:scale-95"
             aria-label="Profil ve Ayarlar"
           >
             {initials}

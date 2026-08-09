@@ -442,7 +442,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
   };
 
   // select class helper
-  const selectClass = "w-full px-3 py-3 bg-zinc-50 dark:bg-zinc-800 border-2 border-zinc-100 dark:border-zinc-700 rounded-xl outline-none focus:border-primary focus:bg-white dark:focus:bg-zinc-700 transition-all text-sm font-semibold appearance-none cursor-pointer text-zinc-900 dark:text-zinc-100";
+  const selectClass = "w-full px-3 py-3 bg-zinc-50 dark:bg-zinc-800 border-2 border-zinc-100 dark:border-zinc-700 rounded-xl outline-none focus:border-primary focus:bg-surface dark:focus:bg-zinc-700 transition-all text-sm font-semibold appearance-none cursor-pointer text-zinc-900 dark:text-zinc-100";
 
   const getLandStyle = (land: Partial<Land>) => {
     if (activeLayer === 'normal') {
@@ -571,7 +571,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
               setIsNDVIActive(true);
             }
           }}
-          className={`p-3 rounded-2xl shadow-xl backdrop-blur-md transition-all border flex items-center gap-2 ${activeLayer === 'ndvi' ? 'bg-primary border-primary text-white font-black' : 'bg-white/90 dark:bg-zinc-900/90 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-white font-bold'}`}
+          className={`p-3 rounded-2xl shadow-xl backdrop-blur-md transition-all border flex items-center gap-2 ${activeLayer === 'ndvi' ? 'bg-primary border-primary text-white font-black' : 'bg-white/90 dark:bg-zinc-900/90 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-surface font-bold'}`}
         >
           {isPremium ? <Radio size={18} className={activeLayer === 'ndvi' ? 'animate-pulse' : ''} /> : <Lock size={18} className="text-amber-500" />}
           <span className="text-xs uppercase tracking-widest hidden sm:inline">🛰️ NDVI Bitki Sağlığı</span>
@@ -592,7 +592,7 @@ export default function LeafletMap({ focusLand, editLand }: { focusLand?: Partia
               setIsNDVIActive(true);
             }
           }}
-          className={`p-3 rounded-2xl shadow-xl backdrop-blur-md transition-all border flex items-center gap-2 ${activeLayer === 'moisture' ? 'bg-blue-600 border-blue-600 text-white font-black' : 'bg-white/90 dark:bg-zinc-900/90 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-white font-bold'}`}
+          className={`p-3 rounded-2xl shadow-xl backdrop-blur-md transition-all border flex items-center gap-2 ${activeLayer === 'moisture' ? 'bg-blue-600 border-blue-600 text-white font-black' : 'bg-white/90 dark:bg-zinc-900/90 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-surface font-bold'}`}
         >
           {isPremium ? <Droplet size={18} className={activeLayer === 'moisture' ? 'animate-pulse' : ''} /> : <Lock size={18} className="text-amber-500" />}
           <span className="text-xs uppercase tracking-widest hidden sm:inline">💧 Toprak Nemi</span>
